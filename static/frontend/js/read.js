@@ -1486,26 +1486,58 @@
         async _preloadNextChapterImages(chapterId) {
             console.log(`[阅读页] 预加载下一章节 ${chapterId} 的前 ${this.config.nextChapterPages} 页`);
 
-            // 提交下一章节前N页的下载任务
-            for (let page = 1; page <= this.config.nextChapterPages; page++) {
-                try {
-                    await fetch(`/api/${this.siteId}/crawler/submit`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            resource_type: 'content_image',
-                            comic_id: this.comicAid,
-                            chapter_id: chapterId,
-                            page: page,
-                            priority: 'low'
-                        })
-                    });
-                } catch (error) {
-                    console.error(`[阅读页] 预加载下一章节第${page}页失败:`, error);
-                }
-            }
+            try {
+                // 先获取下一章节的图片数据，检查哪些图片已存在
+                const response = await fetch(
+                    `/api/${this.siteId}/resource/check?resource_type=content_images&comic_id=${this.comicAid}&chapter_id=${chapterId}`
+                );
+                const result = await response.json();
 
-            console.log(`[阅读页] 下一章节预加载完成`);
+                if (!result.success || !result.data || !result.data.images) {
+                    console.log(`[阅读页] 无法获取下一章节图片数据，跳过预加载`);
+                    return;
+                }
+
+                const images = result.data.images;
+                const maxPage = Math.min(this.config.nextChapterPages, images.length);
+
+                // 只提交未下载的图片任务
+                let submittedCount = 0;
+                let skippedCount = 0;
+
+                for (let page = 1; page <= maxPage; page++) {
+                    const imageData = images.find(img => img.page === page);
+                    if (!imageData) continue;
+
+                    // 检查图片是否已下载
+                    if (imageData.downloaded === true) {
+                        skippedCount++;
+                        continue;
+                    }
+
+                    // 提交下载任务
+                    try {
+                        await fetch(`/api/${this.siteId}/crawler/submit`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                resource_type: 'content_image',
+                                comic_id: this.comicAid,
+                                chapter_id: chapterId,
+                                page: page,
+                                priority: 'low'
+                            })
+                        });
+                        submittedCount++;
+                    } catch (error) {
+                        console.error(`[阅读页] 预加载下一章节第${page}页失败:`, error);
+                    }
+                }
+
+                console.log(`[阅读页] 下一章节预加载完成: 提交${submittedCount}个下载任务, 跳过${skippedCount}个已存在的图片`);
+            } catch (error) {
+                console.error(`[阅读页] 预加载下一章节失败:`, error);
+            }
         }
 
         /**
