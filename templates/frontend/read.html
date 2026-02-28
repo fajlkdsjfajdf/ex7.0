@@ -231,6 +231,16 @@
     /* 不设置transition，由JS控制翻页动画 */
 }
 
+/* 翻页式多页模式：禁用transition */
+.page-flip-double .comic-pager-container,
+.page-flip-double .comic-pager-viewport,
+.page-flip-double .comic-pager-slider,
+.page-flip-double .pager-div-horizontal,
+.page-flip-double .pager-div1,
+.page-flip-double .pager-div1 img {
+    transition: none !important;
+}
+
 /* 水平布局容器 - 参考老代码的 div-horizontal */
 .page-flip-mode .pager-div-horizontal {
     display: table-cell;
@@ -254,7 +264,6 @@
 .page-flip-mode .pager-div1 img {
     max-width: none;
     max-height: none;
-    transition: width 0.2s, height 0.2s;
 }
 
 .page-flip-mode .pager-btn {
@@ -1084,13 +1093,6 @@ body.reading-active .chapter-navigation {
     perspective-origin: center center;
 }
 
-/* 翻页式多页模式的页面样式 */
-.flip-multi-page {
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
-    /* 不设置transition，由JS控制动画 */
-}
-
 .flip-book {
     position: relative;
     transform-style: preserve-3d;
@@ -1104,7 +1106,6 @@ body.reading-active .chapter-navigation {
     transform-style: preserve-3d;
     backface-visibility: hidden;
     transform-origin: left center;
-    transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
     border-radius: 12px;
     overflow: hidden;
@@ -1126,113 +1127,6 @@ body.reading-active .chapter-navigation {
     border-radius: 12px;
 }
 
-/* 向前翻页动画（下一页） */
-.flip-page.flip-forward {
-    animation: flipForward 0.6s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
-}
-
-@keyframes flipForward {
-    0% {
-        transform: rotateY(0deg);
-        z-index: 2;
-    }
-    50% {
-        transform: rotateY(-90deg);
-        z-index: 2;
-    }
-    51% {
-        z-index: 0;
-    }
-    100% {
-        transform: rotateY(-180deg);
-        z-index: 0;
-    }
-}
-
-/* 向后翻页动画（上一页） */
-.flip-page.flip-backward {
-    animation: flipBackward 0.6s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
-}
-
-@keyframes flipBackward {
-    0% {
-        transform: rotateY(0deg);
-        z-index: 2;
-    }
-    50% {
-        transform: rotateY(90deg);
-        z-index: 2;
-    }
-    51% {
-        z-index: 0;
-    }
-    100% {
-        transform: rotateY(180deg);
-        z-index: 0;
-    }
-}
-
-/* 淡入淡出动画（备选方案） */
-.flip-page.fade-out {
-    animation: fadeOut 0.4s ease forwards;
-}
-
-.flip-page.fade-in {
-    animation: fadeIn 0.4s ease forwards;
-}
-
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-        transform: scale(1);
-    }
-    to {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: scale(1.05);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-/* 滑动动画（备选方案2） */
-.flip-page.slide-left {
-    animation: slideLeft 0.5s ease forwards;
-}
-
-.flip-page.slide-right {
-    animation: slideRight 0.5s ease forwards;
-}
-
-@keyframes slideLeft {
-    from {
-        transform: translateX(0);
-        opacity: 1;
-    }
-    to {
-        transform: translateX(-100%);
-        opacity: 0;
-    }
-}
-
-@keyframes slideRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
 </style>
 {% endblock %}
 
@@ -1347,7 +1241,7 @@ body.reading-active .chapter-navigation {
 <script src="/static/frontend/js/read-modes/ScrollMode.js?v=2"></script>
 <script src="/static/frontend/js/read-modes/ScrollSeamlessMode.js?v=2"></script>
 <script src="/static/frontend/js/read-modes/PageFlipMode.js?v=1"></script>
-<script src="/static/frontend/js/read-modes/PageFlipDoubleMode.js?v=3"></script>
+<script src="/static/frontend/js/read-modes/PageFlipDoubleMode.js?v=9"></script>
 <!-- 主控制器 -->
 <script src="/static/frontend/js/read.js?v=4"></script>
 <script>

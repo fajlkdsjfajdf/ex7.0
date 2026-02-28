@@ -8,8 +8,7 @@ class PageFlipMultiMode extends ReadModeBase {
         this.modeName = 'page-flip-multi';
         this.pageSections = [];
         this.currentSection = 0;
-        this.isAnimating = false; // 动画状态
-        this.animationDuration = 600; // 翻页动画时长(ms)
+        this.isAnimating = false; // 防止快速连续点击
         this.currentPageIndex = 0; // 当前页码索引（0-based，用于单页翻）
     }
 
@@ -236,7 +235,7 @@ class PageFlipMultiMode extends ReadModeBase {
     }
 
     /**
-     * 上一节（带3D翻页动画）
+     * 上一节（带翻页动画）
      * @private
      */
     _prevSection() {
@@ -245,16 +244,28 @@ class PageFlipMultiMode extends ReadModeBase {
 
         this.isAnimating = true;
 
-        // 先执行动画，再更新内容
-        this._animateFlip('prev', () => {
+        // 获取当前和目标section
+        const currentData = this.pageSections[this.currentSection];
+        const targetData = this.pageSections[this.currentSection - 1];
+
+        if (!currentData || !targetData) {
+            this.isAnimating = false;
+            return;
+        }
+
+        const currentSection = currentData.section;
+        const targetSection = targetData.section;
+
+        // 执行翻页动画
+        this._animateFlipSections(currentSection, targetSection, 'prev', () => {
             this.currentSection--;
-            this._updateSection();
+            this._updateSectionAfterAnimation();
             this.isAnimating = false;
         });
     }
 
     /**
-     * 下一节（带3D翻页动画）
+     * 下一节（带翻页动画）
      * @private
      */
     _nextSection() {
@@ -263,56 +274,66 @@ class PageFlipMultiMode extends ReadModeBase {
 
         this.isAnimating = true;
 
-        // 先执行动画，再更新内容
-        this._animateFlip('next', () => {
+        // 获取当前和目标section
+        const currentData = this.pageSections[this.currentSection];
+        const targetData = this.pageSections[this.currentSection + 1];
+
+        if (!currentData || !targetData) {
+            this.isAnimating = false;
+            return;
+        }
+
+        const currentSection = currentData.section;
+        const targetSection = targetData.section;
+
+        // 执行翻页动画
+        this._animateFlipSections(currentSection, targetSection, 'next', () => {
             this.currentSection++;
-            this._updateSection();
+            this._updateSectionAfterAnimation();
             this.isAnimating = false;
         });
     }
 
     /**
-     * 执行3D翻页动画 - 真正的翻书效果
+     * 执行两个section之间的切换（无动画）
      * @private
      */
-    _animateFlip(direction, callback) {
-        const currentSection = this.pageSections[this.currentSection];
-        if (!currentSection || !currentSection.section) {
-            callback();
-            return;
+    _animateFlipSections(currentSection, targetSection, direction, callback) {
+        // 直接切换，不使用动画
+        currentSection.style.display = 'none';
+        targetSection.style.display = '';
+        callback();
+    }
+
+    /**
+     * 动画结束后更新显示
+     * @private
+     */
+    _updateSectionAfterAnimation() {
+        // 隐藏所有section，只显示当前section
+        this.pageSections.forEach((sectionData, index) => {
+            if (index === this.currentSection) {
+                sectionData.section.style.display = '';
+                sectionData.section.style.visibility = 'visible';
+            } else {
+                sectionData.section.style.display = 'none';
+            }
+        });
+
+        // 更新按钮状态
+        this.controls.prevBtn.disabled = this.currentSection === 0;
+        this.controls.nextBtn.disabled = this.currentSection >= this.pageSections.length - 1;
+
+        // 更新页码指示器
+        const currentPageEl = this.controls.indicator.querySelector('.current-page');
+        if (currentPageEl) {
+            currentPageEl.textContent = this.currentSection + 1;
         }
 
-        const section = currentSection.section;
+        console.log('[PageFlipMultiMode] 翻到第', this.currentSection + 1, '节');
 
-        // 设置3D环境
-        const viewport = this._viewport;
-        if (viewport) {
-            viewport.style.perspective = '2000px';
-            viewport.style.perspectiveOrigin = 'center center';
-        }
-
-        // 设置section的3D属性
-        section.style.transformStyle = 'preserve-3d';
-        section.style.backfaceVisibility = 'hidden';
-
-        if (direction === 'next') {
-            // 向后翻页（下一页）- 当前页从右向左翻转
-            section.style.transformOrigin = 'left center';
-            section.style.transition = `transform ${this.animationDuration}ms cubic-bezier(0.645, 0.045, 0.355, 1)`;
-            section.style.transform = 'rotateY(-180deg)';
-        } else {
-            // 向前翻页（上一页）- 当前页从左向右翻转
-            section.style.transformOrigin = 'right center';
-            section.style.transition = `transform ${this.animationDuration}ms cubic-bezier(0.645, 0.045, 0.355, 1)`;
-            section.style.transform = 'rotateY(180deg)';
-        }
-
-        // 动画结束后恢复并回调
-        setTimeout(() => {
-            section.style.transition = 'none';
-            section.style.transform = 'rotateY(0deg)';
-            callback();
-        }, this.animationDuration);
+        // 触发预下载
+        this._triggerPreload();
     }
 
     /**
@@ -320,29 +341,25 @@ class PageFlipMultiMode extends ReadModeBase {
      */
     flipSinglePrev() {
         if (this.isAnimating) return;
+        if (this.currentSection <= 0) return;
 
-        // 找到前一页所在的section
-        const currentSection = this.pageSections[this.currentSection];
-        if (!currentSection) return;
+        // 获取当前和目标section
+        const currentData = this.pageSections[this.currentSection];
+        const targetData = this.pageSections[this.currentSection - 1];
 
-        const currentStartPage = currentSection.startPageIndex;
-        if (currentStartPage <= 0) return;
+        if (!currentData || !targetData) return;
 
-        // 计算前一页所在的section索引
-        for (let i = this.currentSection - 1; i >= 0; i--) {
-            const section = this.pageSections[i];
-            if (section.endPageIndex === currentStartPage - 1 ||
-                section.startPageIndex === currentStartPage - 1) {
-                // 找到前一页所在的section
-                this.isAnimating = true;
-                this._animateFlip('prev', () => {
-                    this.currentSection = i;
-                    this._updateSection();
-                    this.isAnimating = false;
-                });
-                return;
-            }
-        }
+        const currentSection = currentData.section;
+        const targetSection = targetData.section;
+
+        this.isAnimating = true;
+
+        // 执行翻页动画
+        this._animateFlipSections(currentSection, targetSection, 'prev', () => {
+            this.currentSection--;
+            this._updateSectionAfterAnimation();
+            this.isAnimating = false;
+        });
     }
 
     /**
@@ -350,28 +367,25 @@ class PageFlipMultiMode extends ReadModeBase {
      */
     flipSingleNext() {
         if (this.isAnimating) return;
+        if (this.currentSection >= this.pageSections.length - 1) return;
 
-        // 找到后一页所在的section
-        const currentSection = this.pageSections[this.currentSection];
-        if (!currentSection) return;
+        // 获取当前和目标section
+        const currentData = this.pageSections[this.currentSection];
+        const targetData = this.pageSections[this.currentSection + 1];
 
-        const currentEndPage = currentSection.endPageIndex;
-        if (currentEndPage >= this._imagesData.length - 1) return;
+        if (!currentData || !targetData) return;
 
-        // 计算后一页所在的section索引
-        for (let i = this.currentSection + 1; i < this.pageSections.length; i++) {
-            const section = this.pageSections[i];
-            if (section.startPageIndex === currentEndPage + 1) {
-                // 找到后一页所在的section
-                this.isAnimating = true;
-                this._animateFlip('next', () => {
-                    this.currentSection = i;
-                    this._updateSection();
-                    this.isAnimating = false;
-                });
-                return;
-            }
-        }
+        const currentSection = currentData.section;
+        const targetSection = targetData.section;
+
+        this.isAnimating = true;
+
+        // 执行翻页动画
+        this._animateFlipSections(currentSection, targetSection, 'next', () => {
+            this.currentSection++;
+            this._updateSectionAfterAnimation();
+            this.isAnimating = false;
+        });
     }
 
     /**
@@ -383,11 +397,11 @@ class PageFlipMultiMode extends ReadModeBase {
 
         // 找到包含该页的section
         for (let i = 0; i < this.pageSections.length; i++) {
-            const section = this.pageSections[i];
-            if (pageIndex >= section.startPageIndex && pageIndex <= section.endPageIndex) {
+            const sectionData = this.pageSections[i];
+            if (pageIndex >= sectionData.startPageIndex && pageIndex <= sectionData.endPageIndex) {
                 if (i !== this.currentSection) {
                     this.currentSection = i;
-                    this._updateSection();
+                    this._updateSectionAfterAnimation();
                     this._onPageAction();
                 }
                 console.log('[PageFlipMultiMode] 跳转到第', pageIndex + 1, '页（section', i + 1, '）');
@@ -444,37 +458,6 @@ class PageFlipMultiMode extends ReadModeBase {
                 }
             });
         });
-    }
-
-    /**
-     * 更新页面显示
-     * @private
-     */
-    _updateSection() {
-        // 隐藏所有section，只显示当前section
-        this.pageSections.forEach((sectionData, index) => {
-            if (index === this.currentSection) {
-                sectionData.section.style.display = '';
-                sectionData.section.style.visibility = 'visible';
-            } else {
-                sectionData.section.style.display = 'none';
-            }
-        });
-
-        // 更新按钮状态
-        this.controls.prevBtn.disabled = this.currentSection === 0;
-        this.controls.nextBtn.disabled = this.currentSection >= this.pageSections.length - 1;
-
-        // 更新页码指示器
-        const currentPageEl = this.controls.indicator.querySelector('.current-page');
-        if (currentPageEl) {
-            currentPageEl.textContent = this.currentSection + 1;
-        }
-
-        console.log('[PageFlipMultiMode] 翻到第', this.currentSection + 1, '节');
-
-        // 触发预下载（每翻页10节预下载一次）
-        this._triggerPreload();
     }
 
     /**

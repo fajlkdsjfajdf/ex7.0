@@ -23,8 +23,7 @@ class PageFlipDoubleMode extends ReadModeBase {
         this.resizeTimeout = null;
         this.timeSkip = 200; // 防抖时间
         this.gifFlag = false; // 防止重复触发
-        this.isAnimating = false; // 动画状态
-        this.animationDuration = 600; // 翻页动画时长(ms)
+        this.isAnimating = false; // 防止快速连续点击
     }
 
     /**
@@ -135,10 +134,8 @@ class PageFlipDoubleMode extends ReadModeBase {
         const div1 = document.getElementById('pageFlip-div1');
         if (!div1) return;
 
-        // 淡入效果
-        div1.style.display = 'none';
+        // 直接清空并重建，不做淡入效果
         div1.innerHTML = '';
-        div1.style.display = 'block';
 
         const currentIndex = this.currentSection;
 
@@ -565,8 +562,8 @@ class PageFlipDoubleMode extends ReadModeBase {
      * @private
      */
     _updateBodyClass() {
-        document.body.classList.remove('scroll-mode', 'scroll-seamless-mode');
-        document.body.classList.add('page-flip-mode');
+        document.body.classList.remove('scroll-mode', 'scroll-seamless-mode', 'page-flip-mode');
+        document.body.classList.add('page-flip-mode', 'page-flip-double');
     }
 
     /**
@@ -631,46 +628,11 @@ class PageFlipDoubleMode extends ReadModeBase {
     }
 
     /**
-     * 执行3D翻页动画 - 真正的翻书效果
+     * 切换页面（无动画）
      * @private
      */
     _animateFlip(direction, callback) {
-        const div1 = document.getElementById('pageFlip-div1');
-        if (!div1) {
-            callback();
-            return;
-        }
-
-        this.isAnimating = true;
-
-        // 设置3D环境
-        const viewport = this.container.querySelector('.comic-pager-viewport');
-        if (viewport) {
-            viewport.style.perspective = '2000px';
-            viewport.style.perspectiveOrigin = 'center center';
-        }
-        div1.style.transformStyle = 'preserve-3d';
-        div1.style.backfaceVisibility = 'hidden';
-
-        if (direction === 'next') {
-            // 向后翻页（下一页）- 当前页从右向左翻转
-            div1.style.transformOrigin = 'left center';
-            div1.style.transition = `transform ${this.animationDuration}ms cubic-bezier(0.645, 0.045, 0.355, 1)`;
-            div1.style.transform = 'rotateY(-180deg)';
-        } else {
-            // 向前翻页（上一页）- 当前页从左向右翻转
-            div1.style.transformOrigin = 'right center';
-            div1.style.transition = `transform ${this.animationDuration}ms cubic-bezier(0.645, 0.045, 0.355, 1)`;
-            div1.style.transform = 'rotateY(180deg)';
-        }
-
-        // 动画结束后恢复并回调
-        setTimeout(() => {
-            div1.style.transition = 'none';
-            div1.style.transform = 'rotateY(0deg)';
-            this.isAnimating = false;
-            callback();
-        }, this.animationDuration);
+        callback();
     }
 
     /**
