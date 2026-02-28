@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/level2.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="header-section bg-gradient-success text-white py-5 mb-4 rounded-3">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-5 fw-bold">
+                    <i class="bi bi-folder2-open"></i> {{ subdir }}
+                </h1>
+                <p class="lead">数据文件列表</p>
+            </div>
+            <a href="{{ url_for('imgtool.index') }}" class="btn btn-light btn-lg">
+                <i class="bi bi-arrow-left"></i> 返回
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    {% if not files %}
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i> 此文件夹中没有找到任何数据文件
+        </div>
+    {% else %}
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-file-earmark-binary"></i> 文件列表
+                </h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>文件名</th>
+                            <th>数据文件</th>
+                            <th>索引文件</th>
+                            <th>修改时间</th>
+                            <th class="text-end">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for file in files %}
+                        <tr>
+                            <td>
+                                <i class="bi bi-file-earmark-text text-primary"></i>
+                                <strong>{{ file.name }}</strong>
+                            </td>
+                            <td>
+                                {% if file.dat_exists %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> 存在
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-exclamation-circle"></i> 缺失
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">
+                                    <i class="bi bi-file-earmark-text"></i> {{ file.idx_path }}
+                                </span>
+                            </td>
+                            <td>
+                                <i class="bi bi-clock-history"></i> {{ file.mod_time }}
+                            </td>
+                            <td class="text-end">
+                                {% if file.dat_exists %}
+                                <a href="/imgtool/view_images/{{ subdir }}/{{ file.dat_path }}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> 查看图片
+                                </a>
+                                {% else %}
+                                <span class="text-muted">
+                                    <i class="bi bi-slash-circle"></i> 不可用
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% from 'head.html' import macro_head %}
+        {{ macro_head("有码av") }}
+    </head>
+    <body>
+        <link rel="stylesheet" type="text/css" href="/static/css/jquery.step.css" />
+        <script src="static/js/pages/avyouma.js"></script>
+        <script src="/static/js/pages/jquery.step.min.js"></script>
+        <!-- Page Container -->
+        <div class="page-container">
+                        <!-- Page Sidebar -->
+            {% from 'page-sidebar.html' import macro_bar %}
+            {{ macro_bar("整理") }}
+            <!-- /Page Sidebar -->
+
+            <!-- Page Content -->
+            <div class="page-content">
+                <!-- Page Header -->
+                {% from 'page-head.html' import macro_head %}
+                {{ macro_head() }}
+                <!-- /Page Header -->
+                <!-- Page Inner -->
+                <div class="page-inner">
+                    <div class="page-title">
+                        <h3 class="breadcrumb-header">有码av</h3>
+                    </div>
+                    <div id="main-wrapper">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="panel panel-white" style="overflow: hidden">
+                                    <div class="panel-heading clearfix">
+                                        <h4 class="panel-title">
+                                            文件夹
+                                            <button onclick="javascript:dongmanSearch();" class="btn btn-success m-l-lg">搜索</button>
+                                            <button onclick="javascript:autoAdd();" class="btn btn-success m-l-lg">自动添加</button>
+                                        </h4>
+
+                                    </div>
+                                    <div class="panel-body">
+                                        <div id="ajaxTree">
+                                            <ul>
+                                                <li>Root node
+                                                    <ul>
+                                                        <li data-jstree='{"icon":"fa fa-warning icon-state-danger icon-md"}'>Custom icon</li>
+                                                        <li data-jstree='{"type":"file"}'>Child node</li>
+                                                    </ul>
+                                                </li>
+                                                <li>Root node
+                                                    <ul>
+                                                        <li data-jstree='{"opened":true}'>Root node
+                                                            <ul>
+                                                                <li data-jstree='{"type":"file"}'>Child node</li>
+                                                                <li data-jstree='{"opened":true}'>Opened
+                                                                    <ul>
+                                                                        <li data-jstree='{"selected":true,"type":"file"}'>Selected</li>
+                                                                        <li data-jstree='{"type":"file"}'>Child node</li>
+                                                                    </ul>
+                                                                </li>
+                                                            </ul>
+                                                        </li>
+                                                        <li data-jstree='{"opened":true}'>Opened
+                                                            <ul>
+                                                                <li data-jstree='{"type":"file"}'>File type</li>
+                                                                <li data-jstree='{"type":"file"}'>File type</li>
+                                                            </ul>
+                                                        </li>
+                                                        <li data-jstree='{"icon":"fa fa-tags icon-state-danger icon-md"}'>Custom icon</li>
+                                                    </ul>
+                                                </li>
+                                                <li data-jstree='{"type":"file"}'>File type</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                    <div class="panel-heading clearfix">
+                                        <h4 class="panel-title" style="height: 62px" >
+                                            文件 &nbsp;&nbsp;&nbsp;&nbsp;
+
+
+                                            <label><input type="checkbox" id="ck_uncensored" checked> ai解码</label>
+
+
+                                            <!--<button onclick="javascript:showSearchModal();" class="btn btn-success m-l-lg">确认</button>-->
+                                        </h4>
+                                         <div class="panel-body">
+                                            <div class="list-group files" id="video">
+                                            </div>
+                                         </div>
+                                    </div>
+                            </div>
+<!--                            <div class="col-md-4">-->
+<!--                                    <div class="panel-heading clearfix">-->
+<!--                                        <h4 class="panel-title">-->
+<!--                                            季:-->
+<!--                                            <input class="ji-num" type="text" value="1" style="width:100px;" id="ji" placeholder="请输入季度">-->
+<!--                                            <button onclick="javascript:showSearchModal();" class="btn btn-success m-l-lg">确认</button>-->
+<!--                                        </h4>-->
+<!--                                         <div class="panel-body">-->
+<!--                                            <div class="list-group files-zl" id="video_change">-->
+<!--                                            </div>-->
+<!--                                         </div>-->
+<!--                                    </div>-->
+<!--                            </div>-->
+                        </div><!-- Row -->
+                    </div><!-- Main Wrapper -->
+                </div>
+
+
+            </div><!-- /Page Content -->
+        </div><!-- /Page Container -->
+        <div class="modal fade" id="bgmModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">登录提示</h4>
+                    </div>
+                    <div class="modal-body">请登录番组计划</div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary login-bgm">登录</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal -->
+        </div>
+<!--        <div class="modal fade" id="searchModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">-->
+<!--            <div class="modal-dialog">-->
+<!--                <div class="modal-content">-->
+<!--                    <div class="modal-header">-->
+<!--                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>-->
+<!--                        <h4 class="modal-title" id="myModalLabel">番组计划查询</h4>-->
+<!--                    </div>-->
+<!--                    <div class="modal-body">-->
+<!--                        <div class="input-group">-->
+<!--                            <span class="input-group-addon">查询名</span>-->
+<!--                            <input type="text" class="form-control searchname">-->
+<!--                            <span class="input-group-btn">-->
+<!--                                <button class="btn btn-default bgmsearch" onclick="javascript:bgmsearch()" type="button">Go!</button>-->
+<!--                            </span>-->
+<!--                        </div>-->
+<!--                        </br>-->
+<!--                        <div class="input-group">-->
+<!--                            <span class="input-group-addon">id查询</span>-->
+<!--                            <input type="text" class="form-control searchid">-->
+<!--                            <span class="input-group-btn">-->
+<!--                                <button class="btn btn-default bgmsearchid" type="button">Go!</button>-->
+<!--                            </span>-->
+<!--                        </div>-->
+
+<!--                        <table class="table table-bordered bgm_data_list">-->
+<!--                          <caption>番组计划数据</caption>-->
+<!--                          <thead>-->
+<!--                            <tr>-->
+<!--                                <th>图片</th>-->
+<!--                                <th>名称</th>-->
+<!--                                <th>中文</th>-->
+<!--                                <th>查看</th>-->
+<!--                                <th>确认</th>-->
+<!--                            </tr>-->
+<!--                          </thead>-->
+<!--                          <tbody>-->
+<!--                          </tbody>-->
+<!--                        </table>-->
+
+<!--                    </div>-->
+<!--                    <div class="modal-footer">-->
+<!--                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>-->
+<!--                    </div>-->
+<!--                </div>&lt;!&ndash; /.modal-content &ndash;&gt;-->
+<!--            </div>&lt;!&ndash; /.modal &ndash;&gt;-->
+<!--        </div>-->
+        <form id="bgm-form" action="https://bgm.tv/oauth/authorize" method="get" class="hide">
+            <input type="text" name="client_id" value="bgm16665f8142948e286"/>
+            <input type="text" name="response_type" value="code"/>
+            <input type="text" name="redirect_uri" value=""/>
+            <input type="text" name="scope" value=""/>
+            <input type="text" name="state" value="asdagsdcxgwedfasfsa"/>
+        </form>
+
+
+
+        <!-- 模态框（Modal） -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog" style="width:80%; max-width: 1200px">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">数据刮削</h4>
+                    </div>
+                    <div class="modal-body">
+
+
+                            <div class="step-info" index="0">
+                                <div class="input-group">
+                                    <span class="input-group-addon">文件名</span>
+                                    <input type="text" class="form-control filename">
+                                </div>
+                                </br>
+                                <div class="input-group">
+                                    <span class="input-group-addon">查询名</span>
+                                    <input type="text" class="form-control searchname">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default bgmsearch" type="button">Go!</button>
+                                    </span>
+                                </div>
+                                </br>
+<!--                                <div class="input-group">-->
+<!--                                    <span class="input-group-addon">id查询</span>-->
+<!--                                    <input type="text" class="form-control searchid">-->
+<!--                                    <span class="input-group-btn">-->
+<!--                                        <button class="btn btn-default bgmsearchid" type="button">Go!</button>-->
+<!--                                    </span>-->
+<!--                                </div>-->
+
+                                <table class="table table-bordered bgm_data_list">
+                                  <caption>番组计划数据</caption>
+                                  <thead>
+                                    <tr>
+                                        <th>图片</th>
+                                        <th>名称</th>
+                                        <th>番号</th>
+
+                                        <th>确认</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                  </tbody>
+                                </table>
+                            </div>
+                            <div class="step-info" index="1">
+
+                                <div class="input-group">
+                                    <span class="input-group-addon">文件名</span>
+                                    <input type="text" class="form-control ass-filename">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default ass-filename-search" type="button">Go!</button>
+                                    </span>
+                                    <span class="input-group-addon">标题</span>
+                                    <input type="text" class="form-control ass-title">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default ass-title-search" type="button">Go!</button>
+                                    </span>
+                                    <span class="input-group-addon">标题(中文)</span>
+                                    <input type="text" class="form-control ass-title-cn">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default ass-title-search-cn" type="button">Go!</button>
+                                    </span>
+                                </div>
+                                <div class="list-group ass-search">
+
+                                </div>
+
+
+                                <div class="list-group list-50">
+                                    <a href="javascript:void(0);" class="list-group-item">
+                                        <h4 class="list-group-item-heading">
+                                            视频文件
+                                        </h4>
+                                    </a>
+                                </div>
+                                <div class="list-group list-50">
+                                    <a href="javascript:void(0);" class="list-group-item">
+                                        <h4 class="list-group-item-heading">
+                                            对应字幕
+
+                                        </h4>
+                                    </a>
+                                </div>
+
+                                <div class="list-group list-50 ass-videos">
+                                </div>
+                                <div class="list-group list-50 ass-asss">
+                                </div>
+                                <p style="float:left;width:100%">
+                                    <button type="button" class="btn btn-default btn-sm">按名称</button>
+                                    <button type="button" class="btn btn-default btn-sm">按集数</button>
+                                </p>
+                                <button type="button" class="btn btn-primary btn-lg btn-block ass_set">确定</button>
+                            </div>
+                            <div class="step-info" index="2">
+                                <div class="input-group">
+                                    <span class="input-group-addon">原名</span>
+                                    <input type="text" class="form-control filename2">
+                                </div>
+                                </br>
+                                <div class="input-group">
+                                    <span class="input-group-addon">查询名</span>
+                                    <input type="text" class="form-control searchname2">
+                                    <span class="input-group-addon">年</span>
+                                    <input type="text" class="form-control searchyear2">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default traktsearch" type="button">Go!</button>
+                                    </span>
+                                </div>
+                                </br>
+                                <div class="input-group">
+                                    <span class="input-group-addon">tvdb id查询</span>
+                                    <input type="text" class="form-control searchid2">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default traktsearchid" type="button">Go!</button>
+                                    </span>
+                                </div>
+
+                                <table class="table table-bordered trakt_data_list">
+                                  <caption>traktTv数据</caption>
+                                  <thead>
+                                    <tr>
+                                        <th>名称</th>
+                                        <th>年份</th>
+                                        <th>查看</th>
+                                        <th>确认</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                  </tbody>
+                                </table>
+                            </div>
+
+                        <div class="step-info" index="3" style="width:1200px;">
+                            <div class="search_img row"></div>
+
+                            <button type="button" class="btn btn-primary btn-lg btn-block img_set">确定</button>
+                        </div>
+                        <div class="step-info" index="4">
+                            <div class="video_link">
+
+                            </div>
+                            <button type="button" class="btn btn-primary btn-lg btn-block info_start">开始整理</button>
+                        </div>
+                        <div class="step-info" index="5">
+                            <div class="link_log">
+
+                            </div>
+                        </div>
+
+                        <div id="step" style="width:800px;margin: 0 auto"></div>
+                        <div class="step-btns">
+                            <button id="prevBtn" style="margin-left:300px;">上一步</button>
+                            <button id="nextBtn">下一步</button>
+                        </div>
+
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal -->
+        </div>
+
+        <style>
+            .filename{color:cornflowerblue}
+            .list-33{width:33%; float:left; margin-left:5px;}
+
+            .list-50{width:48%; float:left; margin-left:5px;}
+            .filename{color:cornflowerblue}
+            .title{margin-top:70px;}
+            .top-nav{
+                height: 30px;
+                line-height: 30px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 1040;
+                background-color: #232323;
+            }
+
+            .text{
+                width:40px;
+                height:20px;
+                line-height:20px;
+            }
+
+
+            .step-btns{
+                width:80%;
+                margin: 0 auto;
+            }
+
+            .step-btns button {
+
+                display: inline-block;
+                padding: 6px 12px;
+                font-size: 14px;
+                line-height: 1.42857143;
+                text-align: center;
+                cursor: pointer;
+                border: 1px solid transparent;
+                border-radius: 4px;
+                color: #fff;
+                background-color: #5bc0de;
+            }
+
+
+            .step-info{
+                width:80%;
+                margin: 0 auto;
+            }
+
+            .search_img ul{
+                list-style: none;
+
+            }
+
+
+            .search_img div{
+                padding: 5px;
+
+            }
+
+            .search_img .active{
+                background: antiquewhite;
+            }
+
+            .search_img img{
+                width: 100%;
+                cursor: pointer;
+            }
+            .link_log{
+                height: 400px;
+                overflow-y: auto;
+            }
+        </style>
+
+
+        <temp class="filetemp">
+
+
+            <a href="javascript:void(0);" index="{index}" file="{file}" path="{path}" class="list-group-item video">
+                <h4 class="list-group-item-heading">
+                    <p>{parent}</p>
+                    <p class="filename">{file}</p><P>{size}MB</P>
+                </h4>
+
+                <button class="use">使用</button>
+            </a>
+        </temp>
+    </body>
+</html>

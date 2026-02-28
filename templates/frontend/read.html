@@ -1,0 +1,1239 @@
+{% extends "frontend_base.html" %}
+
+{% block title %}阅读 - 暗黑漫画站{% endblock %}
+
+{% block extra_css %}
+<style>
+/* 阅读页样式 */
+.comic-viewer-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+/* 防止移动端横向溢出 */
+@media (max-width: 768px) {
+    .comic-viewer-container {
+        max-width: 100vw;
+        width: 100%;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
+/* 等待状态 */
+.waiting-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 20px;
+    text-align: center;
+}
+
+.waiting-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(106, 90, 205, 0.2);
+    border-top-color: #6a5acd;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.waiting-text {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.waiting-subtext {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* 阅读内容 */
+.comic-viewer-content {
+    display: none;
+}
+
+.comic-viewer-content.loaded {
+    display: block;
+}
+
+/* 翻页模式下保持章节导航可见 */
+
+/* 顶部操作栏 */
+.viewer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--bg-light);
+    border-radius: 8px;
+}
+
+.viewer-title {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    text-align: center;
+    flex: 1;
+}
+
+.viewer-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.viewer-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.back-btn {
+    background-color: var(--bg-darker);
+    color: var(--text-primary);
+}
+
+.back-btn:hover {
+    background-color: #333;
+}
+
+.force-update-btn {
+    background-color: #ff6b6b;
+    color: white;
+}
+
+.force-update-btn:hover {
+    background-color: #ff5252;
+}
+
+.force-update-btn:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+}
+
+/* 章节标题 */
+.comic-chapter-title {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+    text-align: center;
+    margin: 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* 漫画图片容器 */
+.comic-images-container {
+    margin-bottom: 20px;
+    min-height: 200px;
+}
+
+/* ========== 下拉式模式（带间隔） ========== */
+.comic-images-container.scroll-mode {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.scroll-mode .comic-image-container {
+    position: relative;
+    margin-bottom: 15px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.scroll-mode .comic-image {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    display: block;
+}
+
+/* ========== 下拉式无缝模式（无间隔） ========== */
+.comic-images-container.scroll-seamless-mode {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+}
+
+.scroll-seamless-mode .comic-image-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    line-height: 0;
+}
+
+.scroll-seamless-mode .comic-image {
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+    box-shadow: none;
+    display: block;
+    vertical-align: bottom;
+}
+
+.scroll-seamless-mode .page-indicator-badge.seamless {
+    opacity: 0.3;
+    transition: opacity 0.3s;
+}
+
+.scroll-seamless-mode .comic-image-container:hover .page-indicator-badge.seamless {
+    opacity: 0.8;
+}
+
+/* ========== 翻页式模式 ========== */
+.page-flip-mode {
+    position: relative;
+    width: 100%;
+}
+
+.page-flip-mode .comic-pager-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.page-flip-mode .comic-pager-viewport {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    background-color: var(--bg-light);
+    border-radius: 8px;
+}
+
+.page-flip-mode .comic-pager-slider {
+    display: flex;
+    /* width: max-content; 让slider宽度能够容纳所有section */
+    height: 100%;
+    transition: transform 0.3s ease;
+}
+
+/* 水平布局容器 - 参考老代码的 div-horizontal */
+.page-flip-mode .pager-div-horizontal {
+    display: table-cell;
+    vertical-align: middle;
+    width: 100%;
+    height: 100%;
+}
+
+/* 图片容器1 - 实际放图片的容器 */
+.page-flip-mode .pager-div1 {
+    display: table;
+    margin: 0 auto;
+}
+
+/* 图片容器2 - 预留 */
+.page-flip-mode .pager-div2 {
+    display: none;
+}
+
+/* 图片样式 - 由JS控制，这里只是默认 */
+.page-flip-mode .pager-div1 img {
+    max-width: none;
+    max-height: none;
+    transition: width 0.2s, height 0.2s;
+}
+
+.page-flip-mode .pager-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 60px;
+    background-color: rgba(106, 90, 205, 0.7);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.page-flip-mode .pager-btn:hover:not(:disabled) {
+    background-color: rgba(106, 90, 205, 0.9);
+}
+
+.page-flip-mode .pager-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.page-flip-mode .prev-btn {
+    left: 10px;
+}
+
+.page-flip-mode .next-btn {
+    right: 10px;
+}
+
+.page-flip-mode .pager-indicator {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    background-color: rgba(30, 30, 30, 0.7);
+    padding: 6px 10px;
+    border-radius: 20px;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.page-flip-mode .pager-indicator .current-page {
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+/* ========== 翻页式多页双页显示 ========== */
+.page-flip-mode .pager-section.double-page-active {
+    gap: 0;
+    justify-content: flex-start;
+    padding: 0;
+}
+
+/* 翻页模式样式 */
+/* 注意：滚动条控制通过JS精确计算高度实现，不使用CSS强制隐藏 */
+
+/* 翻页模式：移除容器宽度限制，让双页模式能扩展更宽 */
+body.page-flip-mode .comic-viewer-container,
+body.page-flip-multi-mode .comic-viewer-container {
+    max-width: none;
+    width: 100%;
+}
+
+body.page-flip-mode .main-content,
+body.page-flip-multi-mode .main-content {
+    /* 高度自适应，通过JS控制图片容器高度避免滚动条 */
+    height: auto;
+    max-height: none;
+}
+
+/* 翻页模式：减少main-content的padding以给图片更多空间 */
+body.page-flip-mode .main-content,
+body.page-flip-multi-mode .main-content {
+    padding: 10px;
+    padding-top: calc(10px + var(--header-height));
+}
+
+/* 翻页模式：隐藏或精简viewer-header和chapter-title */
+body.page-flip-mode .viewer-header,
+body.page-flip-multi-mode .viewer-header {
+    margin-bottom: 5px;
+    padding: 8px 12px;
+}
+
+body.page-flip-mode .comic-chapter-title,
+body.page-flip-multi-mode .comic-chapter-title {
+    font-size: 1rem;
+    margin: 5px 0;
+    padding-bottom: 5px;
+}
+
+/* 翻页模式下，图片容器需要被JS控制高度 */
+.page-flip-mode .comic-pager-container,
+.page-flip-multi-mode .comic-pager-container {
+    /* 高度由JS动态设置，确保不出现滚动条 */
+}
+
+/* 翻页模式：减少pager-section的padding */
+.page-flip-mode .pager-section {
+    padding: 5px;
+    flex-shrink: 0; /* 防止被压缩 */
+    width: 100%; /* 每个section占满viewport宽度 */
+    box-sizing: border-box;
+}
+
+/* 双页模式：移除padding以确保图片无间隙 */
+.page-flip-mode .pager-section.double-page-active {
+    padding: 0 !important;
+}
+
+/* 翻页模式：减少翻页按钮尺寸 */
+.page-flip-mode .pager-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+}
+
+/* 翻页模式：减少页码指示器padding */
+.page-flip-mode .pager-indicator {
+    padding: 4px 10px;
+    font-size: 0.85rem;
+}
+
+/* 单页显示时的图片样式 */
+.page-flip-mode .pager-section img {
+    max-width: calc(100% - 10px);
+    max-height: calc(100% - 10px);
+    object-fit: contain;
+    width: auto;
+    height: auto;
+}
+
+/* 双页模式下，每张图片独立显示，保持原始比例 */
+/* 此规则必须在单页规则之后，以确保样式优先级正确 */
+.page-flip-mode .pager-section.double-page-active img {
+    /* 保持比例，让图片自然大小，不拉伸 */
+    width: auto !important;
+    max-width: none !important;
+    height: 100%;
+    max-height: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    display: block;
+    object-fit: contain;
+}
+
+/* 单页显示时隐藏第二张图 */
+.page-flip-mode .pager-section:not(.double-page-active) img[data-index="1"] {
+    display: none;
+}
+
+/* 通用图片样式 */
+.comic-image-container {
+    position: relative;
+}
+
+.comic-image {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 页码指示器 */
+.page-indicator-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    min-width: 50px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(2px);
+}
+
+/* 图片加载状态 */
+.comic-image[data-status="loading"] {
+    opacity: 0.6;
+    filter: blur(1px);
+}
+
+.comic-image[data-status="loaded"] {
+    opacity: 1;
+    filter: none;
+}
+
+.comic-image[data-status="error"] {
+    opacity: 0.5;
+    filter: grayscale(100%);
+}
+
+/* 图片容器加载动画 */
+.comic-image-container {
+    position: relative;
+    min-height: 200px;
+    background-color: var(--bg-darker);
+    border-radius: 4px;
+}
+
+/* 图片淡入效果 */
+.comic-image {
+    transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* 下载进度指示器（可选） */
+.download-progress {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(106, 90, 205, 0.9);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.download-progress i {
+    animation: spin 1s linear infinite;
+}
+
+/* 已下载标记 */
+.comic-image-container.downloaded::after {
+    content: '✓';
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background-color: rgba(76, 175, 80, 0.9);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+}
+
+/* 加载状态 */
+.image-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    background-color: var(--bg-darker);
+    border-radius: 4px;
+    color: var(--text-secondary);
+}
+
+.image-loading i {
+    font-size: 2rem;
+    margin-right: 10px;
+    animation: spin 1s linear infinite;
+}
+
+/* 章节导航 */
+.chapter-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    padding: 20px;
+    background-color: var(--bg-light);
+    border-radius: 8px;
+}
+
+.nav-btn {
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background-color: var(--accent-hover);
+}
+
+.nav-btn:disabled {
+    background-color: var(--bg-darker);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
+/* ========== 阅读模式切换器 ========== */
+.mode-switcher-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+/* 切换按钮 */
+.mode-switcher-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-color), #8b7cf5);
+    border: none;
+    box-shadow: 0 4px 15px rgba(106, 90, 205, 0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.3rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.mode-switcher-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(106, 90, 205, 0.6);
+}
+
+.mode-switcher-btn:active {
+    transform: scale(0.95);
+}
+
+/* 当前模式指示器小点 */
+.mode-switcher-btn .current-indicator {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 8px;
+    height: 8px;
+    background-color: #4ade80;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+/* 模式选择弹窗 */
+.mode-switcher-modal {
+    position: absolute;
+    bottom: 60px;
+    right: 0;
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    padding: 12px;
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px) scale(0.95);
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.mode-switcher-modal.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+/* 弹窗标题 */
+.mode-switcher-modal .modal-title {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* 模式选项列表 */
+.mode-switcher-modal .mode-options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mode-option-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: none;
+    background-color: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+.mode-option-btn:hover {
+    background-color: var(--bg-light);
+}
+
+.mode-option-btn.active {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.mode-option-btn .mode-icon {
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.mode-option-btn .mode-text {
+    flex: 1;
+}
+
+.mode-option-btn .mode-check {
+    font-size: 0.8rem;
+    opacity: 0;
+}
+
+.mode-option-btn.active .mode-check {
+    opacity: 1;
+}
+
+/* 点击外部关闭的遮罩层 */
+.mode-switcher-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: transparent;
+    z-index: 1;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+}
+
+.mode-switcher-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .mode-switcher-container {
+        bottom: 16px;
+        right: 16px;
+    }
+
+    .mode-switcher-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 1.2rem;
+    }
+
+    .mode-switcher-modal {
+        bottom: 56px;
+        right: 0;
+        min-width: 180px;
+        max-width: calc(100vw - 40px);
+    }
+
+    .mode-switcher-modal .modal-title {
+        font-size: 0.85rem;
+    }
+
+    .mode-option-btn {
+        padding: 12px 10px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .mode-switcher-container {
+        bottom: 12px;
+        right: 12px;
+    }
+
+    .mode-switcher-modal {
+        right: -8px;
+        min-width: 160px;
+    }
+
+    /* 翻页模式超小屏幕优化 */
+    .page-flip-mode .pager-btn {
+        width: 32px;
+        height: 44px;
+        font-size: 0.9rem;
+    }
+
+    /* 确保按钮不超出屏幕 */
+    .page-flip-mode .prev-btn {
+        left: 2px;
+    }
+
+    .page-flip-mode .next-btn {
+        right: 2px;
+    }
+
+    .page-flip-mode .pager-indicator {
+        font-size: 0.75rem;
+        padding: 3px 6px;
+    }
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    /* 隐藏顶部标题以节省空间 */
+    .viewer-header {
+        display: none;
+    }
+
+    .comic-chapter-title {
+        display: none;
+    }
+
+    /* 章节导航改为底部固定菜单栏 */
+    .chapter-navigation {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        flex-direction: row;
+        gap: 0;
+        margin: 0;
+        padding: 8px 10px;
+        background-color: rgba(20, 20, 20, 0.95);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid var(--border-color);
+        border-radius: 0;
+        justify-content: space-around;
+    }
+
+    .nav-btn {
+        width: auto;
+        padding: 10px 15px;
+        font-size: 0.75rem;
+        flex: 1;
+        margin: 0 3px;
+        border-radius: 8px;
+    }
+
+    #chapterInfo {
+        flex: 1;
+        text-align: center;
+        font-size: 0.75rem;
+        padding: 10px 5px;
+        color: var(--text-secondary);
+    }
+
+    /* 为底部菜单栏留出空间 */
+    .comic-viewer-content {
+        padding-bottom: 60px;
+    }
+
+    /* 翻页模式移动端优化 */
+    .page-flip-mode .pager-btn {
+        width: 36px;
+        height: 50px;
+        font-size: 1rem;
+    }
+
+    .page-flip-mode .prev-btn {
+        left: 5px;
+    }
+
+    .page-flip-mode .next-btn {
+        right: 5px;
+    }
+
+    .page-flip-mode .pager-indicator {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+        bottom: 70px; /* 抬高以避开底部菜单 */
+    }
+
+    /* 模式切换器上移以避开底部菜单 */
+    .mode-switcher-container {
+        bottom: 70px;
+    }
+}
+
+/* ==================== 悬浮控件 ==================== */
+/* 隐藏原有控件位置 */
+body.reading-active .viewer-header,
+body.reading-active .comic-chapter-title,
+body.reading-active .chapter-navigation {
+    display: none !important;
+}
+
+/* 顶部浮动栏 */
+.floating-top-bar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: var(--sidebar-width);
+    z-index: 1000;
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 8px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+}
+
+.floating-top-bar.visible {
+    transform: translateY(0);
+}
+
+.floating-top-bar .comic-title {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    flex: 1;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 10px;
+}
+
+.floating-top-bar .top-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* 底部浮动栏 */
+.floating-bottom-bar {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: var(--sidebar-width);
+    z-index: 1000;
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border-color);
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.floating-bottom-bar.visible {
+    transform: translateY(0);
+}
+
+.floating-bottom-bar .chapter-info {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.floating-bottom-bar .nav-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.floating-btn-small {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.floating-btn-small:disabled {
+    background: var(--bg-darker);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
+/* 移动端适配 */
+@media (max-width: 992px) {
+    .floating-top-bar,
+    .floating-bottom-bar {
+        left: 0;
+    }
+
+    .floating-top-bar .comic-title {
+        font-size: 0.75rem;
+    }
+}
+
+/* ========== 翻书页动画效果 ========== */
+.flip-book-viewport {
+    perspective: 2000px;
+    perspective-origin: center center;
+}
+
+.flip-book {
+    position: relative;
+    transform-style: preserve-3d;
+    margin: 0 auto;
+}
+
+.flip-page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    transform-origin: left center;
+    transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.flip-page-current {
+    z-index: 2;
+}
+
+.flip-page-next {
+    z-index: 1;
+}
+
+.flip-page-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 12px;
+}
+
+/* 向前翻页动画（下一页） */
+.flip-page.flip-forward {
+    animation: flipForward 0.6s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
+}
+
+@keyframes flipForward {
+    0% {
+        transform: rotateY(0deg);
+        z-index: 2;
+    }
+    50% {
+        transform: rotateY(-90deg);
+        z-index: 2;
+    }
+    51% {
+        z-index: 0;
+    }
+    100% {
+        transform: rotateY(-180deg);
+        z-index: 0;
+    }
+}
+
+/* 向后翻页动画（上一页） */
+.flip-page.flip-backward {
+    animation: flipBackward 0.6s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
+}
+
+@keyframes flipBackward {
+    0% {
+        transform: rotateY(0deg);
+        z-index: 2;
+    }
+    50% {
+        transform: rotateY(90deg);
+        z-index: 2;
+    }
+    51% {
+        z-index: 0;
+    }
+    100% {
+        transform: rotateY(180deg);
+        z-index: 0;
+    }
+}
+
+/* 淡入淡出动画（备选方案） */
+.flip-page.fade-out {
+    animation: fadeOut 0.4s ease forwards;
+}
+
+.flip-page.fade-in {
+    animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(1.05);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* 滑动动画（备选方案2） */
+.flip-page.slide-left {
+    animation: slideLeft 0.5s ease forwards;
+}
+
+.flip-page.slide-right {
+    animation: slideRight 0.5s ease forwards;
+}
+
+@keyframes slideLeft {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+}
+
+@keyframes slideRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="comic-viewer-container" id="comicViewerContainer">
+    <!-- 等待状态 -->
+    <div class="waiting-state" id="waitingState">
+        <div class="waiting-spinner"></div>
+        <div class="waiting-text" id="waitingText">正在获取章节内容...</div>
+        <div class="waiting-subtext" id="waitingSubtext">首次访问可能需要较长时间</div>
+    </div>
+
+    <!-- 阅读内容 -->
+    <div class="comic-viewer-content" id="comicViewerContent">
+        <!-- 顶部操作栏 -->
+        <div class="viewer-header">
+            <button class="viewer-btn back-btn" id="backBtn">
+                <i class="fas fa-arrow-left"></i> 返回
+            </button>
+            <h1 class="viewer-title" id="viewerTitle">加载中...</h1>
+            <div class="viewer-actions">
+                <button class="viewer-btn force-update-btn" id="forceUpdateBtn">
+                    <i class="fas fa-sync-alt"></i> 强制更新
+                </button>
+            </div>
+        </div>
+
+        <!-- 章节标题 -->
+        <h2 class="comic-chapter-title" id="chapterTitle"></h2>
+
+        <!-- 漫画图片容器 -->
+        <div class="comic-images-container" id="comicImagesContainer">
+            <!-- 图片会动态加载 -->
+        </div>
+
+        <!-- 章节导航 -->
+        <div class="chapter-navigation" id="chapterNavigation">
+            <button class="nav-btn" id="prevChapterBtn" disabled>
+                <i class="fas fa-chevron-left"></i> 上一章
+            </button>
+            <span style="color: var(--text-secondary);" id="chapterInfo"></span>
+            <button class="nav-btn" id="nextChapterBtn" disabled>
+                下一章 <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 阅读模式切换器 -->
+    <div class="mode-switcher-container" id="modeSwitcherContainer">
+        <!-- 遮罩层 -->
+        <div class="mode-switcher-overlay" id="modeSwitcherOverlay"></div>
+
+        <!-- 模式选择弹窗 -->
+        <div class="mode-switcher-modal" id="modeSwitcherModal">
+            <div class="modal-title">
+                <span>阅读模式</span>
+                <i class="fas fa-times" style="cursor: pointer;" id="closeModalBtn"></i>
+            </div>
+            <div class="mode-options">
+                <button class="mode-option-btn" data-mode="scroll">
+                    <span class="mode-icon"><i class="fas fa-arrows-alt-v"></i></span>
+                    <span class="mode-text">下拉式</span>
+                    <span class="mode-check"><i class="fas fa-check"></i></span>
+                </button>
+                <button class="mode-option-btn" data-mode="scroll-seamless">
+                    <span class="mode-icon"><i class="fas fa-align-justify"></i></span>
+                    <span class="mode-text">下拉式无缝</span>
+                    <span class="mode-check"><i class="fas fa-check"></i></span>
+                </button>
+                <button class="mode-option-btn" data-mode="page-flip">
+                    <span class="mode-icon"><i class="fas fa-book"></i></span>
+                    <span class="mode-text">翻页式</span>
+                    <span class="mode-check"><i class="fas fa-check"></i></span>
+                </button>
+                <button class="mode-option-btn" data-mode="page-flip-multi">
+                    <span class="mode-icon"><i class="fas fa-copy"></i></span>
+                    <span class="mode-text">翻页式多页</span>
+                    <span class="mode-check"><i class="fas fa-check"></i></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 切换按钮 -->
+        <button class="mode-switcher-btn" id="modeSwitcherBtn" title="切换阅读模式">
+            <i class="fas fa-book-reader"></i>
+            <span class="current-indicator"></span>
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- 核心模块 -->
+<script src="/static/frontend/js/read-core.js?v=1"></script>
+<!-- 阅读模式 -->
+<script src="/static/frontend/js/read-modes/ScrollMode.js?v=2"></script>
+<script src="/static/frontend/js/read-modes/ScrollSeamlessMode.js?v=2"></script>
+<script src="/static/frontend/js/read-modes/PageFlipMode.js?v=1"></script>
+<script src="/static/frontend/js/read-modes/PageFlipDoubleMode.js?v=3"></script>
+<!-- 主控制器 -->
+<script src="/static/frontend/js/read.js?v=4"></script>
+<script>
+// 阅读页初始化
+(function() {
+    'use strict';
+
+    const currentSiteId = '{{ current_site_id }}';
+
+    // 初始化函数
+    function initReadPage() {
+        if (window.ReadPage) {
+            window.readPage = new window.ReadPage(currentSiteId);
+            window.readPage.init();
+        } else {
+            console.error('[阅读页] ReadPage 类未加载');
+        }
+    }
+
+    // 处理 DOMContentLoaded 可能已触发的情况
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initReadPage);
+    } else {
+        // DOM 已就绪，直接初始化
+        initReadPage();
+    }
+})();
+</script>
+{% endblock %}

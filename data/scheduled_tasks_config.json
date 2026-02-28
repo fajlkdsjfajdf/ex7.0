@@ -1,0 +1,14 @@
+{
+  "tasks": {
+    "refresh_cm_cookies": {
+      "enabled": true,
+      "interval_hours": 0.2,
+      "last_run": "2026-02-27T01:10:34.315070",
+      "next_run": "2026-02-27T01:22:34.315070",
+      "config": {
+        "site_id": "cm",
+        "timeout": 10
+      }
+    }
+  }
+}

@@ -1,0 +1,961 @@
+{% extends "frontend_base.html" %}
+
+{% block title %}漫画列表 - 暗黑漫画站{% endblock %}
+
+{% block extra_css %}
+<style>
+/* 列表页样式 */
+.list-container {
+    padding: 20px;
+    padding-bottom: 80px;
+}
+    padding: 20px;
+}
+
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(106, 90, 205, 0.3);
+    border-top-color: #6a5acd;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-secondary);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+    color: var(--text-muted);
+}
+
+.empty-state h3 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.empty-state p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+/* ========== 翻页控件样式 ========== */
+.pagination-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--bg-darker);
+    border-top: 1px solid var(--border-color);
+    padding: 15px 20px;
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    transition: left 0.3s ease;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pagination-btn {
+    background-color: var(--bg-light);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pagination-info {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    padding: 0 10px;
+}
+
+.pagination-jump-btn {
+    background-color: var(--accent-color);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 0.9rem;
+}
+
+.pagination-jump-btn:hover {
+    background-color: var(--accent-hover);
+}
+
+/* 跳转弹窗样式 */
+.jump-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.jump-modal-overlay.active {
+    display: flex;
+}
+
+.jump-modal {
+    background-color: var(--bg-light);
+    border-radius: 10px;
+    padding: 25px;
+    min-width: 300px;
+    max-width: 90%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.jump-modal h3 {
+    margin: 0 0 20px 0;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+}
+
+.jump-modal-content {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.jump-modal-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.jump-modal-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.jump-modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    justify-content: flex-end;
+}
+
+.jump-modal-btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.jump-modal-btn.primary {
+    background-color: var(--accent-color);
+    border: none;
+    color: white;
+}
+
+.jump-modal-btn.primary:hover {
+    background-color: var(--accent-hover);
+}
+
+.jump-modal-btn.secondary {
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.jump-modal-btn.secondary:hover {
+    background-color: var(--bg-light);
+}
+
+/* 桌面端适配 */
+@media (min-width: 993px) {
+    .pagination-container {
+        left: var(--sidebar-width);
+    }
+
+    .pagination-container.expanded {
+        left: 0;
+    }
+}
+
+/* 移动端适配 */
+@media (max-width: 992px) {
+    .pagination-container {
+        left: 0;
+        padding: 10px 15px;
+    }
+
+    .pagination-controls {
+        gap: 8px;
+    }
+
+    .pagination-btn {
+        padding: 10px 14px;
+        font-size: 0.85rem;
+    }
+
+    .pagination-info {
+        font-size: 0.85rem;
+        padding: 0 5px;
+    }
+
+    .pagination-jump-btn {
+        padding: 10px 14px;
+    }
+}
+
+/* 滚动提示 */
+.scroll-hint {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--accent-color);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 10px;
+    font-size: 1rem;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.scroll-hint.show {
+    opacity: 1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="list-container">
+    <!-- 漫画网格容器 -->
+    <div class="comic-grid portrait" id="comicGrid">
+        <!-- 漫画卡片将通过JavaScript动态加载 -->
+    </div>
+
+    <!-- 加载状态 -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- 空状态提示 -->
+    <div class="empty-state" id="emptyState" style="display: none;">
+        <i class="fas fa-inbox"></i>
+        <h3>暂无漫画数据</h3>
+        <p>请先在后台爬取漫画数据，或稍后再试</p>
+    </div>
+
+    <!-- 翻页控件 -->
+    <div class="pagination-container" id="paginationContainer">
+        <div class="pagination-controls">
+            <button class="pagination-btn" id="prevPageBtn" title="上一页">
+                <i class="fas fa-chevron-left"></i>
+                <span class="desktop-only">上一页</span>
+            </button>
+
+            <span class="pagination-info" id="paginationInfo">1 / 1</span>
+
+            <button class="pagination-btn" id="nextPageBtn" title="下一页">
+                <span class="desktop-only">下一页</span>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <button class="pagination-jump-btn" id="jumpPageBtn" title="跳转到指定页">
+                <i class="fas fa-forward"></i>
+                <span class="desktop-only">跳转</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 跳转弹窗 -->
+    <div class="jump-modal-overlay" id="jumpModalOverlay">
+        <div class="jump-modal">
+            <h3>跳转到指定页</h3>
+            <div class="jump-modal-content">
+                <input type="number" class="jump-modal-input" id="jumpPageInput" min="1" placeholder="输入页码">
+                <span style="color: var(--text-secondary);">/ <span id="totalPagesDisplay">1</span></span>
+            </div>
+            <div class="jump-modal-buttons">
+                <button class="jump-modal-btn secondary" id="jumpModalCancel">取消</button>
+                <button class="jump-modal-btn primary" id="jumpModalConfirm">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 滚动提示 -->
+    <div class="scroll-hint" id="scrollHint"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/common/js/grid-view.js"></script>
+<script>
+(function() {
+    'use strict';
+
+    // ========== 全局变量 ==========
+    let allComics = [];
+    let filteredComics = [];
+    let currentPage = 1;
+    let totalPages = 1;
+    let totalComics = 0;
+    let isLoading = false;
+    let hasMore = true;
+
+    // 移动端滚动翻页相关变量
+    let lastScrollTop = 0;
+    let scrollDirection = '';
+    let scrollCount = 0;
+    let scrollTimer = null;
+    const SCROLL_THRESHOLD = 3; // 连续滚动次数阈值
+
+    // 当前站点ID
+    let currentSiteId = 'cm';
+
+    // DOM元素
+    const comicGrid = document.getElementById('comicGrid');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const emptyState = document.getElementById('emptyState');
+
+    // ========== 初始化站点ID ==========
+    function initSiteId() {
+        // 优先从URL参数获取站点ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlSiteId = urlParams.get('site');
+        if (urlSiteId) {
+            currentSiteId = urlSiteId;
+            // 保存到localStorage以便下次使用
+            localStorage.setItem('current_site_id', urlSiteId);
+        } else {
+            // 如果URL没有参数，从localStorage获取
+            const savedSiteId = localStorage.getItem('current_site_id');
+            if (savedSiteId) {
+                currentSiteId = savedSiteId;
+            }
+        }
+
+        // 初始化智能图片加载器
+        if (window.SmartImageLoader) {
+            window.SmartImageLoader.setSiteId(currentSiteId);
+        }
+
+        console.log(`[初始化] 当前站点: ${currentSiteId}`);
+    }
+
+    // ========== 检查登录状态 ==========
+    async function checkLoginStatus() {
+        try {
+            // 调用后端 API 验证 session 状态
+            const response = await fetch('/api/user/current');
+            const data = await response.json();
+
+            if (data.success && data.user) {
+                // 后端 session 有效，同步更新 localStorage
+                Utils.storage.set('current_user', data.user);
+                console.log('[登录检查] 用户已登录:', data.user.username);
+                return true;
+            } else {
+                // 后端 session 无效，清除 localStorage 并跳转登录页
+                Utils.storage.remove('current_user');
+                console.log('[登录检查] 用户未登录，跳转登录页');
+                window.location.href = '/login.html';
+                return false;
+            }
+        } catch (error) {
+            console.error('[登录检查] 验证失败:', error);
+            // 网络错误时，跳转登录页
+            window.location.href = '/login.html';
+            return false;
+        }
+    }
+
+    // ========== 加载漫画数据 ==========
+    async function loadComics(page = 1, append = false) {
+        if (isLoading) return;
+
+        isLoading = true;
+        showLoading();
+
+        try {
+            const response = await fetch(`/api/${currentSiteId}/comics?page=${page}&per_page=50`);
+            const result = await response.json();
+
+            if (result.success && result.comics) {
+                const newComics = result.comics;
+
+                if (append) {
+                    allComics = allComics.concat(newComics);
+                } else {
+                    allComics = newComics;
+                }
+
+                filteredComics = [...allComics];
+                hasMore = page < result.pages;
+                currentPage = page;
+                totalPages = result.pages || 1;
+                totalComics = result.total || 0;
+
+                renderComics(filteredComics);
+                updatePaginationUI();
+
+                // 隐藏加载状态
+                hideLoading();
+
+                // 显示结果数量
+                if (result.total > 0) {
+                    console.log(`已加载 ${allComics.length}/${result.total} 部漫画`);
+                }
+            } else {
+                console.error('加载漫画数据失败:', result.error);
+                Utils.showToast('加载失败，请刷新页面重试', 'error');
+                showEmptyState();
+                hideLoading();
+            }
+
+        } catch (error) {
+            console.error('加载漫画数据失败:', error);
+            Utils.showToast('加载失败，请检查网络连接', 'error');
+            showEmptyState();
+            hideLoading();
+        } finally {
+            isLoading = false;
+        }
+    }
+
+    // ========== 渲染漫画列表 ==========
+    function renderComics(comics) {
+        if (!comics || comics.length === 0) {
+            showEmptyState();
+            return;
+        }
+
+        hideEmptyState();
+        comicGrid.innerHTML = '';
+
+        const comicsToLoad = []; // 收集需要加载图片的漫画
+
+        comics.forEach(comic => {
+            const card = createComicCard(comic);
+            comicGrid.appendChild(card);
+
+            // 收集图片元素用于批量加载
+            const imgElement = card.querySelector('.comic-cover-img');
+            if (imgElement) {
+                comicsToLoad.push({
+                    aid: comic.aid,
+                    imgElement: imgElement,
+                    comic: comic
+                });
+
+                // 先设置等待图片
+                imgElement.src = '/static/common/images/waiting-image.svg';
+                imgElement.dataset.status = 'loading';
+            }
+        });
+
+        // 批量检查并加载图片（只检查存在的，不存在的不触发任务）
+        batchLoadImages(comicsToLoad);
+    }
+
+    // ========== 创建漫画卡片 ==========
+    function createComicCard(comic) {
+        const card = document.createElement('div');
+        card.className = 'comic-card';
+        card.dataset.aid = comic.aid;
+        card.dataset.id = comic.id;
+
+        // 处理状态徽章（左上角）
+        const statusBadge = comic.is_end ?
+            '<div class="comic-badge">完结</div>' :
+            '<div class="comic-badge" style="background-color: var(--color-success);">更新</div>';
+
+        // 处理类型徽章（右上角，去重）
+        const types = comic.types || [];
+        const uniqueTypes = [...new Set(types)];
+        const typeBadges = uniqueTypes.slice(0, 3).map(type =>
+            `<span class="comic-badge-type">${type}</span>`
+        ).join('');
+        const typeBadgesHtml = typeBadges ?
+            `<div class="comic-badges-right">${typeBadges}</div>` : '';
+
+        // 格式化阅读数和喜爱数
+        const readersText = formatCount(comic.readers || 0);
+        const likesText = formatCount(comic.likes || comic.favorites || 0);
+
+        // 处理标签（原来的types位置，现在放其他标签）
+        const tags = (comic.tags || []).slice(0, 3).map(tag =>
+            `<span class="comic-tag">${tag}</span>`
+        ).join('');
+
+        // 格式化更新时间
+        const updateTime = formatDate(comic.updated_at || comic.updated_at);
+        const updateTimeHtml = updateTime ? `<span class="comic-update-time"><i class="far fa-clock"></i>${updateTime}</span>` : '';
+
+        // 图片页数（如果有的话）
+        const pageCount = comic.page_count || comic.pages || 0;
+
+        card.innerHTML = `
+            <div class="comic-cover">
+                <img data-comic-id="${comic.aid}" alt="${escapeHtml(comic.title)}" loading="lazy" class="comic-cover-img">
+                ${statusBadge}
+                ${typeBadgesHtml}
+                <div class="comic-cover-stats">
+                    <div class="comic-stat left">
+                        <i class="fas fa-eye"></i>
+                        <span>${readersText}</span>
+                    </div>
+                    <div class="comic-stat right">
+                        <i class="fas fa-heart"></i>
+                        <span>${likesText}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="comic-info">
+                <h3 class="comic-title" title="${escapeHtml(comic.title)}">${escapeHtml(comic.title)}</h3>
+                <div class="comic-tags">${tags || '<span class="comic-tags-empty">无标签</span>'}</div>
+                ${updateTimeHtml}
+                <div class="comic-meta">
+                    <span>${comic.list_count || 0}话</span>
+                    <span>${pageCount}页</span>
+                </div>
+            </div>
+        `;
+
+        // 点击卡片跳转到详情页
+        card.addEventListener('click', () => {
+            window.location.href = `/info.html?site=${currentSiteId}&aid=${comic.aid}`;
+        });
+
+        return card;
+    }
+
+    // ========== 批量加载图片 ==========
+    function batchLoadImages(comicsToLoad) {
+        if (!comicsToLoad.length) return;
+
+        if (window.SmartImageLoader) {
+            // 使用批量加载
+            window.SmartImageLoader.batchLoadCoverImages(comicsToLoad);
+        } else {
+            // 回退：使用原有的直接加载逻辑
+            comicsToLoad.forEach(item => {
+                const comic = item.comic;
+                const imgElement = item.imgElement;
+
+                if (comic.cover_file_id) {
+                    const coverUrl = `/api/media/image?file_id=${comic.cover_file_id}&site_id=${currentSiteId}`;
+                    loadImageWithFallback(imgElement, coverUrl, comic.aid);
+                } else if (comic.pic) {
+                    loadImageWithFallback(imgElement, comic.pic, comic.aid);
+                } else {
+                    imgElement.src = '/static/common/images/default-cover.png';
+                    imgElement.dataset.loaded = 'true';
+                }
+            });
+        }
+    }
+
+    // ========== 图片加载与回退处理 ==========
+    function loadImageWithFallback(imgElement, url, comicId) {
+        // 设置初始src
+        imgElement.src = url;
+        imgElement.dataset.loaded = 'true';
+
+        // 监听加载失败，使用智能加载器
+        imgElement.addEventListener('error', function() {
+            console.log(`[列表页] 图片加载失败，尝试智能加载: ${comicId}`);
+
+            // 如果智能加载器可用，触发按需爬取
+            if (window.SmartImageLoader) {
+                window.SmartImageLoader.loadCoverImage(comicId, imgElement, '/static/common/images/default-cover.png');
+            } else {
+                // 回退到默认封面
+                imgElement.src = '/static/common/images/default-cover.png';
+                imgElement.dataset.loaded = 'true';
+            }
+        });
+
+        // 标记加载成功
+        imgElement.addEventListener('load', function() {
+            imgElement.dataset.loaded = 'true';
+        });
+    }
+
+    // ========== 格式化数字（阅读数、喜爱数等） ==========
+    function formatCount(count) {
+        if (count >= 10000) {
+            return (count / 10000).toFixed(1) + '万+';
+        } else if (count >= 1000) {
+            return (count / 1000).toFixed(1) + 'k+';
+        }
+        return count.toString();
+    }
+
+    // ========== HTML转义 ==========
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ========== 格式化日期 ==========
+    function formatDate(dateString) {
+        if (!dateString) return '';
+
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '';
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        // 显示完整日期：YYYY-MM-DD
+        return `${year}-${month}-${day}`;
+    }
+
+    // ========== 显示/隐藏加载状态 ==========
+    function showLoading() {
+        if (loadingSpinner) loadingSpinner.style.display = 'flex';
+        if (comicGrid) comicGrid.style.display = 'none';
+    }
+
+    function hideLoading() {
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+        if (comicGrid) comicGrid.style.display = 'grid';
+    }
+
+    // ========== 显示/隐藏空状态 ==========
+    function showEmptyState() {
+        if (comicGrid) comicGrid.style.display = 'none';
+        if (emptyState) emptyState.style.display = 'block';
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+    }
+
+    function hideEmptyState() {
+        if (comicGrid) comicGrid.style.display = 'grid';
+        if (emptyState) emptyState.style.display = 'none';
+    }
+
+    // ========== 翻页功能 ==========
+    function updatePaginationUI() {
+        const prevBtn = document.getElementById('prevPageBtn');
+        const nextBtn = document.getElementById('nextPageBtn');
+        const pageInfo = document.getElementById('paginationInfo');
+        const totalPagesDisplay = document.getElementById('totalPagesDisplay');
+
+        // 更新页码显示
+        pageInfo.textContent = `${currentPage} / ${totalPages}`;
+        if (totalPagesDisplay) {
+            totalPagesDisplay.textContent = totalPages;
+        }
+
+        // 更新按钮状态
+        if (prevBtn) prevBtn.disabled = currentPage <= 1;
+        if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+    }
+
+    function goToPage(page) {
+        if (page < 1 || page > totalPages || page === currentPage || isLoading) {
+            return;
+        }
+
+        // 滚动到顶部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // 加载指定页
+        loadComics(page, false);
+    }
+
+    function goToPrevPage() {
+        goToPage(currentPage - 1);
+    }
+
+    function goToNextPage() {
+        goToPage(currentPage + 1);
+    }
+
+    // ========== 跳转弹窗功能 ==========
+    function openJumpModal() {
+        const overlay = document.getElementById('jumpModalOverlay');
+        const input = document.getElementById('jumpPageInput');
+
+        if (overlay && input) {
+            input.value = currentPage;
+            input.max = totalPages;
+            overlay.classList.add('active');
+            input.focus();
+            input.select();
+        }
+    }
+
+    function closeJumpModal() {
+        const overlay = document.getElementById('jumpModalOverlay');
+        if (overlay) {
+            overlay.classList.remove('active');
+        }
+    }
+
+    function confirmJump() {
+        const input = document.getElementById('jumpPageInput');
+        if (input) {
+            const page = parseInt(input.value);
+            if (page >= 1 && page <= totalPages) {
+                goToPage(page);
+                closeJumpModal();
+            } else {
+                Utils.showToast(`请输入1-${totalPages}之间的页码`, 'warning');
+            }
+        }
+    }
+
+    // ========== 显示滚动提示 ==========
+    function showScrollHint(message) {
+        const hint = document.getElementById('scrollHint');
+        if (hint) {
+            hint.textContent = message;
+            hint.classList.add('show');
+
+            setTimeout(() => {
+                hint.classList.remove('show');
+            }, 1500);
+        }
+    }
+
+    // ========== 移动端滚动翻页 ==========
+    function handleScrollForPagination() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const scrollHeight = document.documentElement.scrollHeight;
+        const clientHeight = window.innerHeight;
+
+        // 检测滚动方向
+        if (scrollTop > lastScrollTop) {
+            scrollDirection = 'down';
+        } else if (scrollTop < lastScrollTop) {
+            scrollDirection = 'up';
+        }
+
+        lastScrollTop = scrollTop;
+
+        // 清除之前的定时器
+        if (scrollTimer) {
+            clearTimeout(scrollTimer);
+        }
+
+        // 设置新的定时器来检测连续滚动
+        scrollTimer = setTimeout(() => {
+            if (scrollDirection === 'down' && scrollTop + clientHeight >= scrollHeight - 50) {
+                // 滚动到底部，增加计数
+                scrollCount++;
+
+                if (scrollCount >= SCROLL_THRESHOLD && currentPage < totalPages) {
+                    showScrollHint(`正在前往第 ${currentPage + 1} 页...`);
+                    scrollCount = 0;
+                    setTimeout(() => goToNextPage(), 300);
+                } else if (scrollCount >= SCROLL_THRESHOLD) {
+                    showScrollHint('已经是最后一页了');
+                    scrollCount = 0;
+                }
+            } else if (scrollDirection === 'up' && scrollTop <= 50) {
+                // 滚动到顶部，增加计数
+                scrollCount++;
+
+                if (scrollCount >= SCROLL_THRESHOLD && currentPage > 1) {
+                    showScrollHint(`正在前往第 ${currentPage - 1} 页...`);
+                    scrollCount = 0;
+                    setTimeout(() => goToPrevPage(), 300);
+                } else if (scrollCount >= SCROLL_THRESHOLD) {
+                    showScrollHint('已经是第一页了');
+                    scrollCount = 0;
+                }
+            } else {
+                // 重置计数
+                scrollCount = 0;
+            }
+        }, 150);
+    }
+
+    // ========== 初始化翻页事件 ==========
+    function initPaginationEvents() {
+        // 上一页按钮
+        const prevBtn = document.getElementById('prevPageBtn');
+        if (prevBtn) {
+            prevBtn.addEventListener('click', goToPrevPage);
+        }
+
+        // 下一页按钮
+        const nextBtn = document.getElementById('nextPageBtn');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', goToNextPage);
+        }
+
+        // 跳转按钮
+        const jumpBtn = document.getElementById('jumpPageBtn');
+        if (jumpBtn) {
+            jumpBtn.addEventListener('click', openJumpModal);
+        }
+
+        // 跳转弹窗事件
+        const jumpModalCancel = document.getElementById('jumpModalCancel');
+        const jumpModalConfirm = document.getElementById('jumpModalConfirm');
+        const jumpModalOverlay = document.getElementById('jumpModalOverlay');
+        const jumpPageInput = document.getElementById('jumpPageInput');
+
+        if (jumpModalCancel) {
+            jumpModalCancel.addEventListener('click', closeJumpModal);
+        }
+        if (jumpModalConfirm) {
+            jumpModalConfirm.addEventListener('click', confirmJump);
+        }
+        if (jumpModalOverlay) {
+            jumpModalOverlay.addEventListener('click', function(e) {
+                if (e.target === jumpModalOverlay) {
+                    closeJumpModal();
+                }
+            });
+        }
+        if (jumpPageInput) {
+            jumpPageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    confirmJump();
+                }
+            });
+        }
+
+        // 移动端滚动翻页 (仅在移动设备上启用)
+        if (window.innerWidth <= 992) {
+            window.addEventListener('scroll', handleScrollForPagination);
+        }
+    }
+
+    // ========== 监听搜索事件 ==========
+    document.addEventListener('performSearch', function(e) {
+        const { keyword, tags } = e.detail;
+
+        // 客户端过滤（简单实现）
+        filteredComics = allComics.filter(comic => {
+            // 关键词过滤
+            if (keyword) {
+                const keywordLower = keyword.toLowerCase();
+                const matchTitle = comic.title && comic.title.toLowerCase().includes(keywordLower);
+                const matchAuthor = comic.author && comic.author.toLowerCase().includes(keywordLower);
+
+                if (!matchTitle && !matchAuthor) {
+                    return false;
+                }
+            }
+
+            // 标签过滤
+            if (tags && tags.length > 0) {
+                const includeTags = tags.filter(t => !t.isExcluded).map(t => t.text);
+                const excludeTags = tags.filter(t => t.isExcluded).map(t => t.text);
+                const comicTags = comic.types || [];
+
+                // 检查包含标签
+                const hasIncludeTags = includeTags.length === 0 ||
+                    includeTags.some(tag => comicTags.includes(tag));
+
+                // 检查排除标签
+                const hasExcludeTags = excludeTags.some(tag => comicTags.includes(tag));
+
+                if (!hasIncludeTags || hasExcludeTags) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        renderComics(filteredComics);
+
+        if (filteredComics.length > 0) {
+            Utils.showToast(`找到 ${filteredComics.length} 部漫画`, 'success');
+        } else {
+            Utils.showToast('未找到匹配的漫画', 'info');
+        }
+    });
+
+    // ========== 监听视图切换事件 ==========
+    document.addEventListener('viewModeChanged', function(e) {
+        const { mode } = e.detail;
+        if (comicGrid) {
+            comicGrid.className = `comic-grid ${mode}`;
+        }
+    });
+
+    // ========== 监听列数变化事件 ==========
+    document.addEventListener('columnsChanged', function(e) {
+        const { columns } = e.detail;
+        if (comicGrid) {
+            comicGrid.style.setProperty('--grid-columns', columns);
+        }
+    });
+
+    // ========== 初始化 ==========
+    async function init() {
+        // 先检查登录状态（异步）
+        const isLoggedIn = await checkLoginStatus();
+        if (!isLoggedIn) return;
+
+        initSiteId();
+        initPaginationEvents();
+        loadComics();
+    }
+
+    // 页面加载完成后初始化
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+})();
+</script>
+{% endblock %}

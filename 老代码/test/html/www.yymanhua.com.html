@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+
+
+<script>
+eval(function(p, a, c, k, e, d) {
+    e = function(c) {
+        let x1 = "";
+        if(c<a){
+            x1 = ""
+        }
+        else{
+            x1 = e(parseInt(c / a));
+        }
+        c = c % a
+        let x2 = "";
+        if (c>35){
+            x2 = String.fromCharCode(c + 29);
+        }
+        else{
+            x2 = c.toString(36)
+        }
+        return x1 + x2;
+
+    }
+    ;
+    if (!''.replace(/^/, String)) {
+        while (c--){
+            let index = e(c);
+            if(k[c]){
+                d[index] = k[c]
+            }
+            else{
+                d[index] = e(c);
+            }
+
+        }
+        console.log(d);
+
+        k = [function(e) {
+            return d[e]
+        }
+        ];
+        console.log(k);
+        e = function() {
+            return '\\w+'
+        }
+        ;
+        c = 1;
+    }
+    ;while (c--)
+        if (k[c])
+            //console.log(p);
+            console.log(k[c]);
+            p = p.replace(new RegExp('\\b\\w+\\b','g'), k[c]);
+    return p;
+}('e 9(){2 6=4;2 5=\'a\';2 7="g://j.h.f/1/b/4";2 3=["/c.8","/k.8"];o(2 i=0;i<3.l;i++){3[i]=7+3[i]+\'?6=4&5=a&m=\'}n 3}2 d;d=9();', 25, 25, '||var|pvalue|10523|key|cid|pix|jpg|dm5imagefun|a114a8c27b6a8e67cf6cdce6bd86cabc|75|1_4315||function|com|https|yymanhua||image|2_6292|length|uk|return|for'.split('|'), 0, {}))
+
+console.log(d);
+
+</script>
+
+</html>

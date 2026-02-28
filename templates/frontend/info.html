@@ -1,0 +1,858 @@
+{% extends "frontend_base.html" %}
+
+{% block title %}漫画详情 - 暗黑漫画站{% endblock %}
+
+{% block extra_css %}
+<style>
+/* 详情页样式 */
+.comic-detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* 等待状态 */
+.waiting-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 20px;
+    text-align: center;
+}
+
+.waiting-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(106, 90, 205, 0.2);
+    border-top-color: #6a5acd;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.waiting-text {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.waiting-subtext {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* 详情内容 */
+.comic-detail-content {
+    display: none;
+}
+
+.comic-detail-content.loaded {
+    display: block;
+}
+
+/* 封面图片样式 */
+.comic-cover-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.comic-cover-image {
+    max-height: 500px;
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* 标题样式 */
+.comic-titles {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.comic-title-main {
+    font-size: 2rem;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.comic-title-sub {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+    font-weight: normal;
+}
+
+/* 功能按钮 */
+.comic-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.favorite-btn {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.favorite-btn:hover {
+    background-color: var(--accent-hover);
+}
+
+.read-btn {
+    background-color: var(--bg-light);
+    color: var(--text-primary);
+}
+
+.read-btn:hover {
+    background-color: #2a2a2a;
+}
+
+.share-btn {
+    background-color: var(--bg-light);
+    color: var(--text-primary);
+}
+
+.share-btn:hover {
+    background-color: #2a2a2a;
+}
+
+.force-update-btn {
+    background-color: #ff6b6b;
+    color: white;
+}
+
+.force-update-btn:hover {
+    background-color: #ff5252;
+}
+
+/* 漫画信息 */
+.comic-meta-info {
+    background-color: var(--bg-light);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.meta-row {
+    display: flex;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.meta-label {
+    width: 100px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.meta-value {
+    flex: 1;
+    color: var(--text-primary);
+}
+
+/* 章节标题 */
+.section-title {
+    font-size: 1.3rem;
+    color: var(--accent-color);
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chapter-count {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* 漫画简介 */
+.comic-description {
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.comic-description p {
+    margin-bottom: 10px;
+}
+
+/* 标签 */
+.comic-tags-section {
+    margin-bottom: 20px;
+}
+
+.comic-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag-clickable {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tag-clickable:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+/* 章节列表 */
+.chapters-table {
+    background-color: var(--bg-light);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.chapter-header, .chapter-row {
+    display: flex;
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chapter-header {
+    font-weight: bold;
+    background-color: var(--bg-darker);
+}
+
+.chapter-row {
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.chapter-row:hover {
+    background-color: #2a2a2a;
+}
+
+.chapter-row:last-child {
+    border-bottom: none;
+}
+
+.chapter-col {
+    padding: 0 5px;
+}
+
+.chapter-col.name {
+    flex: 3;
+}
+
+.chapter-col.id {
+    flex: 1;
+    text-align: center;
+}
+
+.chapter-col.date {
+    flex: 1.5;
+    text-align: center;
+}
+
+.chapter-col.update-time {
+    flex: 1.5;
+    text-align: center;
+}
+
+.chapter-col.read {
+    flex: 1.5;
+    text-align: center;
+}
+
+/* 章节类型标签 */
+.chapter-type-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.chapter-type-badge.chapter {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.chapter-type-badge.book {
+    background-color: #ff9800;
+    color: white;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .comic-actions {
+        flex-direction: column;
+    }
+
+    /* 移动端章节卡片样式 */
+    .chapters-table {
+        display: block;
+    }
+
+    .chapter-header {
+        display: none; /* 移动端隐藏表头 */
+    }
+
+    .chapter-row {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 12px;
+        margin: 8px;
+        border-radius: 8px;
+        background-color: var(--bg-darker);
+        border-bottom: none;
+        align-items: center;
+    }
+
+    .chapter-col {
+        padding: 4px 0;
+    }
+
+    .chapter-col.name {
+        order: 1;
+        flex: 1 0 100%;
+        font-weight: 500;
+        font-size: 1rem;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .chapter-col.id {
+        order: 2;
+        flex: 0 0 auto;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-right: 15px;
+    }
+
+    .chapter-col.date {
+        order: 3;
+        flex: 0 0 auto;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-right: 15px;
+    }
+
+    .chapter-col.update-time {
+        order: 4;
+        flex: 1;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-align: right;
+    }
+
+    .chapter-col.read {
+        display: none; /* 移动端隐藏阅读列 */
+    }
+
+    /* 移动端章节类型标签 */
+    .chapter-type-badge {
+        font-size: 0.7rem;
+        padding: 2px 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chapter-row {
+        padding: 10px;
+        margin: 6px;
+    }
+
+    .chapter-col.name {
+        font-size: 0.95rem;
+    }
+
+    .chapter-col.id,
+    .chapter-col.date,
+    .chapter-col.update-time {
+        font-size: 0.8rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="comic-detail-container" id="comicDetailContainer">
+    <!-- 等待状态 -->
+    <div class="waiting-state" id="waitingState">
+        <div class="waiting-spinner"></div>
+        <div class="waiting-text">正在获取漫画信息...</div>
+        <div class="waiting-subtext">首次访问可能需要较长时间</div>
+    </div>
+
+    <!-- 详情内容 -->
+    <div class="comic-detail-content" id="comicDetailContent">
+        <!-- 漫画封面图片 -->
+        <div class="comic-cover-container">
+            <img id="comicCover" src="" alt="漫画封面" class="comic-cover-image">
+        </div>
+
+        <!-- 漫画标题 -->
+        <div class="comic-titles">
+            <h1 class="comic-title-main" id="comicTitle">加载中...</h1>
+            <h2 class="comic-title-sub" id="comicTitleSub"></h2>
+            <h3 class="comic-title-sub" id="comicTitleSub2"></h3>
+        </div>
+
+        <!-- 功能按钮 -->
+        <div class="comic-actions">
+            <button class="action-btn favorite-btn" id="favoriteBtn">
+                <i class="fas fa-heart"></i> 加入收藏
+            </button>
+            <button class="action-btn read-btn" id="readBtn">
+                <i class="fas fa-book-open"></i> 开始阅读
+            </button>
+            <button class="action-btn share-btn" id="shareBtn">
+                <i class="fas fa-share-alt"></i> 分享
+            </button>
+            <button class="action-btn force-update-btn" id="forceUpdateBtn">
+                <i class="fas fa-sync-alt"></i> 强制更新
+            </button>
+        </div>
+
+        <!-- 漫画信息 -->
+        <div class="comic-meta-info" id="comicMetaInfo">
+            <div class="meta-row">
+                <span class="meta-label">更新时间:</span>
+                <span class="meta-value" id="updateTime">-</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">原始ID:</span>
+                <span class="meta-value" id="originalAid">-</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">页数:</span>
+                <span class="meta-value" id="pageCount">-</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">章节:</span>
+                <span class="meta-value" id="chapterCount">-</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">分类:</span>
+                <span class="meta-value" id="comicTypes">-</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">作者:</span>
+                <span class="meta-value" id="comicAuthor">-</span>
+            </div>
+        </div>
+
+        <!-- 漫画简介 -->
+        <div class="comic-description" id="comicDescription">
+            <h3 class="section-title">简介</h3>
+            <p id="descriptionText">-</p>
+        </div>
+
+        <!-- 标签 -->
+        <div class="comic-tags-section" id="comicTagsSection">
+            <h3 class="section-title">标签</h3>
+            <div class="comic-tags" id="comicTags">
+                <!-- 标签会动态添加 -->
+            </div>
+        </div>
+
+        <!-- 章节列表 -->
+        <div class="comic-chapters">
+            <h3 class="section-title">章节列表 <span class="chapter-count" id="chaptersCountTitle"></span></h3>
+            <div class="chapters-table" id="chaptersTable">
+                <div class="chapter-header">
+                    <div class="chapter-col name">章节名称</div>
+                    <div class="chapter-col id">章节ID</div>
+                    <div class="chapter-col update-time">更新时间</div>
+                </div>
+                <div id="chaptersList">
+                    <!-- 章节列表会动态添加 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 漫画详情页逻辑
+(function() {
+    'use strict';
+
+    // 获取URL参数
+    const urlParams = new URLSearchParams(window.location.search);
+    const comicAid = urlParams.get('aid');
+    const currentSiteId = '{{ current_site_id }}';
+
+    // DOM元素
+    const waitingState = document.getElementById('waitingState');
+    const comicDetailContent = document.getElementById('comicDetailContent');
+    const comicCover = document.getElementById('comicCover');
+    const comicTitle = document.getElementById('comicTitle');
+    const comicTitleSub = document.getElementById('comicTitleSub');
+    const comicTitleSub2 = document.getElementById('comicTitleSub2');
+    const readBtn = document.getElementById('readBtn');
+    const favoriteBtn = document.getElementById('favoriteBtn');
+    const shareBtn = document.getElementById('shareBtn');
+    const forceUpdateBtn = document.getElementById('forceUpdateBtn');
+
+    // 加载漫画详情
+    async function loadComicDetail() {
+        if (!comicAid) {
+            showError('缺少漫画ID参数');
+            return;
+        }
+
+        try {
+            // 先检查详情页是否有数据
+            const checkResponse = await fetch(`/api/${currentSiteId}/resource/check?resource_type=comic_info&comic_id=${comicAid}`);
+            const checkResult = await checkResponse.json();
+
+            if (checkResult.success && checkResult.status === 'exists') {
+                const comicData = checkResult.data;
+
+                // 检查 info_update 是否为空，如果为空则自动爬取详情页
+                if (!comicData.info_update || comicData.info_update === null) {
+                    console.log('[详情页] 检测到 info_update 为空，自动提交详情页爬取任务');
+                    await submitCrawlTaskAndSubscribe('comic_info', comicAid);
+                    return;
+                }
+
+                // 数据存在且有info_update，直接显示
+                displayComicDetail(comicData);
+            } else {
+                // 数据不存在，提交爬取任务
+                await submitCrawlTaskAndSubscribe('comic_info', comicAid);
+            }
+
+        } catch (error) {
+            console.error('[详情页] 加载失败:', error);
+            showError('加载失败，请稍后重试');
+        }
+    }
+
+    // 显示漫画详情
+    function displayComicDetail(data) {
+        hideWaiting();
+
+        if (!data) {
+            showError('漫画信息不存在');
+            return;
+        }
+
+        // 设置标题
+        comicTitle.textContent = data.title || '未知标题';
+
+        // 设置封面
+        if (data.cover_url) {
+            comicCover.src = data.cover_url;
+        } else if (data.pic) {
+            comicCover.src = data.pic;
+        } else {
+            comicCover.src = '/static/common/images/default-cover.png';
+        }
+
+        // 设置元数据
+        document.getElementById('updateTime').textContent = formatDate(data.updated_at);
+        document.getElementById('originalAid').textContent = data.aid || '-';
+        document.getElementById('pageCount').textContent = data.pages || data.list_count || '-';
+
+        // 章节数量
+        const listCount = data.list_count || data.chapters?.length || 0;
+        document.getElementById('chapterCount').textContent = listCount + ' 话';
+
+        // 分类
+        const types = data.types || [];
+        document.getElementById('comicTypes').textContent = types.join(' / ') || '-';
+
+        // 作者
+        const author = data.author;
+        if (Array.isArray(author)) {
+            document.getElementById('comicAuthor').textContent = author.join(', ');
+        } else {
+            document.getElementById('comicAuthor').textContent = author || '未知作者';
+        }
+
+        // 简介
+        const description = data.summary || data.description || '';
+        document.getElementById('descriptionText').textContent = description || '暂无简介';
+
+        // 标签
+        const tagsContainer = document.getElementById('comicTags');
+        const tags = data.tags || [];
+        if (tags.length > 0) {
+            tagsContainer.innerHTML = tags.map(tag =>
+                `<span class="tag tag-clickable">${tag}</span>`
+            ).join('');
+        } else {
+            document.getElementById('comicTagsSection').style.display = 'none';
+        }
+
+        // 章节列表
+        loadChapters(data);
+
+        // 设置阅读按钮
+        readBtn.addEventListener('click', () => {
+            const firstChapter = data.chapters && data.chapters[0];
+            if (firstChapter) {
+                window.location.href = `/read.html?site=${currentSiteId}&aid=${comicAid}&pid=${firstChapter.id}`;
+            }
+        });
+
+        // 设置强制更新按钮
+        forceUpdateBtn.addEventListener('click', () => {
+            forceUpdateComic();
+        });
+
+        // 显示内容
+        comicDetailContent.classList.add('loaded');
+    }
+
+    // 强制更新漫画信息
+    async function forceUpdateComic() {
+        if (!comicAid) {
+            return;
+        }
+
+        // 禁用按钮
+        forceUpdateBtn.disabled = true;
+
+        try {
+            // 先删除现有章节数据
+            console.log('[详情页] 删除现有章节数据...');
+            const deleteResponse = await fetch(`/api/${currentSiteId}/chapters/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    comic_id: comicAid
+                })
+            });
+
+            const deleteResult = await deleteResponse.json();
+            if (deleteResult.success) {
+                console.log('[详情页] 已删除章节数据:', deleteResult.deleted_count, '条');
+            } else {
+                console.warn('[详情页] 删除章节数据失败:', deleteResult.message);
+            }
+
+            // 提交详情页爬取任务
+            const taskResponse = await fetch(`/api/${currentSiteId}/crawler/submit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    resource_type: 'comic_info',
+                    comic_id: comicAid,
+                    priority: 'high'
+                })
+            });
+
+            const taskResult = await taskResponse.json();
+
+            if (taskResult.success) {
+                console.log('[详情页] 强制更新任务已提交:', taskResult.task_id);
+
+                // 显示等待状态
+                document.querySelector('.waiting-text').textContent = '正在强制更新漫画信息...';
+                waitingState.style.display = 'flex';
+                comicDetailContent.classList.remove('loaded');
+
+                // 订阅WebSocket通知
+                if (window.WSClient) {
+                    const resourceKey = `info:${comicAid}`;
+                    window.WSClient.subscribeResource('comic_info', resourceKey, (result) => {
+                        console.log('[详情页] 收到更新通知:', result);
+                        // 重新加载详情
+                        loadComicDetail();
+                    });
+                }
+
+                // 轮询备用方案
+                pollForResource('comic_info', comicAid);
+            } else {
+                showError('提交更新任务失败: ' + taskResult.message);
+                forceUpdateBtn.disabled = false;
+            }
+
+        } catch (error) {
+            console.error('[详情页] 强制更新失败:', error);
+            showError('强制更新失败');
+            forceUpdateBtn.disabled = false;
+        }
+    }
+
+    // 加载章节列表
+    function loadChapters(data) {
+        const chaptersList = document.getElementById('chaptersList');
+        const chaptersCountTitle = document.getElementById('chaptersCountTitle');
+        const chaptersTable = document.getElementById('chaptersTable');
+
+        const chapters = data.chapters || [];
+
+        if (chapters.length === 0) {
+            chaptersTable.style.display = 'none';
+            return;
+        }
+
+        // 统计各类型章节数
+        const chapterCount = chapters.filter(ch => ch.chapter_type === 'chapter').length;
+        const bookCount = chapters.filter(ch => ch.chapter_type === 'book').length;
+        let countText = `(共${chapters.length}章)`;
+        if (chapterCount > 0 && bookCount > 0) {
+            countText = `(共${chapters.length}章: ${chapterCount}话 + ${bookCount}卷)`;
+        }
+        chaptersCountTitle.textContent = countText;
+
+        chaptersList.innerHTML = chapters.map(chapter => {
+            // 章节类型标签
+            let typeBadge = '';
+            if (chapter.chapter_type === 'book') {
+                typeBadge = '<span class="chapter-type-badge book">卷</span>';
+            }
+
+            // 更新时间优先使用update_time，其次created_at
+            const updateTime = chapter.update_time || chapter.created_at;
+
+            return `
+                <div class="chapter-row" data-chapter-id="${chapter.id}" data-chapter-title="${chapter.title}">
+                    <div class="chapter-col name">${chapter.title || '未知章节'}${typeBadge}</div>
+                    <div class="chapter-col id">${chapter.id}</div>
+                    <div class="chapter-col update-time">${formatDate(updateTime)}</div>
+                </div>
+            `;
+        }).join('');
+
+        // 添加章节点击事件
+        chaptersList.querySelectorAll('.chapter-row').forEach(row => {
+            row.addEventListener('click', () => {
+                const chapterId = row.dataset.chapterId;
+                const chapterTitle = row.dataset.chapterTitle;
+                window.location.href = `/read.html?site=${currentSiteId}&aid=${comicAid}&pid=${chapterId}`;
+            });
+        });
+    }
+
+    // 提交爬取任务并订阅通知
+    async function submitCrawlTaskAndSubscribe(resourceType, comicId) {
+        try {
+            // 提交任务
+            const taskResponse = await fetch(`/api/${currentSiteId}/crawler/submit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    resource_type: resourceType,
+                    comic_id: comicId,
+                    priority: 'high'
+                })
+            });
+
+            const taskResult = await taskResponse.json();
+
+            if (taskResult.success) {
+                console.log('[详情页] 任务已提交:', taskResult.task_id);
+
+                // 订阅WebSocket通知
+                if (window.WSClient) {
+                    const resourceKey = resourceType === 'comic_info' ? `info:${comicId}` : comicId;
+
+                    window.WSClient.subscribeResource(resourceType, resourceKey, (result) => {
+                        console.log('[详情页] 收到更新通知:', result);
+                        // 重新加载详情
+                        loadComicDetail();
+                    });
+                }
+
+                // 轮询备用方案
+                pollForResource(resourceType, comicId);
+            } else {
+                showError('提交爬取任务失败: ' + taskResult.message);
+            }
+
+        } catch (error) {
+            console.error('[详情页] 提交任务失败:', error);
+            showError('提交爬取任务失败');
+        }
+    }
+
+    // 轮询检查资源
+    function pollForResource(resourceType, comicId) {
+        const pollInterval = setInterval(async () => {
+            try {
+                const checkResponse = await fetch(`/api/${currentSiteId}/resource/check?resource_type=${resourceType}&comic_id=${comicId}`);
+                const checkResult = await checkResponse.json();
+
+                if (checkResult.success && checkResult.status === 'exists') {
+                    clearInterval(pollInterval);
+                    loadComicDetail();
+                }
+            } catch (error) {
+                console.error('[详情页] 轮询检查失败:', error);
+            }
+        }, 5000);
+
+        // 5分钟后停止轮询
+        setTimeout(() => {
+            clearInterval(pollInterval);
+        }, 300000);
+    }
+
+    // 显示错误
+    function showError(message) {
+        hideWaiting();
+        comicDetailContent.innerHTML = `
+            <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+                <i class="fas fa-exclamation-circle" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                <p>${message}</p>
+                <button onclick="location.reload()" class="action-btn" style="margin-top: 20px;">
+                    <i class="fas fa-redo"></i> 重新加载
+                </button>
+            </div>
+        `;
+        comicDetailContent.classList.add('loaded');
+    }
+
+    // 隐藏等待状态
+    function hideWaiting() {
+        waitingState.style.display = 'none';
+    }
+
+    // 格式化日期
+    function formatDate(dateString) {
+        if (!dateString) return '-';
+
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '-';
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    }
+
+    // 页面加载时执行
+    loadComicDetail();
+})();
+</script>
+{% endblock %}

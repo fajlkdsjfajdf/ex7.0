@@ -1,0 +1,29 @@
+/**
+ * 基础布局样式
+ */
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    padding-top: calc(20px + var(--header-height));
+    background-color: var(--bg-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 98;
+}
+
+.sidebar-overlay.active {
+    display: block;
+}

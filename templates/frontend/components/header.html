@@ -1,0 +1,32 @@
+<!-- 顶部全局Header -->
+<header class="global-header" id="global-header">
+    <!-- 移动端菜单按钮 -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- 站点标题 -->
+    <div class="header-title">
+        <h2>
+            <i class="fas fa-book-reader"></i> 暗黑漫画站
+        </h2>
+    </div>
+
+    <!-- 视图控制（桌面端显示） -->
+    <div class="view-controls desktop-only">
+        {% block view_controls %}
+        <div class="view-mode">
+            <button class="view-mode-btn active" id="portraitBtn" title="竖版">
+                <i class="fas fa-portrait"></i>
+            </button>
+            <button class="view-mode-btn" id="landscapeBtn" title="横版">
+                <i class="fas fa-landscape"></i>
+            </button>
+        </div>
+        <div class="slider-container">
+            <input type="range" min="1" max="10" value="4" class="slider" id="columnSlider">
+            <span class="slider-value" id="sliderValue">4</span>
+        </div>
+        {% endblock %}
+    </div>
+</header>

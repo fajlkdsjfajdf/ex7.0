@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <!-- 背景 -->
+  <rect width="400" height="300" fill="#2a2a3e"/>
+
+  <!-- 加载图标 -->
+  <circle cx="200" cy="120" r="30" fill="none" stroke="#6a5acd" stroke-width="4">
+    <animate attributeName="r" from="20" to="40" dur="1s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" from="1" to="0" dur="1s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="200" cy="120" r="20" fill="none" stroke="#8b7cf5" stroke-width="4">
+    <animate attributeName="r" from="10" to="30" dur="1s" repeatCount="indefinite" begin="0.3s"/>
+    <animate attributeName="opacity" from="1" to="0" dur="1s" repeatCount="indefinite" begin="0.3s"/>
+  </circle>
+
+  <!-- 文字 -->
+  <text x="200" y="180" font-family="Arial, sans-serif" font-size="16" fill="#8b7cf5" text-anchor="middle">
+    加载中...
+  </text>
+  <text x="200" y="205" font-family="Arial, sans-serif" font-size="12" fill="#6a5acd" text-anchor="middle">
+    正在获取资源
+  </text>
+</svg>

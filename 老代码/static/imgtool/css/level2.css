@@ -1,0 +1,53 @@
+.table-hover tbody tr:hover {
+    background-color: rgba(78, 115, 223, 0.05);
+}
+
+.table thead th {
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.table .badge {
+    font-size: 0.75rem;
+}
+
+.btn-outline-primary {
+    border-width: 2px;
+    font-weight: 500;
+}
+
+/* 响应式表格 */
+@media (max-width: 768px) {
+    .table-responsive {
+        border: 0;
+    }
+    
+    .table thead {
+        display: none;
+    }
+    
+    .table tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 0.25rem;
+    }
+    
+    .table td {
+        display: block;
+        text-align: right;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .table td::before {
+        content: attr(data-label);
+        float: left;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        color: var(--secondary-color);
+    }
+    
+    .table td:last-child {
+        border-bottom: 0;
+    }
+}

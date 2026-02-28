@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}暗黑漫画站{% endblock %}</title>
+
+    <!-- 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- 全局CSS变量 -->
+    <link rel="stylesheet" href="/static/common/css/variables.css">
+
+    <!-- 基础样式 -->
+    <link rel="stylesheet" href="/static/common/css/reset.css">
+    <link rel="stylesheet" href="/static/common/css/base.css">
+    <link rel="stylesheet" href="/static/common/css/sidebar.css">
+    <link rel="stylesheet" href="/static/common/css/header.css">
+    <link rel="stylesheet" href="/static/common/css/comic-grid.css">
+    <link rel="stylesheet" href="/static/common/css/search-modal.css">
+
+    <!-- 页面特定CSS -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- 侧边栏 -->
+    {% include 'components/sidebar.html' %}
+
+    <!-- 顶部全局Header -->
+    {% include 'components/header.html' %}
+
+    <!-- 搜索弹窗 -->
+    {% include 'components/search-modal.html' %}
+
+    <!-- 侧边栏遮罩 -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- 主内容区 -->
+    <main class="main-content" id="mainContent">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- SocketIO客户端 (可选，用于实时通知) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
+
+    <!-- 全局JS -->
+    <script src="/static/common/js/utils.js"></script>
+    <script src="/static/common/js/api.js"></script>
+    <script src="/static/common/js/site-manager.js"></script>
+    <script src="/static/common/js/websocket-client.js"></script>
+    <script src="/static/common/js/smart-image-loader.js"></script>
+    <script src="/static/common/js/sidebar.js"></script>
+    <script src="/static/common/js/search-modal.js"></script>
+
+    <!-- 页面特定JS -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

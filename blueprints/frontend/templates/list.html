@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}漫画列表 - 暗黑漫画站{% endblock %}
+
+{% block extra_css %}
+<style>
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 漫画网格容器 -->
+<div class="comic-grid portrait" id="comicGrid">
+    <!-- 漫画卡片将通过JavaScript动态加载 -->
+</div>
+
+<!-- 空状态提示 -->
+<div class="empty-state" id="emptyState" style="display: none;">
+    <i class="fas fa-inbox"></i>
+    <h3>暂无漫画</h3>
+    <p>请稍后再试</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/common/js/grid-view.js"></script>
+<script>
+(function() {
+    'use strict';
+
+    // 全局变量
+    let allComics = [];
+    let filteredComics = [];
+
+    // DOM元素
+    const comicGrid = document.getElementById('comicGrid');
+    const emptyState = document.getElementById('emptyState');
+
+    // ========== 检查登录状态 ==========
+    function checkLoginStatus() {
+        const user = Utils.storage.get('current_user');
+        if (!user) {
+            window.location.href = '/login.html';
+            return false;
+        }
+        return true;
+    }
+
+    // ========== 加载漫画数据 ==========
+    async function loadComics() {
+        try {
+            const response = await fetch('/data/sample_comics.json');
+            const data = await response.json();
+            allComics = data.comics;
+            filteredComics = [...allComics];
+            renderComics(filteredComics);
+        } catch (error) {
+            console.error('加载漫画数据失败:', error);
+            Utils.showToast('加载失败，请刷新页面重试', 'error');
+            showEmptyState();
+        }
+    }
+
+    // ========== 渲染漫画列表 ==========
+    function renderComics(comics) {
+        if (!comics || comics.length === 0) {
+            showEmptyState();
+            return;
+        }
+
+        hideEmptyState();
+        comicGrid.innerHTML = '';
+
+        comics.forEach(comic => {
+            const card = createComicCard(comic);
+            comicGrid.appendChild(card);
+        });
+    }
+
+    // ========== 创建漫画卡片 ==========
+    function createComicCard(comic) {
+        const card = document.createElement('div');
+        card.className = 'comic-card';
+        card.dataset.aid = comic.aid;
+
+        const tags = (comic.types || []).slice(0, 3).map(tag =>
+            `<span class="comic-tag">${tag}</span>`
+        ).join('');
+
+        const badge = comic.is_end ?
+            '<div class="comic-badge">完结</div>' :
+            '<div class="comic-badge" style="background-color: var(--color-success);">更新</div>';
+
+        card.innerHTML = `
+            <div class="comic-cover">
+                <img src="${comic.pic}" alt="${comic.title}" loading="lazy">
+                ${badge}
+            </div>
+            <div class="comic-info">
+                <h3 class="comic-title" title="${comic.title}">${comic.title}</h3>
+                <div class="comic-tags">${tags}</div>
+                <div class="comic-meta">
+                    <span>${comic.list_count}话</span>
+                    <span>${Utils.formatNumber(comic.readers)}阅读</span>
+                </div>
+            </div>
+        `;
+
+        card.addEventListener('click', () => {
+            // TODO: 跳转到详情页
+            Utils.showToast(`正在开发: ${comic.title}`, 'info');
+        });
+
+        return card;
+    }
+
+    // ========== 显示/隐藏空状态 ==========
+    function showEmptyState() {
+        if (comicGrid) comicGrid.style.display = 'none';
+        if (emptyState) emptyState.style.display = 'block';
+    }
+
+    function hideEmptyState() {
+        if (comicGrid) comicGrid.style.display = 'grid';
+        if (emptyState) emptyState.style.display = 'none';
+    }
+
+    // ========== 监听搜索事件 ==========
+    document.addEventListener('performSearch', function(e) {
+        const { keyword, tags } = e.detail;
+
+        // 过滤漫画
+        filteredComics = allComics.filter(comic => {
+            // 关键词过滤
+            if (keyword) {
+                const keywordLower = keyword.toLowerCase();
+                const matchTitle = comic.title.toLowerCase().includes(keywordLower);
+                const matchSummary = comic.summary && comic.summary.toLowerCase().includes(keywordLower);
+                const matchAuthor = comic.author && comic.author.some(a =>
+                    a.toLowerCase().includes(keywordLower)
+                );
+
+                if (!matchTitle && !matchSummary && !matchAuthor) {
+                    return false;
+                }
+            }
+
+            // 标签过滤
+            if (tags && tags.length > 0) {
+                const includeTags = tags.filter(t => !t.isExcluded).map(t => t.text);
+                const excludeTags = tags.filter(t => t.isExcluded).map(t => t.text);
+                const comicTags = [...(comic.types || []), ...(comic.tags || [])];
+
+                // 检查包含标签
+                const hasIncludeTags = includeTags.length === 0 ||
+                    includeTags.some(tag => comicTags.includes(tag));
+
+                // 检查排除标签
+                const hasExcludeTags = excludeTags.some(tag => comicTags.includes(tag));
+
+                if (!hasIncludeTags || hasExcludeTags) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        renderComics(filteredComics);
+
+        Utils.showToast(`找到 ${filteredComics.length} 部漫画`, 'success');
+    });
+
+    // ========== 初始化 ==========
+    function init() {
+        if (!checkLoginStatus()) return;
+
+        loadComics();
+    }
+
+    // 页面加载完成后初始化
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+})();
+</script>
+{% endblock %}

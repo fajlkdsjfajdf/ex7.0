@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.js"></script>
+<script src="https://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+</head>
+<body>
+	<input type="text" id="password"/>
+	<input value="确认" type="button"  id="btn"/>
+	<script>
+		$(function(){
+			$("#password").keydown(function(event){
+				if(event.which == 13){
+					enterPwd($("#password").val());
+				}
+			  });
+			$("#btn").click(function(){
+				enterPwd($("#password").val());
+			});
+			let password = localStorage.getItem("user");
+			$("#password").val(password);
+		});
+
+		function enterPwd(password){
+			// 存储值
+			localStorage.setItem("user", password);
+			let url = "tpw";
+			$.post(url, {"type": "check", "password": password}, function(data){
+				if(data["msg"] == "success"){
+					$.cookie("login", data["login"], { expires: 30 });
+					window.location.href = "/";
+				}
+			});
+
+		}
+	</script>
+</body>

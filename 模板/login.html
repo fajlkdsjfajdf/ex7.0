@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>暗黑漫画站 - 用户登录</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-darker: #0a0a0a;
+            --bg-light: #1e1e1e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent-color: #6a5acd;
+            --accent-hover: #7b68ee;
+            --border-color: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ========== 登录页面样式 ========== */
+        /* 登录容器 */
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            background-color: var(--bg-light);
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 登录标题 */
+        .login-title {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+
+        /* 登录表单组 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        /* 表单标签 */
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* 表单输入框 */
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        /* 登录按钮 */
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .login-btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* 错误提示 */
+        .error-message {
+            color: #ff4444;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 20px;
+                margin: 0 15px;
+            }
+            
+            .login-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录表单 -->
+    <div class="login-container">
+        <h2 class="login-title">用户登录</h2>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username" class="form-label">用户名</label>
+                <input type="text" id="username" class="form-input" placeholder="请输入用户名" required>
+                <div class="error-message" id="usernameError"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">密码</label>
+                <input type="password" id="password" class="form-input" placeholder="请输入密码" required>
+                <div class="error-message" id="passwordError"></div>
+            </div>
+            
+            <button type="submit" class="login-btn">登 录</button>
+        </form>
+    </div>
+
+    <script>
+        // ========== 登录表单脚本 ==========
+        const loginForm = document.getElementById('loginForm');
+        
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 获取表单值
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // 重置错误信息
+            document.getElementById('usernameError').style.display = 'none';
+            document.getElementById('passwordError').style.display = 'none';
+            
+            // 简单验证
+            let isValid = true;
+            
+            if (!username) {
+                document.getElementById('usernameError').textContent = '请输入用户名';
+                document.getElementById('usernameError').style.display = 'block';
+                isValid = false;
+            }
+            
+            if (!password) {
+                document.getElementById('passwordError').textContent = '请输入密码';
+                document.getElementById('passwordError').style.display = 'block';
+                isValid = false;
+            } else if (password.length < 6) {
+                document.getElementById('passwordError').textContent = '密码长度不能少于6位';
+                document.getElementById('passwordError').style.display = 'block';
+                isValid = false;
+            }
+            
+            if (isValid) {
+                // 这里应该是实际的登录逻辑
+                console.log('登录信息:', { username, password });
+                alert('登录成功！即将跳转到首页...');
+                // window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

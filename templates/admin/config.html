@@ -1,0 +1,472 @@
+{% extends "admin_base.html" %}
+
+{% block title %}配置管理{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-sliders-h"></i> 配置管理</h1>
+    <p class="page-subtitle">管理站点配置和系统配置</p>
+</div>
+
+<!-- 站点配置 -->
+<section class="dashboard-section">
+    <h2 class="section-title">
+        <i class="fas fa-globe"></i> 站点配置
+    </h2>
+
+    <div class="config-actions">
+        <button class="btn btn-primary" onclick="openAddSiteDialog()">
+            <i class="fas fa-plus"></i> 添加站点
+        </button>
+        <button class="btn btn-secondary" onclick="refreshSiteList()">
+            <i class="fas fa-sync-alt"></i> 刷新
+        </button>
+    </div>
+
+    <div class="site-list" id="siteList">
+        <!-- 站点列表将通过JavaScript动态加载 -->
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>暂无站点配置</p>
+        </div>
+    </div>
+</section>
+
+<!-- 系统配置 -->
+<section class="dashboard-section">
+    <h2 class="section-title">
+        <i class="fas fa-cogs"></i> 系统配置
+    </h2>
+
+    <form id="systemConfigForm" class="config-form">
+        <!-- 爬虫线程池配置 -->
+        <div class="config-group">
+            <h3 class="config-group-title">
+                <i class="fas fa-microchip"></i> 爬虫线程池配置
+            </h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">工作线程数</label>
+                    <input type="number" name="crawler_num_workers" class="form-input" value="4" min="1" max="500">
+                    <span class="form-hint">并发爬虫线程数量（建议值：一般使用4-8，高频使用10-50，极限100-500）</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">超时时间（秒）</label>
+                    <input type="number" name="crawler_timeout" class="form-input" value="30" min="5" max="300">
+                    <span class="form-hint">单个请求超时时间</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">最大重试次数</label>
+                    <input type="number" name="crawler_max_retries" class="form-input" value="3" min="0" max="10">
+                    <span class="form-hint">请求失败时的重试次数</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 日志配置 -->
+        <div class="config-group">
+            <h3 class="config-group-title">
+                <i class="fas fa-file-alt"></i> 日志配置
+            </h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">日志级别</label>
+                    <select name="log_level" class="form-select">
+                        <option value="DEBUG">DEBUG</option>
+                        <option value="INFO" selected>INFO</option>
+                        <option value="WARNING">WARNING</option>
+                        <option value="ERROR">ERROR</option>
+                    </select>
+                    <span class="form-hint">日志记录级别</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">日志文件大小限制（MB）</label>
+                    <input type="number" name="log_max_size" class="form-input" value="10" min="1" max="100">
+                    <span class="form-hint">单个日志文件最大大小</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MinIO配置 -->
+        <div class="config-group">
+            <h3 class="config-group-title">
+                <i class="fas fa-database"></i> MinIO配置
+            </h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">MinIO端点</label>
+                    <input type="text" name="minio_endpoint" class="form-input" placeholder="http://localhost:9000">
+                    <span class="form-hint">MinIO服务地址</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Access Key</label>
+                    <input type="text" name="minio_access_key" class="form-input" placeholder="minioadmin">
+                    <span class="form-hint">MinIO访问密钥</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Secret Key</label>
+                    <input type="password" name="minio_secret_key" class="form-input" placeholder="minioadmin">
+                    <span class="form-hint">MinIO秘密密钥</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">存储桶名称</label>
+                    <input type="text" name="minio_bucket_name" class="form-input" value="comics">
+                    <span class="form-hint">用于存储图片的桶名称</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 保存按钮 -->
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="resetSystemConfig()">
+                <i class="fas fa-undo"></i> 重置
+            </button>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> 保存配置
+            </button>
+        </div>
+    </form>
+</section>
+
+<!-- 添加/编辑站点对话框 -->
+<div id="siteDialog" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h2 id="siteDialogTitle">添加站点</h2>
+            <button class="modal-close" onclick="closeSiteDialog()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form id="siteConfigForm" class="modal-body">
+            <input type="hidden" id="isEditMode" name="isEditMode" value="false">
+
+            <!-- 基本信息 -->
+            <div class="config-group">
+                <h3 class="config-group-title">
+                    <i class="fas fa-info-circle"></i> 基本信息
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">站点ID <span class="required">*</span></label>
+                        <input type="text" id="site_id" name="site_id" class="form-input" placeholder="例如: cm" required>
+                        <span class="form-hint">站点唯一标识符（英文）</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">站点名称 <span class="required">*</span></label>
+                        <input type="text" name="site_name" class="form-input" placeholder="例如: 成人漫画" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">域名URL列表 <span class="required">*</span></label>
+                    <div id="urlList">
+                        <input type="text" class="form-input url-input" placeholder="https://example.com" required>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="addUrlField()">
+                        <i class="fas fa-plus"></i> 添加URL
+                    </button>
+                    <span class="form-hint">站点的多个域名URL，爬虫会自动选择最快的</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">CDN URL列表</label>
+                    <div id="cdnUrlList">
+                        <input type="text" class="form-input cdn-url-input" placeholder="https://cdn.example.com">
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="addCdnUrlField()">
+                        <i class="fas fa-plus"></i> 添加CDN URL
+                    </button>
+                    <span class="form-hint">CDN地址，用于图片下载，可配置多个</span>
+                </div>
+            </div>
+
+            <!-- 定时任务配置 -->
+            <div class="config-group">
+                <h3 class="config-group-title">
+                    <i class="fas fa-clock"></i> 定时任务配置
+                </h3>
+
+                <!-- 页面爬取任务 -->
+                <h4 class="sub-title">页面爬取任务</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">列表页更新（小时）</label>
+                        <input type="number" name="schedule_list_page" class="form-input" value="4" min="0" max="168">
+                        <span class="form-hint">0表示不启用</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">详情页更新（小时）</label>
+                        <input type="number" name="schedule_info_page" class="form-input" value="6" min="0" max="168">
+                        <span class="form-hint">0表示不启用</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">内容页更新（小时）</label>
+                        <input type="number" name="schedule_content_page" class="form-input" value="8" min="0" max="168">
+                        <span class="form-hint">0表示不启用</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">评论页更新（小时）</label>
+                        <input type="number" name="schedule_comment_page" class="form-input" value="12" min="0" max="168">
+                        <span class="form-hint">0表示不启用</span>
+                    </div>
+                </div>
+
+                <!-- 图片爬取任务 -->
+                <h4 class="sub-title">图片爬取任务</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">封面图更新（小时）</label>
+                        <input type="number" name="schedule_cover_image" class="form-input" value="6" min="0" max="168">
+                        <span class="form-hint">0表示不启用</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">缩略图更新（小时）</label>
+                        <input type="number" name="schedule_thumbnail_image" class="form-input" value="8" min="0" max="168">
+                        <span class="form-hint">0表示不启用</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">内容图更新（小时）</label>
+                        <input type="number" name="schedule_content_image" class="form-input" value="10" min="0" max="168">
+                        <span class="form-hint">0表示不启用</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 爬取限制配置 -->
+            <div class="config-group">
+                <h3 class="config-group-title">
+                    <i class="fas fa-sliders-h"></i> 爬取数量限制
+                </h3>
+
+                <!-- 页面爬取限制 -->
+                <h4 class="sub-title">页面爬取限制</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">列表页最大页数</label>
+                        <input type="number" name="crawl_limit_list_page_max" class="form-input" value="100" min="1">
+                        <span class="form-hint">单次爬取列表页的最大页数</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">详情页最大数量</label>
+                        <input type="number" name="crawl_limit_info_page_max" class="form-input" value="500" min="1">
+                        <span class="form-hint">单次更新详情页的最大漫画数量</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">内容页最大数量</label>
+                        <input type="number" name="crawl_limit_content_page_max" class="form-input" value="1000" min="1">
+                        <span class="form-hint">单次更新内容页的最大漫画数量</span>
+                    </div>
+                </div>
+
+                <!-- 评论爬取限制 -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">评论页最大数量</label>
+                        <input type="number" name="crawl_limit_comment_page_max" class="form-input" value="50" min="0">
+                        <span class="form-hint">单次更新评论页的最大数量</span>
+                    </div>
+                </div>
+
+                <!-- 图片爬取限制 -->
+                <h4 class="sub-title">图片爬取限制</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">封面图最大数量</label>
+                        <input type="number" name="crawl_limit_cover_image_max" class="form-input" value="500" min="1">
+                        <span class="form-hint">单次下载封面图的最大数量</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">缩略图最大数量</label>
+                        <input type="number" name="crawl_limit_thumbnail_image_max" class="form-input" value="1000" min="1">
+                        <span class="form-hint">单次下载缩略图的最大数量</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">内容图最大数量</label>
+                        <input type="number" name="crawl_limit_content_image_max" class="form-input" value="5000" min="1">
+                        <span class="form-hint">单次下载内容图的最大数量</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 网络配置 -->
+            <div class="config-group">
+                <h3 class="config-group-title">
+                    <i class="fas fa-network-wired"></i> 网络配置
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label">IP地址列表</label>
+                    <div id="ipList">
+                        <input type="text" class="form-input ip-input" placeholder="192.168.1.1">
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="addIpField()">
+                        <i class="fas fa-plus"></i> 添加IP
+                    </button>
+                    <span class="form-hint">站点的IP地址（可选，用于域名解析失败时）</span>
+                </div>
+
+                <!-- Cookies设置 -->
+                <div class="form-group">
+                    <label class="form-label">Cookies设置</label>
+                    <div class="cookies-config">
+                        <!-- 默认Cookies -->
+                        <div class="cookies-section">
+                            <div class="cookies-section-header">
+                                <h4>默认Cookies（所有URL共用）</h4>
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="toggleCookiesSection('default')">
+                                    <i class="fas fa-chevron-down"></i> 展开/折叠
+                                </button>
+                            </div>
+                            <div id="cookies-default" class="cookies-section-content">
+                                <textarea id="cookies-default-input" class="form-textarea" rows="3" placeholder='{"key": "value"}'></textarea>
+                                <span class="form-hint">JSON格式的默认Cookies，当URL没有特定Cookies时使用</span>
+                            </div>
+                        </div>
+
+                        <!-- URL特定Cookies -->
+                        <div class="cookies-section">
+                            <h4>URL特定Cookies</h4>
+                            <span class="form-hint">为每个URL单独设置Cookies，优先使用URL特定Cookies</span>
+                            <div id="url-cookies-list">
+                                <!-- 动态生成URL的Cookies设置 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">默认代理模式</label>
+                    <select name="proxy_mode" class="form-select">
+                        <option value="none">不使用代理</option>
+                        <option value="domestic">使用国内代理</option>
+                        <option value="foreign">使用国外代理</option>
+                        <option value="both">两种代理都用</option>
+                    </select>
+                    <span class="form-hint">站点的默认代理设置，span>
+                </div>
+
+                <!-- 细分代理配置 -->
+                <div class="proxy-overrides-section" style="margin-top: 15px;">
+                    <h4 class="sub-title">细分代理配置</h4>
+                    <span class="form-hint">为不同页面类型单独设置代理， 默认使用上方设置的代理模式</span>
+
+                    <div class="form-row proxy-overrides-grid">
+                        <div class="form-group">
+                            <label class="form-label">列表页</label>
+                            <select name="proxy_list_page" class="form-select proxy-override">
+                                <option value="default">默认</option>
+                                <option value="none">不使用代理</option>
+                                <option value="domestic">国内代理</option>
+                                <option value="foreign">国外代理</option>
+                                <option value="both">两种都用</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">详情页</label>
+                            <select name="proxy_info_page" class="form-select proxy-override">
+                                <option value="default">默认</option>
+                                <option value="none">不使用代理</option>
+                                <option value="domestic">国内代理</option>
+                                <option value="foreign">国外代理</option>
+                                <option value="both">两种都用</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">内容页</label>
+                            <select name="proxy_content_page" class="form-select proxy-override">
+                                <option value="default">默认</option>
+                                <option value="none">不使用代理</option>
+                                <option value="domestic">国内代理</option>
+                                <option value="foreign">国外代理</option>
+                                <option value="both">两种都用</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">评论页</label>
+                            <select name="proxy_comment_page" class="form-select proxy-override">
+                                <option value="default">默认</option>
+                                <option value="none">不使用代理</option>
+                                <option value="domestic">国内代理</option>
+                                <option value="foreign">国外代理</option>
+                                <option value="both">两种都用</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row proxy-overrides-grid">
+                        <div class="form-group">
+                            <label class="form-label">封面图</label>
+                            <select name="proxy_cover_image" class="form-select proxy-override">
+                                <option value="default">默认</option>
+                                <option value="none">不使用代理</option>
+                                <option value="domestic">国内代理</option>
+                                <option value="foreign">国外代理</option>
+                                <option value="both">两种都用</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">缩略图</label>
+                            <select name="proxy_thumbnail_image" class="form-select proxy-override">
+                                <option value="default">默认</option>
+                                <option value="none">不使用代理</option>
+                                <option value="domestic">国内代理</option>
+                                <option value="foreign">国外代理</option>
+                                <option value="both">两种都用</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">内容图</label>
+                            <select name="proxy_content_image" class="form-select proxy-override">
+                                <option value="default">默认</option>
+                                <option value="none">不使用代理</option>
+                                <option value="domestic">国内代理</option>
+                                <option value="foreign">国外代理</option>
+                                <option value="both">两种都用</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeSiteDialog()">
+                    <i class="fas fa-times"></i> 取消
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> 保存
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/common/js/admin-config.js"></script>
+{% endblock %}

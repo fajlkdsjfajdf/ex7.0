@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}仪表盘{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/common/css/admin.css">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-tachometer-alt"></i> 系统仪表盘</h1>
+    <p class="page-subtitle">实时监控系统状态和任务运行情况</p>
+</div>
+
+<!-- 资源监控 -->
+<section class="dashboard-section">
+    <h2 class="section-title">
+        <i class="fas fa-server"></i> 资源监控
+    </h2>
+    <div class="resource-grid">
+        <div class="resource-card">
+            <div class="resource-header">
+                <i class="fas fa-microchip resource-icon cpu-icon"></i>
+                <span class="resource-name">CPU 使用率</span>
+            </div>
+            <div class="resource-value">
+                <span id="cpuValue">--</span>%
+            </div>
+            <div class="resource-bar">
+                <div class="resource-progress" id="cpuBar">
+                    <div class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="resource-card">
+            <div class="resource-header">
+                <i class="fas fa-memory resource-icon memory-icon"></i>
+                <span class="resource-name">内存使用率</span>
+            </div>
+            <div class="resource-value">
+                <span id="memoryValue">--</span>%
+            </div>
+            <div class="resource-bar">
+                <div class="resource-progress" id="memoryBar">
+                    <div class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="resource-detail">
+                已用: <span id="memoryUsed">--</span> GB / 总计: <span id="memoryTotal">--</span> GB
+            </div>
+        </div>
+
+        <div class="resource-card">
+            <div class="resource-header">
+                <i class="fas fa-hdd resource-icon disk-icon"></i>
+                <span class="resource-name">磁盘使用率</span>
+            </div>
+            <div class="resource-value">
+                <span id="diskValue">--</span>%
+            </div>
+            <div class="resource-bar">
+                <div class="resource-progress" id="diskBar">
+                    <div class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="resource-detail">
+                已用: <span id="diskUsed">--</span> GB / 总计: <span id="diskTotal">--</span> GB
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 三桶状态 -->
+<section class="dashboard-section">
+    <h2 class="section-title">
+        <i class="fas fa-buckets"></i> 三桶状态
+    </h2>
+    <div class="bucket-grid">
+        <div class="bucket-card high-speed">
+            <div class="bucket-header">
+                <i class="fas fa-bolt"></i>
+                <h3>高速桶</h3>
+            </div>
+            <div class="bucket-stats">
+                <div class="bucket-stat">
+                    <span class="stat-label">待处理任务</span>
+                    <span class="stat-value" id="highSpeedCount">--</span>
+                </div>
+                <div class="bucket-stat">
+                    <span class="stat-label">容量限制</span>
+                    <span class="stat-value">100</span>
+                </div>
+            </div>
+            <div class="bucket-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="highSpeedProgress" style="width: 0%"></div>
+                </div>
+                <span class="progress-text" id="highSpeedPercent">0%</span>
+            </div>
+            <div class="bucket-footer">
+                <span class="bucket-desc">高优先级任务队列</span>
+                <button class="btn-view" onclick="viewBucket('high_speed')">
+                    <i class="fas fa-eye"></i> 查看
+                </button>
+            </div>
+        </div>
+
+        <div class="bucket-card low-speed">
+            <div class="bucket-header">
+                <i class="fas fa-snail"></i>
+                <h3>低速桶</h3>
+            </div>
+            <div class="bucket-stats">
+                <div class="bucket-stat">
+                    <span class="stat-label">批量任务</span>
+                    <span class="stat-value" id="lowSpeedCount">--</span>
+                </div>
+                <div class="bucket-stat">
+                    <span class="stat-label">容量限制</span>
+                    <span class="stat-value">1000</span>
+                </div>
+            </div>
+            <div class="bucket-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="lowSpeedProgress" style="width: 0%"></div>
+                </div>
+                <span class="progress-text" id="lowSpeedPercent">0%</span>
+            </div>
+            <div class="bucket-footer">
+                <span class="bucket-desc">低优先级批量任务</span>
+                <button class="btn-view" onclick="viewBucket('low_speed')">
+                    <i class="fas fa-eye"></i> 查看
+                </button>
+            </div>
+        </div>
+
+        <div class="bucket-card result">
+            <div class="bucket-header">
+                <i class="fas fa-check-circle"></i>
+                <h3>结果桶</h3>
+            </div>
+            <div class="bucket-stats">
+                <div class="bucket-stat">
+                    <span class="stat-label">执行记录</span>
+                    <span class="stat-value" id="resultCount">--</span>
+                </div>
+                <div class="bucket-stat">
+                    <span class="stat-label">容量限制</span>
+                    <span class="stat-value">10000</span>
+                </div>
+            </div>
+            <div class="bucket-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="resultProgress" style="width: 0%"></div>
+                </div>
+                <span class="progress-text" id="resultPercent">0%</span>
+            </div>
+            <div class="bucket-footer">
+                <span class="bucket-desc">已完成任务记录</span>
+                <button class="btn-view" onclick="viewBucket('result')">
+                    <i class="fas fa-eye"></i> 查看
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 手动运行爬虫 -->
+<section class="dashboard-section">
+    <h2 class="section-title">
+        <i class="fas fa-play-circle"></i> 手动运行爬虫
+    </h2>
+
+    <div class="crawler-controls">
+        <div class="control-group">
+            <label class="control-label">
+                <i class="fas fa-globe"></i> 选择站点
+            </label>
+            <select id="siteSelect" class="form-select">
+                <option value="">请选择站点...</option>
+                <option value="cm">成人漫画 (CM)</option>
+                <!-- TODO: 动态加载站点列表 -->
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label">
+                <i class="fas fa-tasks"></i> 任务类型
+            </label>
+            <select id="taskTypeSelect" class="form-select">
+                <option value="list_page">列表页更新</option>
+                <option value="info_page">详情页更新</option>
+                <option value="content_page">内容页下载</option>
+                <option value="single_comic">单本漫画</option>
+            </select>
+        </div>
+
+        <div class="control-group" id="aidGroup" style="display: none;">
+            <label class="control-label">
+                <i class="fas fa-id-card"></i> 漫画ID
+            </label>
+            <input type="number" id="aidInput" class="form-input" placeholder="输入漫画AID">
+        </div>
+
+        <div class="control-group">
+            <label class="control-label">
+                <i class="fas fa-flag"></i> 优先级
+            </label>
+            <select id="prioritySelect" class="form-select">
+                <option value="high">高优先级（高速桶）</option>
+                <option value="low">低优先级（低速桶）</option>
+            </select>
+        </div>
+
+        <div class="control-actions">
+            <button class="btn btn-primary" id="runCrawlerBtn">
+                <i class="fas fa-play"></i> 运行爬虫
+            </button>
+            <button class="btn btn-secondary" id="refreshStatusBtn">
+                <i class="fas fa-sync-alt"></i> 刷新状态
+            </button>
+        </div>
+    </div>
+
+    <!-- 运行日志 -->
+    <div class="run-log-container">
+        <div class="log-header">
+            <h3><i class="fas fa-terminal"></i> 运行日志</h3>
+            <button class="btn-clear" onclick="clearRunLog()">
+                <i class="fas fa-trash"></i> 清空
+            </button>
+        </div>
+        <div class="log-content" id="runLogContent">
+            <div class="log-entry log-info">
+                <span class="log-time">--:--:--</span>
+                <span class="log-message">等待运行爬虫任务...</span>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/common/js/admin-dashboard.js"></script>
+{% endblock %}

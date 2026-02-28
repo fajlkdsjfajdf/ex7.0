@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漫画SPA</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 顶部导航栏 -->
+        <div class="app-header">
+            <h1 class="logo">漫画SPA</h1>
+            <div class="nav-links">
+                <a href="#list" class="nav-link active">列表</a>
+                <a href="#search" class="nav-link">搜索</a>
+            </div>
+        </div>
+        
+        <!-- 内容容器 -->
+        <div id="content-container">
+            <!-- 内容将通过AJAX动态加载到这里 -->
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

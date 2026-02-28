@@ -1,0 +1,112 @@
+/**
+ * 全局CSS变量定义
+ * 支持主题切换
+ */
+
+:root {
+    /* ========== 默认主题（暗黑） ========== */
+
+    /* 颜色系统 */
+    --bg-dark: #121212;
+    --bg-darker: #0a0a0a;
+    --bg-light: #1e1e1e;
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --text-muted: #757575;
+    --accent-color: #6a5acd;
+    --accent-hover: #7b68ee;
+    --border-color: #333;
+
+    /* 布局 */
+    --sidebar-width: 250px;
+    --header-height: 60px;
+    --border-radius: 8px;
+
+    /* 阅读器 */
+    --reader-bg: #1e1e1e;
+    --reader-text: #e0e0e0;
+
+    /* 状态颜色 */
+    --color-success: #4caf50;
+    --color-warning: #ff9800;
+    --color-error: #f44336;
+    --color-info: #2196f3;
+
+    /* 网格 */
+    --columns: 4;
+    --max-columns: 10;
+}
+
+/* 亮色主题 */
+[data-theme="light"] {
+    --bg-dark: #f5f5f5;
+    --bg-darker: #e0e0e0;
+    --bg-light: #ffffff;
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --border-color: #cccccc;
+    --reader-bg: #ffffff;
+    --reader-text: #333333;
+}
+
+/* 蓝色主题 */
+[data-theme="blue"] {
+    --accent-color: #1976d2;
+    --accent-hover: #2196f3;
+    --bg-dark: #0d1b2a;
+    --bg-darker: #070d15;
+}
+
+/* 绿色主题 */
+[data-theme="green"] {
+    --accent-color: #2e7d32;
+    --accent-hover: #4caf50;
+    --bg-dark: #1b1a1a;
+}
+
+/* 紫色主题 */
+[data-theme="purple"] {
+    --accent-color: #9c27b0;
+    --accent-hover: #ba68c8;
+    --bg-dark: #1a0b1e;
+    --bg-darker: #0f0711;
+}
+
+/* ========== 背景颜色主题 ========== */
+
+/* 亮色主题（白色背景） */
+.theme-light {
+    --bg-dark: #f5f5f5;
+    --bg-darker: #e0e0e0;
+    --bg-light: #ffffff;
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --border-color: #cccccc;
+    --reader-bg: #ffffff;
+    --reader-text: #333333;
+}
+
+/* 暗色主题（黑色背景）- 默认 */
+.theme-dark {
+    --bg-dark: #121212;
+    --bg-darker: #0a0a0a;
+    --bg-light: #1e1e1e;
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --border-color: #333;
+    --reader-bg: #1e1e1e;
+    --reader-text: #e0e0e0;
+}
+
+/* 护眼主题 */
+.theme-eye-care {
+    --bg-dark: #c7edcc;
+    --bg-darker: #b8e6bf;
+    --bg-light: #d8f3dc;
+    --text-primary: #2d5016;
+    --text-secondary: #4a7028;
+    --border-color: #a3d8a8;
+    --reader-bg: #d8f3dc;
+    --reader-text: #2d5016;
+}
+

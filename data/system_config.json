@@ -1,0 +1,21 @@
+{
+  "crawler_num_workers": 100,
+  "crawler_timeout": 30,
+  "crawler_max_retries": 3,
+  "log_level": "INFO",
+  "log_max_size": 10,
+  "minio_endpoint": "",
+  "minio_access_key": "",
+  "minio_secret_key": "",
+  "minio_bucket_name": "comics",
+  "image_storage": {
+    "windows_path": "Y:/ex7.0/image",
+    "linux_path": "/mnt/appdata",
+    "description": "图片存储根路径，系统会根据操作系统自动选择"
+  },
+  "database": {
+    "host": "192.168.1.222",
+    "port": 27017,
+    "name": "manga_hub"
+  }
+}

@@ -1,0 +1,126 @@
+/**
+ * 顶部Header样式
+ */
+
+.global-header {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: var(--header-height);
+    background-color: var(--bg-dark);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 90;
+    transition: left 0.3s ease;
+}
+
+.header-title h2 {
+    font-size: 1.2rem;
+    color: var(--accent-color);
+    margin: 0;
+}
+
+.view-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.view-mode {
+    display: flex;
+    background-color: var(--bg-light);
+    border-radius: 20px;
+    padding: 5px;
+}
+
+.view-mode-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    padding: 5px 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.view-mode-btn.active {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    width: 150px;
+}
+
+.slider {
+    flex: 1;
+    height: 6px;
+    background: var(--bg-light);
+    border-radius: 3px;
+    outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+}
+
+.slider-value {
+    margin-left: 10px;
+    min-width: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.mobile-menu-btn {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-right: 15px;
+    display: none;
+}
+
+/* 桌面端 */
+@media (min-width: 993px) {
+    .global-header {
+        left: var(--sidebar-width);
+    }
+
+    .global-header.expanded {
+        left: 0;
+    }
+}
+
+/* 移动端 */
+@media (max-width: 992px) {
+    .global-header {
+        left: 0;
+    }
+
+    .mobile-menu-btn {
+        display: block;
+    }
+
+    .desktop-only {
+        display: none !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .slider-container {
+        width: 100px;
+    }
+}

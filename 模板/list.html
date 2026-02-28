@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>暗黑漫画站</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-darker: #0a0a0a;
+            --bg-light: #1e1e1e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent-color: #6a5acd;
+            --accent-hover: #7b68ee;
+            --border-color: #333;
+            --columns: 4; /* 默认列数 */
+            --max-columns: 10; /* 最大列数，由JS动态设置 */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ========== 首页样式 ========== */
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 250px;
+            background-color: var(--bg-darker);
+            border-right: 1px solid var(--border-color);
+            transition: transform 0.3s ease;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+
+        .sidebar-menu {
+            padding: 15px 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background-color: var(--bg-light);
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .menu-item.active {
+            background-color: var(--bg-light);
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .menu-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .menu-item.active i {
+            color: var(--accent-color);
+        }
+
+        .menu-item span {
+            font-size: 0.95rem;
+        }
+
+        /* 主内容区样式 */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background-color: var(--bg-dark);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-light);
+            border-radius: 20px;
+            padding: 8px 15px;
+            width: 300px;
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            width: 100%;
+            padding: 5px;
+            outline: none;
+        }
+
+        .search-bar i {
+            color: var(--text-secondary);
+            margin-right: 10px;
+        }
+
+        .view-controls {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+
+        }
+
+        .view-mode {
+            display: flex;
+            background-color: var(--bg-light);
+            border-radius: 20px;
+            padding: 5px;
+        }
+
+        .view-mode-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .view-mode-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            width: 150px;
+        }
+
+        .slider {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-light);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+        }
+
+        .slider-value {
+            margin-left: 10px;
+            min-width: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+        }
+
+        .sidebar-search-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-search-btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* 瀑布流漫画列表 */
+        .comic-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        /* 纵向视图 */
+        .comic-grid.portrait {
+            grid-template-columns: repeat(var(--columns, auto-fill), minmax(180px, 1fr));
+        }
+
+        .comic-grid.portrait .comic-cover {
+            min-height: 200px;
+            max-height: 300px;
+            height: auto;
+        }
+
+        /* 横向视图 */
+        .comic-grid.landscape {
+            grid-template-columns: repeat(var(--columns, auto-fill), minmax(240px, 1fr));
+        }
+
+        .comic-grid.landscape .comic-cover {
+            min-height: 120px;
+            max-height: 180px;
+            height: auto;
+            aspect-ratio: 16/9;
+        }
+
+        .comic-card {
+            background-color: var(--bg-light);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .comic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .comic-cover {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .comic-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .comic-card:hover .comic-cover img {
+            transform: scale(1.05);
+        }
+
+        .comic-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
+
+        .comic-info {
+            padding: 12px;
+        }
+
+        .comic-title {
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .comic-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .comic-tag {
+            background-color: var(--bg-dark);
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .comic-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* 移动设备样式 */
+        .mobile-menu-btn {
+            /* display: none; */
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-right: 15px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 98;
+        }
+
+        /* ========== 搜索弹窗样式 ========== */
+        .search-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .search-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: var(--bg-dark);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 搜索框区域 */
+        .search-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px 15px;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .search-button {
+            padding: 0 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background-color 0.2s;
+        }
+
+        .search-button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* 已选标签区域 */
+        .selected-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 15px;
+            min-height: 32px;
+            padding: 8px;
+            background-color: var(--bg-light);
+            border-radius: 6px;
+        }
+
+
+        /* 包含状态（蓝色） */
+        .tag.selected,
+        .selected-tag:not(.excluded) {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* 排除状态（红色） */
+        .tag.excluded,
+        .selected-tag.excluded {
+            background-color: #ff4444;
+            color: white;
+            position: relative;
+        }
+
+        /* 排除状态的标签添加禁止线 */
+        .selected-tag.excluded::before {
+            content: "";
+            position: absolute;
+            left: 5px;
+            right: 5px;
+            top: 50%;
+            height: 2px;
+            background-color: white;
+            transform: translateY(-50%);
+        }
+
+        .selected-tag {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            line-height: 1.2;
+        }
+
+        .selected-tag .remove-tag {
+            margin-left: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        /* 标签搜索区域 */
+        .tag-search-container {
+            margin-bottom: 15px;
+        }
+
+        .tag-search-input {
+            width: 100%;
+            padding: 10px 15px;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            margin-bottom: 8px;
+        }
+
+        .tag-search-input:focus {
+            border-color: var(--accent-color);
+        }
+
+        /* 标签分类区域 */
+        .tag-categories {
+            margin-bottom: 20px;
+        }
+
+        .tag-category {
+            margin-bottom: 12px;
+            background-color: var(--bg-light);
+            border-radius: 6px;
+            overflow: hidden;
+            will-change: max-height; /* 优化性能 */
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .category-title {
+            font-size: 0.95rem;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .category-title i {
+            margin-right: 6px;
+            font-size: 0.9rem;
+        }
+
+        .category-toggle {
+            font-size: 0.9rem;
+            transition: transform 0.3s;
+        }
+
+        .category-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 更平滑的缓动函数 */
+            padding: 0 12px;
+            box-sizing: border-box; /* 确保padding计算在内 */
+        }
+
+       .category-content.active {
+            max-height: var(--content-height); /* 使用CSS变量动态设置 */
+            padding: 0 12px 12px;
+        }
+        /* 标签样式 */
+        .tag {
+            padding: 5px 10px;
+            background-color: var(--bg-darker);
+            border-radius: 12px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .tag:hover {
+            border-color: var(--accent-color);
+        }
+
+        .tag.selected {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* 标签搜索建议 */
+        .tag-suggestions {
+            display: none;
+            background-color: var(--bg-darker);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-top: 4px;
+        }
+
+        .tag-suggestions.active {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 0.85rem;
+            line-height: 1.3;
+        }
+
+        .suggestion-item:hover {
+            background-color: var(--bg-light);
+        }
+
+        .suggestion-category {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-left: 5px;
+        }
+
+        /* 关闭按钮 */
+        .close-search {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-search:hover {
+            color: var(--text-primary);
+        }
+
+        /* 响应式设计 - 首页部分 */
+        @media (max-width: 1200px) {
+            .comic-grid.portrait {
+                --max-columns: 8;
+            }
+        }
+        @media (min-width: 993px){
+            .sidebar.active {
+                display: block;
+            }
+
+            /* .sidebar.hide {
+                display: none;
+            } */
+
+            .sidebar.hide {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                position: fixed;
+                z-index: 99;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .comic-grid.portrait {
+                --max-columns: 6;
+                grid-template-columns: repeat(var(--columns, auto-fill), minmax(150px, 1fr));
+            }
+
+            .comic-grid.landscape {
+                --max-columns: 5;
+                grid-template-columns: repeat(var(--columns, auto-fill), minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .comic-grid.portrait {
+                --max-columns: 4;
+                grid-template-columns: repeat(var(--columns, auto-fill), minmax(120px, 1fr));
+            }
+
+            .comic-grid.landscape {
+                --max-columns: 3;
+                grid-template-columns: repeat(var(--columns, auto-fill), minmax(160px, 1fr));
+            }
+
+            .search-bar {
+                width: 200px;
+            }
+
+            .slider-container {
+                width: 120px;
+            }
+
+            /* 搜索弹窗响应式 */
+            .search-header {
+                flex-direction: column;
+            }
+            
+            .search-button {
+                width: 100%;
+                padding: 10px;
+                margin-top: 8px;
+            }
+            
+            .category-content {
+                gap: 4px;
+            }
+            
+            .tag {
+                padding: 4px 8px;
+                font-size: 0.7rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .comic-grid.portrait {
+                --max-columns: 3;
+                grid-template-columns: repeat(var(--columns, auto-fill), minmax(100px, 1fr));
+                gap: 10px;
+            }
+
+            .comic-grid.landscape {
+                --max-columns: 2;
+                grid-template-columns: repeat(var(--columns, auto-fill), minmax(140px, 1fr));
+                gap: 10px;
+            }
+
+            .search-bar {
+                width: 150px;
+            }
+
+            .view-controls {
+                flex-direction: column;
+                align-items: flex-end;
+            }
+        }
+
+
+
+        .global-header {
+            position: fixed;
+            top: 0;
+            left: 0px; /* 与侧边栏宽度一致 */
+            right: 0;
+            height: 60px; /* 根据实际需要调整 */
+            background-color: var(--bg-dark);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            
+            z-index: 90; /* 低于侧边栏的z-index */
+            transition: left 0.3s ease; /* 与侧边栏动画同步 */
+        }
+
+
+
+        /* 调整main-content的位置 */
+        .main-content {
+            margin-top: 60px; /* 与header高度一致 */
+
+            padding: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- header -->
+    <div class="global-header" id="global-header">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <div class="view-controls">
+            <!-- 原来的header内容 -->
+            <div class="view-mode">
+                <button class="view-mode-btn active" id="portraitBtn">
+                    <i class="fas fa-portrait"></i>
+                </button>
+                <button class="view-mode-btn" id="landscapeBtn">
+                    <i class="fas fa-landscape"></i>
+                </button>
+            </div>
+            <div class="slider-container">
+                <input type="range" min="1" max="10" value="4" class="slider" id="columnSlider">
+                <span class="slider-value" id="sliderValue">4</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1>暗黑漫画</h1>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item active">
+                <i class="fas fa-home"></i>
+                <span>首页</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-history"></i>
+                <span>历史记录</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-bookmark"></i>
+                <span>收藏夹</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-info-circle"></i>
+                <span>信息中心</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-book-open"></i>
+                <span>内容管理</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-cog"></i>
+                <span>设置</span>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <button id="sidebarSearchBtn" class="sidebar-search-btn">
+                <i class="fas fa-search"></i> 搜索漫画
+            </button>
+        </div>
+    </div>
+
+    <!-- 侧边栏遮罩 -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        
+
+        <div class="comic-grid portrait" id="comicGrid">
+            <!-- 漫画卡片示例 - 实际使用时可以用循环生成 -->
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/300/450?random=1" alt="漫画封面">
+                    <div class="comic-badge">更新</div>
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">暗夜猎手：起源</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">动作</span>
+                        <span class="comic-tag">奇幻</span>
+                        <span class="comic-tag">冒险</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第15话</span>
+                        <span>3小时前</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/300/400?random=2" alt="漫画封面">
+                    <div class="comic-badge">完结</div>
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">星际迷航：新纪元</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">科幻</span>
+                        <span class="comic-tag">太空</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>全30话</span>
+                        <span>1天前</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/300/500?random=3" alt="漫画封面">
+                    <div class="comic-badge">热门</div>
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">校园恋爱物语</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">恋爱</span>
+                        <span class="comic-tag">校园</span>
+                        <span class="comic-tag">喜剧</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第42话</span>
+                        <span>2天前</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/300/350?random=4" alt="漫画封面">
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">神秘侦探社</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">悬疑</span>
+                        <span class="comic-tag">推理</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第7话</span>
+                        <span>3天前</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/300/420?random=5" alt="漫画封面">
+                    <div class="comic-badge">新作</div>
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">美食猎人</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">美食</span>
+                        <span class="comic-tag">冒险</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第3话</span>
+                        <span>5天前</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/300/380?random=6" alt="漫画封面">
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">超能力学院</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">超能力</span>
+                        <span class="comic-tag">校园</span>
+                        <span class="comic-tag">战斗</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第18话</span>
+                        <span>1周前</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/300/460?random=7" alt="漫画封面">
+                    <div class="comic-badge">推荐</div>
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">荒野求生指南</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">生存</span>
+                        <span class="comic-tag">冒险</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第12话</span>
+                        <span>1周前</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/300/410?random=8" alt="漫画封面">
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">古代王朝秘史</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">历史</span>
+                        <span class="comic-tag">权谋</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第25话</span>
+                        <span>2周前</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 横版图片测试 -->
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/600/300?random=9" alt="漫画封面">
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">横版漫画测试</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">测试</span>
+                        <span class="comic-tag">横版</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第1话</span>
+                        <span>1天前</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/500/250?random=10" alt="漫画封面">
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">横版漫画测试2</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">测试</span>
+                        <span class="comic-tag">横版</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第2话</span>
+                        <span>2天前</span>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/300/450?random=1" alt="漫画封面">
+                    <div class="comic-badge">更新</div>
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">暗夜猎手：起源</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">动作</span>
+                        <span class="comic-tag">奇幻</span>
+                        <span class="comic-tag">冒险</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第15话</span>
+                        <span>3小时前</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/300/400?random=2" alt="漫画封面">
+                    <div class="comic-badge">完结</div>
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">星际迷航：新纪元</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">科幻</span>
+                        <span class="comic-tag">太空</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>全30话</span>
+                        <span>1天前</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/300/500?random=3" alt="漫画封面">
+                    <div class="comic-badge">热门</div>
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">校园恋爱物语</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">恋爱</span>
+                        <span class="comic-tag">校园</span>
+                        <span class="comic-tag">喜剧</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第42话</span>
+                        <span>2天前</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/300/350?random=4" alt="漫画封面">
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">神秘侦探社</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">悬疑</span>
+                        <span class="comic-tag">推理</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第7话</span>
+                        <span>3天前</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/300/420?random=5" alt="漫画封面">
+                    <div class="comic-badge">新作</div>
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">美食猎人</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">美食</span>
+                        <span class="comic-tag">冒险</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第3话</span>
+                        <span>5天前</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/300/380?random=6" alt="漫画封面">
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">超能力学院</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">超能力</span>
+                        <span class="comic-tag">校园</span>
+                        <span class="comic-tag">战斗</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第18话</span>
+                        <span>1周前</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/300/460?random=7" alt="漫画封面">
+                    <div class="comic-badge">推荐</div>
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">荒野求生指南</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">生存</span>
+                        <span class="comic-tag">冒险</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第12话</span>
+                        <span>1周前</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/300/410?random=8" alt="漫画封面">
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">古代王朝秘史</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">历史</span>
+                        <span class="comic-tag">权谋</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第25话</span>
+                        <span>2周前</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 横版图片测试 -->
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/600/300?random=9" alt="漫画封面">
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">横版漫画测试</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">测试</span>
+                        <span class="comic-tag">横版</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第1话</span>
+                        <span>1天前</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-card">
+                <div class="comic-cover">
+                    <img src="https://picsum.photos/500/250?random=10" alt="漫画封面">
+                </div>
+                <div class="comic-info">
+                    <h3 class="comic-title">横版漫画测试2</h3>
+                    <div class="comic-tags">
+                        <span class="comic-tag">测试</span>
+                        <span class="comic-tag">横版</span>
+                    </div>
+                    <div class="comic-meta">
+                        <span>第2话</span>
+                        <span>2天前</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 搜索弹窗 ========== -->
+    <div class="search-modal" id="searchModal">
+        <span class="close-search" id="closeSearch"><i class="fas fa-times"></i></span>
+        <div class="search-container">
+            <!-- 搜索框区域 -->
+            <div class="search-header">
+                <input type="text" class="search-input" id="searchInput" placeholder="搜索漫画标题、作者...">
+                <button class="search-button" id="searchButton">
+                    <i class="fas fa-search"></i> 搜索
+                </button>
+            </div>
+
+            <!-- 已选标签区域 -->
+            <div class="selected-tags" id="selectedTags">
+                <!-- 选中的标签会动态添加到这里 -->
+            </div>
+
+            <!-- 标签搜索区域 -->
+            <div class="tag-search-container">
+                <input type="text" class="tag-search-input" id="tagSearchInput" placeholder="搜索标签...">
+                <div class="tag-suggestions" id="tagSuggestions">
+                    <!-- 标签建议会动态添加到这里 -->
+                </div>
+            </div>
+
+            <!-- 标签分类区域 -->
+            <div class="tag-categories" id="tagCategories">
+                <!-- 分类会通过JavaScript动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== 首页脚本 ==========
+        // 移动端菜单切换
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const header = document.getElementById('global-header');
+
+        function updateHeader(){
+            if(window.innerWidth <= 992){
+                header.style.left = "0px";
+            }
+            else{
+                header.style.left = "250px";
+            }
+        }
+
+        mobileMenuBtn.addEventListener('click', () => {
+            if (window.innerWidth <= 992) {
+                // 移动设备逻辑：使用active类控制侧边栏
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+            } else {
+                // 桌面设备逻辑：使用hide类控制侧边栏
+                // sidebar.classList.toggle('hide');
+
+                // 桌面设备新逻辑
+                const isHiding = !sidebar.classList.contains('hide');
+                
+                if (isHiding) {
+                    // 准备隐藏侧边栏
+                    sidebar.classList.toggle('hide');
+                    setTimeout(() => {
+                        sidebar.style.display = 'none';
+                        header.style.left = "0px";
+                    }, 100);
+                } else {
+                    // 准备显示侧边栏
+                    sidebar.classList.toggle('hide');
+                    // 小延迟确保display生效后再触发动画
+                    setTimeout(() => {
+                        sidebar.style.display = 'block';
+                        header.style.left = "250px";
+                    }, 100);
+                }
+
+            }
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        });
+
+        // 菜单项点击效果
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                menuItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                
+                // 在移动设备上点击菜单项后自动关闭菜单
+                if (window.innerWidth <= 992) {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                }
+            });
+        });
+
+        // 视图模式切换
+        const portraitBtn = document.getElementById('portraitBtn');
+        const landscapeBtn = document.getElementById('landscapeBtn');
+        const comicGrid = document.getElementById('comicGrid');
+        const columnSlider = document.getElementById('columnSlider');
+        const sliderValue = document.getElementById('sliderValue');
+
+        portraitBtn.addEventListener('click', () => {
+            portraitBtn.classList.add('active');
+            landscapeBtn.classList.remove('active');
+            comicGrid.classList.remove('landscape');
+            comicGrid.classList.add('portrait');
+            updateMaxColumns();
+            updateColumns();
+        });
+
+        landscapeBtn.addEventListener('click', () => {
+            landscapeBtn.classList.add('active');
+            portraitBtn.classList.remove('active');
+            comicGrid.classList.remove('portrait');
+            comicGrid.classList.add('landscape');
+            updateMaxColumns();
+            updateColumns();
+        });
+
+        // 动态计算最大列数
+        function updateMaxColumns() {
+            const isPortrait = comicGrid.classList.contains('portrait');
+            const containerWidth = comicGrid.clientWidth;
+            
+            // 根据视图模式和容器宽度计算最小卡片宽度
+            const minCardWidth = isPortrait ? 200 : 300;
+            
+            // 计算最大合理列数
+            let maxColumns = Math.floor(containerWidth / minCardWidth);
+            
+            // 限制最小和最大值
+            maxColumns = Math.max(2, Math.min(maxColumns, 16));
+            
+            // 更新滑块最大值
+            columnSlider.max = maxColumns;
+            
+            // 如果当前值超过最大值，调整到最大值
+            if (parseInt(columnSlider.value) > maxColumns) {
+                columnSlider.value = maxColumns;
+                sliderValue.textContent = maxColumns;
+            }
+            
+            return maxColumns;
+        }
+
+        function updateColumns() {
+            const columns = columnSlider.value;
+            document.documentElement.style.setProperty('--columns', columns);
+        }
+
+        // 初始化滑块
+        columnSlider.min = 1;
+        columnSlider.value = 4;
+        sliderValue.textContent = '4';
+        updateMaxColumns();
+
+        columnSlider.addEventListener('input', () => {
+            sliderValue.textContent = columnSlider.value;
+            updateColumns();
+        });
+
+        // 窗口大小改变时重新计算最大列数
+        window.addEventListener('resize', () => {
+            updateMaxColumns();
+            updateHeader();
+            updateColumns();
+        });
+
+        // 初始化
+        updateColumns();
+
+        // 替换原来的初始化代码
+        function initSlider() {
+            columnSlider.min = 1;
+            const maxColumns = updateMaxColumns(); // 获取计算出的最大列数
+            
+            // 设置初始值为最大列数的50%-75%（可根据需要调整比例）
+            const initialColumns = Math.max(
+                2, // 最小2列
+                Math.min(
+                    Math.round(maxColumns * 0.66), // 取最大列数的2/3
+                    maxColumns // 不超过最大值
+                )
+            );
+            
+            columnSlider.value = initialColumns;
+            sliderValue.textContent = initialColumns;
+            updateColumns();
+        }
+
+        // 在DOM加载完成后调用
+        document.addEventListener('DOMContentLoaded', function(){
+            initSlider();
+            updateHeader();
+        });
+
+        // ========== 搜索弹窗脚本 ==========
+        // 模拟数据 - 实际应用中应该从API获取
+        const tagCategories = [
+            {
+                id: 'genre',
+                name: '题材',
+                icon: 'fa-book',
+                tags: ['冒险', '奇幻', '科幻', '恋爱', '校园', '悬疑', '恐怖', '搞笑', '历史', '战争', '运动', '美食', '音乐', '职场', '日常', '推理', '侦探', '超能力', '时间旅行', '重生']
+            },
+            {
+                id: 'gender',
+                name: '受众',
+                icon: 'fa-venus-mars',
+                tags: ['男性向', '女性向', '全年龄', 'BL', 'GL', '百合', '耽美', '后宫', '逆后宫', '成人向', '青年向', '少年向', '少女向']
+            },
+            {
+                id: 'style',
+                name: '风格',
+                icon: 'fa-paint-brush',
+                tags: ['热血', '治愈', '黑暗', '欢乐', '致郁', '硬核', '轻松', '严肃', '文艺', '猎奇', '搞笑', '讽刺', '哲理', '现实主义', '浪漫主义']
+            },
+            {
+                id: 'format',
+                name: '形式',
+                icon: 'fa-file-alt',
+                tags: ['连载中', '已完结', '短篇', '四格', '全彩', '黑白', '条漫', '页漫', '竖版', '横版', '单行本', '网络连载', '杂志连载']
+            },
+            {
+                id: 'theme',
+                name: '主题',
+                icon: 'fa-tags',
+                tags: ['穿越', '重生', '系统', '异能', '魔法', '仙侠', '武侠', '机甲', '丧尸', '吸血鬼', '妖怪', '侦探', '警察', '医生', '学生', '教师', '厨师', '运动员']
+            }
+        ];
+
+        // 所有标签的完整列表（用于搜索建议）
+        const allTags = [];
+        tagCategories.forEach(category => {
+            category.tags.forEach(tag => {
+                allTags.push({
+                    name: tag,
+                    category: category.name
+                });
+            });
+        });
+
+        // 已选标签数组
+        let selectedTags = [];
+        
+        // DOM元素
+        const sidebarSearchBtn = document.getElementById('sidebarSearchBtn');
+        const searchModal = document.getElementById('searchModal');
+        const closeSearch = document.getElementById('closeSearch');
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const selectedTagsContainer = document.getElementById('selectedTags');
+        const tagSearchInput = document.getElementById('tagSearchInput');
+        const tagSuggestions = document.getElementById('tagSuggestions');
+        const tagCategoriesContainer = document.getElementById('tagCategories');
+
+        // 打开搜索弹窗
+        sidebarSearchBtn.addEventListener('click', () => {
+            searchModal.style.display = 'block';
+            document.body.style.overflow = 'hidden'; // 禁止页面滚动
+        });
+
+        // 关闭搜索弹窗
+        closeSearch.addEventListener('click', () => {
+            searchModal.style.display = 'none';
+            document.body.style.overflow = ''; // 恢复页面滚动
+        });
+
+        // 点击弹窗外部关闭
+        searchModal.addEventListener('click', (e) => {
+            if (e.target === searchModal) {
+                searchModal.style.display = 'none';
+                document.body.style.overflow = ''; // 恢复页面滚动
+            }
+        });
+
+        // 初始化标签分类
+        function initTagCategories() {
+            tagCategories.forEach(category => {
+                const categoryElement = document.createElement('div');
+                categoryElement.className = 'tag-category';
+                categoryElement.innerHTML = `
+                    <div class="category-header">
+                        <div class="category-title">
+                            <i class="fas ${category.icon}"></i> ${category.name}
+                        </div>
+                        <div class="category-toggle">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="category-content"></div>
+                `;
+                
+                const categoryContent = categoryElement.querySelector('.category-content');
+                const categoryToggle = categoryElement.querySelector('.category-toggle');
+                
+                // 添加标签
+                category.tags.forEach(tag => {
+                    const tagElement = document.createElement('div');
+                    tagElement.className = 'tag';
+                    tagElement.textContent = tag;
+                    tagElement.setAttribute('data-category', category.id);
+                    tagElement.setAttribute('data-tag', tag);
+                    
+                    tagElement.addEventListener('click', () => {
+                        toggleTagSelection(tag, category.id);
+                    });
+                    
+                    categoryContent.appendChild(tagElement);
+                });
+                
+                // 切换分类展开/折叠
+
+                categoryElement.querySelector('.category-header').addEventListener('click', function() {
+                    const isExpanding = !categoryContent.classList.contains('active');
+                    const toggleIcon = this.querySelector('.category-toggle i');
+                    
+                    if (isExpanding) {
+                        // 展开动画
+                        categoryContent.style.display = 'flex'; // 确保内容可见才能测量
+                        categoryContent.style.height = '0';
+                        categoryContent.classList.add('active');
+                        
+                        // 使用双重RAF确保平滑过渡
+                        requestAnimationFrame(() => {
+                            const contentHeight = categoryContent.scrollHeight;
+                            requestAnimationFrame(() => {
+                                categoryContent.style.height = `${contentHeight}px`;
+                                toggleIcon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+                                
+                                // 过渡结束后恢复auto
+                                setTimeout(() => {
+                                    categoryContent.style.height = '';
+                                }, 300);
+                            });
+                        });
+                    } else {
+                        // 收起动画
+                        const contentHeight = categoryContent.scrollHeight;
+                        categoryContent.style.height = `${contentHeight}px`;
+                        
+                        requestAnimationFrame(() => {
+                            categoryContent.classList.remove('active');
+                            categoryContent.style.height = '0';
+                            toggleIcon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+                            
+                            // 过渡结束后隐藏内容
+                            setTimeout(() => {
+                                categoryContent.style.display = 'none';
+                                categoryContent.style.height = '';
+                            }, 300);
+                        });
+                    }
+                });
+                
+                tagCategoriesContainer.appendChild(categoryElement);
+            });
+        }
+
+        // 切换标签选中状态
+        function toggleTagSelection(tagText, categoryId) {
+            const existingTag = selectedTags.find(tag => tag.text === tagText);
+            
+            if (!existingTag) {
+                // 首次点击：加入选中列表（默认包含状态）
+                selectedTags.push({
+                    text: tagText,
+                    category: categoryId,
+                    isExcluded: false // false=包含(蓝色), true=排除(红色)
+                });
+            } else {
+                // 切换包含/排除状态
+                existingTag.isExcluded = !existingTag.isExcluded;
+            }
+            
+            updateSelectedTagsDisplay();
+            updateTagButtonState(tagText);
+        }
+
+        // 更新标签按钮的选中状态
+        function updateTagButtonState(tagText) {
+            const tagButtons = document.querySelectorAll(`.tag[data-tag="${tagText}"]`);
+            const tagState = selectedTags.find(tag => tag.text === tagText);
+            
+            tagButtons.forEach(button => {
+                button.classList.remove('selected', 'excluded');
+                
+                if (tagState) {
+                    button.classList.add(tagState.isExcluded ? 'excluded' : 'selected');
+                }
+            });
+        }
+
+        // 添加标签
+        function addTag(tagText) {
+            if (!selectedTags.includes(tagText)) {
+                selectedTags.push(tagText);
+                updateSelectedTagsDisplay();
+            }
+        }
+
+        // 移除标签
+        function removeTag(tagText) {
+            selectedTags = selectedTags.filter(tag => tag.text !== tagText);
+            updateSelectedTagsDisplay();
+            updateTagButtonState(tagText);
+        }
+
+        // 更新已选标签显示
+        function updateSelectedTagsDisplay() {
+            selectedTagsContainer.innerHTML = '';
+            
+            selectedTags.forEach(tag => {
+                const tagElement = document.createElement('div');
+                tagElement.className = `selected-tag ${tag.isExcluded ? 'excluded' : ''}`;
+                tagElement.innerHTML = `
+                    ${tag.text}
+                    <span class="remove-tag" data-tag="${tag.text}">×</span>
+                `;
+                selectedTagsContainer.appendChild(tagElement);
+                
+                // 移除标签事件（只有点击×才移除）
+                tagElement.querySelector('.remove-tag').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeTag(tag.text);
+                });
+            });
+        }
+
+        // 标签搜索输入事件
+        tagSearchInput.addEventListener('input', () => {
+            const searchText = tagSearchInput.value.trim().toLowerCase();
+            
+            if (searchText === '') {
+                tagSuggestions.classList.remove('active');
+                return;
+            }
+            
+            const matchedTags = allTags.filter(tag => 
+                tag.name.toLowerCase().includes(searchText) && !selectedTags.includes(tag.name)
+            );
+            
+            if (matchedTags.length > 0) {
+                tagSuggestions.innerHTML = '';
+                
+                matchedTags.forEach(tag => {
+                    const suggestion = document.createElement('div');
+                    suggestion.className = 'suggestion-item';
+                    suggestion.innerHTML = `
+                        ${tag.name} <span class="suggestion-category">${tag.category}</span>
+                    `;
+                    suggestion.addEventListener('click', () => {
+                        addTag(tag.name);
+                        tagSearchInput.value = '';
+                        tagSuggestions.classList.remove('active');
+                        updateTagButtonState(tag.name);
+                    });
+                    
+                    tagSuggestions.appendChild(suggestion);
+                });
+                
+                tagSuggestions.classList.add('active');
+            } else {
+                tagSuggestions.classList.remove('active');
+            }
+        });
+
+        // 点击页面其他地方关闭建议
+        document.addEventListener('click', (e) => {
+            if (!tagSearchInput.contains(e.target) && !tagSuggestions.contains(e.target)) {
+                tagSuggestions.classList.remove('active');
+            }
+        });
+
+        // 搜索按钮点击事件
+        searchButton.addEventListener('click', () => {
+            const searchText = searchInput.value.trim();
+            console.log('搜索:', searchText, '标签:', selectedTags);
+            alert(`执行搜索: ${searchText || "无文本"}, 标签: ${selectedTags.join(", ") || "无标签"}`);
+        });
+
+        // 初始化搜索弹窗
+        initTagCategories();
+    </script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>暗黑漫画站 - 用户登录</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/common/css/variables.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ========== 登录页面样式 ========== */
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            background-color: var(--bg-light);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 登录标题 */
+        .login-title {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+
+        /* 登录表单组 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        /* 表单标签 */
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* 表单输入框 */
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        /* 登录按钮 */
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .login-btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .login-btn:disabled {
+            background-color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        /* 错误提示 */
+        .error-message {
+            color: var(--color-error);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* 成功提示 */
+        .success-message {
+            color: var(--color-success);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 20px;
+                margin: 0 15px;
+            }
+
+            .login-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录表单 -->
+    <div class="login-container">
+        <h2 class="login-title">
+            <i class="fas fa-book-reader"></i> 暗黑漫画站
+        </h2>
+        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">用户登录</p>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username" class="form-label">用户名</label>
+                <input
+                    type="text"
+                    id="username"
+                    class="form-input"
+                    placeholder="请输入用户名"
+                    required
+                    autocomplete="username">
+                <div class="error-message" id="usernameError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">密码</label>
+                <input
+                    type="password"
+                    id="password"
+                    class="form-input"
+                    placeholder="请输入密码"
+                    required
+                    autocomplete="current-password">
+                <div class="error-message" id="passwordError"></div>
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                <span>登 录</span>
+            </button>
+
+            <div class="error-message" id="loginError" style="text-align: center; margin-top: 15px;"></div>
+            <div class="success-message" id="loginSuccess" style="text-align: center; margin-top: 15px;"></div>
+        </form>
+
+        <p style="text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-secondary);">
+            &nbsp;
+        </p>
+    </div>
+
+    <!-- 引入工具函数 -->
+    <script src="/static/common/js/utils.js"></script>
+
+    <script>
+        // ========== 登录表单脚本 ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const loginBtn = document.getElementById('loginBtn');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+
+            // 尝试自动填充上次登录的用户名
+            const lastUsername = Utils.storage.get('last_username');
+            if (lastUsername) {
+                usernameInput.value = lastUsername;
+            }
+
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                // 获取表单值
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value;
+
+                // 重置错误信息
+                hideError('usernameError');
+                hideError('passwordError');
+                hideError('loginError');
+                hideError('loginSuccess');
+
+                // 前端验证
+                let isValid = true;
+
+                if (!username) {
+                    showError('usernameError', '请输入用户名');
+                    isValid = false;
+                }
+
+                if (!password) {
+                    showError('passwordError', '请输入密码');
+                    isValid = false;
+                } else if (password.length < 6) {
+                    showError('passwordError', '密码长度不能少于6位');
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    return;
+                }
+
+                // 显示加载状态
+                setLoading(true);
+
+                try {
+                    // 调用真实API登录
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.message || '登录失败');
+                    }
+
+                    // 保存用户信息到LocalStorage（前端使用）
+                    Utils.storage.set('current_user', data.user);
+
+                    // 保存用户名以便下次自动填充
+                    Utils.storage.set('last_username', username);
+
+                    // 显示成功消息
+                    showSuccess('loginSuccess', '登录成功！正在跳转...');
+
+                    // 延迟跳转（Session已由服务器端设置）
+                    setTimeout(() => {
+                        window.location.href = '/list.html';
+                    }, 1000);
+
+                } catch (error) {
+                    showError('loginError', error.message || '登录失败，请重试');
+                    setLoading(false);
+                }
+            });
+
+            // 显示错误
+            function showError(elementId, message) {
+                const element = document.getElementById(elementId);
+                element.textContent = message;
+                element.classList.add('show');
+            }
+
+            // 隐藏错误
+            function hideError(elementId) {
+                const element = document.getElementById(elementId);
+                element.classList.remove('show');
+            }
+
+            // 显示成功
+            function showSuccess(elementId, message) {
+                const element = document.getElementById(elementId);
+                element.textContent = message;
+                element.classList.add('show');
+            }
+
+            // 设置加载状态
+            function setLoading(isLoading) {
+                if (isLoading) {
+                    loginBtn.disabled = true;
+                    loginBtn.innerHTML = '<span class="loading"></span>登录中...';
+                } else {
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<span>登 录</span>';
+                }
+            }
+
+            // 回车键登录
+            document.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    loginForm.dispatchEvent(new Event('submit'));
+                }
+            });
+        });
+    </script>
+</body>
+</html>

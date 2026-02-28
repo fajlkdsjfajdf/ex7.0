@@ -1,0 +1,123 @@
+{
+  "cm": {
+    "site_id": "cm",
+    "site_name": "成人漫画",
+    "urls": [
+      "https://www.cdngwc.cc"
+    ],
+    "cdn_urls": [
+      "https://cdn-msp2.jmapiproxy3.cc",
+      "https://cdn-msp3.jmdanjonproxy.vip"
+    ],
+    "schedule": {
+      "list_page": 8,
+      "info_page": 11,
+      "content_page": 4,
+      "comment_page": 4,
+      "cover_image": 4,
+      "thumbnail_image": 0,
+      "content_image": 4
+    },
+    "crawl_limits": {
+      "list_page_max": 1,
+      "info_page_max": 1000,
+      "content_page_max": 1000,
+      "comment_page_max": 1000,
+      "cover_image_max": 10000,
+      "thumbnail_image_max": 10,
+      "content_image_max": 1002
+    },
+    "ips": [],
+    "proxy_mode": "none",
+    "cookies": {
+      "by_url": {
+        "https://www.cdngwc.cc": {
+          "AVS": "05fqhk7jvimc5er9m9gjd5010k",
+          "__cflb": "02DiuFJP4j11anBsGH43RiBVEvktfWqCwJnwVdb44A9Xa",
+          "ipcountry": "CN",
+          "ipm5": "00986b7bb80cd0fe604ec11fb3d5a704",
+          "theme": "light"
+        }
+      }
+    },
+    "enabled": true,
+    "last_check": "2026-02-27T01:10:34.313551",
+    "fastest_url": "https://www.cdngwc.cc",
+    "fastest_cdn": "https://cdn-msp3.jmdanjonproxy.vip",
+    "url_test_results": [
+      {
+        "success": true,
+        "url": "https://www.cdngwc.cc",
+        "status_code": 200,
+        "response_time": 3.1083061695098877
+      }
+    ],
+    "cdn_test_results": [
+      {
+        "success": false,
+        "url": "https://cdn-msp2.jmapiproxy3.cc",
+        "status_code": 403,
+        "error": "HTTP 403"
+      },
+      {
+        "success": true,
+        "url": "https://cdn-msp3.jmdanjonproxy.vip",
+        "status_code": 200,
+        "response_time": 1.1141104698181152
+      }
+    ],
+    "proxy_overrides": {
+      "list_page": "default",
+      "info_page": "default",
+      "content_page": "default",
+      "comment_page": "default",
+      "cover_image": "default",
+      "thumbnail_image": "default",
+      "content_image": "default"
+    }
+  },
+  "km": {
+    "site_id": "km",
+    "site_name": "宅漫畫",
+    "urls": [
+      "https://komiic.com"
+    ],
+    "cdn_urls": [
+      "https://komiic.com"
+    ],
+    "schedule": {
+      "list_page": 8,
+      "info_page": 11,
+      "content_page": 4,
+      "comment_page": 12,
+      "cover_image": 4,
+      "thumbnail_image": 0,
+      "content_image": 4
+    },
+    "crawl_limits": {
+      "list_page_max": 1,
+      "info_page_max": 10,
+      "content_page_max": 1,
+      "comment_page_max": 50,
+      "cover_image_max": 10000,
+      "thumbnail_image_max": 1000,
+      "content_image_max": 1
+    },
+    "ips": [],
+    "proxy_mode": "domestic",
+    "proxy_overrides": {
+      "list_page": "default",
+      "info_page": "default",
+      "content_page": "default",
+      "comment_page": "default",
+      "cover_image": "default",
+      "thumbnail_image": "default",
+      "content_image": "default"
+    },
+    "cookies": {
+      "default": {},
+      "by_url": {}
+    },
+    "enabled": true
+  }
+}

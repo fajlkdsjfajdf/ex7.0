@@ -1,0 +1,97 @@
+{% extends "admin_base.html" %}
+
+{% block title %}系统日志{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-file-alt"></i> 系统日志</h1>
+    <p>查看和管理系统运行日志</p>
+</div>
+
+<!-- 日志文件列表 -->
+<div class="content-box">
+    <div class="box-header">
+        <h2><i class="fas fa-list"></i> 日志文件</h2>
+        <div class="box-actions">
+            <button class="btn btn-secondary" onclick="refreshLogList()">
+                <i class="fas fa-sync-alt"></i> 刷新
+            </button>
+            <button class="btn btn-danger" onclick="clearAllLogs()">
+                <i class="fas fa-trash"></i> 清空所有日志
+            </button>
+        </div>
+    </div>
+
+    <div id="logFilesList" class="log-files-list">
+        <div class="loading">
+            <i class="fas fa-spinner fa-spin"></i> 加载中...
+        </div>
+    </div>
+</div>
+
+<!-- 日志内容查看 -->
+<div id="logContentSection" class="content-box" style="display: none;">
+    <div class="box-header">
+        <h2 id="logContentTitle"><i class="fas fa-eye"></i> 日志内容</h2>
+        <div class="box-actions">
+            <button class="btn btn-secondary" onclick="refreshLogContent()">
+                <i class="fas fa-sync-alt"></i> 刷新
+            </button>
+            <button class="btn btn-primary" onclick="downloadCurrentLog()">
+                <i class="fas fa-download"></i> 下载
+            </button>
+            <button class="btn btn-secondary" onclick="closeLogContent()">
+                <i class="fas fa-times"></i> 关闭
+            </button>
+        </div>
+    </div>
+
+    <!-- 日志过滤 -->
+    <div class="log-filters">
+        <div class="filter-group">
+            <label>日志级别:</label>
+            <select id="logLevelFilter" class="form-select" onchange="filterLogs()">
+                <option value="">全部</option>
+                <option value="DEBUG">DEBUG</option>
+                <option value="INFO">INFO</option>
+                <option value="WARNING">WARNING</option>
+                <option value="ERROR">ERROR</option>
+                <option value="CRITICAL">CRITICAL</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>显示行数:</label>
+            <select id="logLinesLimit" class="form-select" onchange="refreshLogContent()">
+                <option value="50">50行</option>
+                <option value="100" selected>100行</option>
+                <option value="500">500行</option>
+                <option value="1000">1000行</option>
+                <option value="0">全部</option>
+            </select>
+        </div>
+        <div class="filter-info">
+            <span id="logInfoText">共 0 条日志</span>
+        </div>
+    </div>
+
+    <!-- 日志内容 -->
+    <div class="log-viewer">
+        <pre id="logContent" class="log-content"></pre>
+    </div>
+
+    <!-- 分页控制 -->
+    <div class="log-pagination">
+        <button class="btn btn-sm btn-secondary" id="prevPageBtn" onclick="loadPrevPage()" disabled>
+            <i class="fas fa-chevron-up"></i> 上一页
+        </button>
+        <span id="pageInfo"></span>
+        <button class="btn btn-sm btn-secondary" id="nextPageBtn" onclick="loadNextPage()" disabled>
+            下一页 <i class="fas fa-chevron-down"></i>
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/common/js/admin-logs.js"></script>
+{% endblock %}

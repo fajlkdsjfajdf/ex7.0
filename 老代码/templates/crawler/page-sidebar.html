@@ -1,0 +1,130 @@
+{# 左侧菜单单元 #}
+{% macro macro_bar(active_menu) %}
+<!-- Page Sidebar -->
+<div class="page-sidebar">
+    <a class="logo-box" href="index.html">
+        <span>我的绅士站</span>
+        <i class="icon-radio_button_unchecked" id="fixed-sidebar-toggle-button"></i>
+        <i class="icon-close" id="sidebar-toggle-button-close"></i>
+    </a>
+    <div class="page-sidebar-inner">
+        <div class="page-sidebar-menu">
+            <ul class="accordion-menu">
+                <li>
+                    <a href="/">
+                        <i class="menu-icon icon-home4"></i><span>仪表盘</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="javascript:void(0)">
+                        <i class="menu-icon icon-flash_on"></i><span>设置</span><i class="accordion-icon fa fa-angle-left"></i>
+                    </a>
+                    <ul class="sub-menu">
+                        <li><a href="/?temp=setting">爬虫设置</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript:void(0)">
+                        <i class="menu-icon icon-format_list_bulleted"></i><span>爬虫详情</span><i class="accordion-icon fa fa-angle-left"></i>
+                    </a>
+                    <ul class="sub-menu crawlers-menu">
+
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="javascript:void(0)">
+                        <i class="menu-icon icon-layers"></i><span>整理</span><i class="accordion-icon fa fa-angle-left"></i>
+                    </a>
+                    <ul class="sub-menu">
+                        <li><a href="?temp=manhua-zl">一般漫画</a></li>
+                        <li><a href="?temp=dongman-zl">动漫整理</a></li>
+                        <li><a href="?temp=movie-zl">电影整理</a></li>
+                        <li><a href="?temp=avyouma-zl">有码av</a></li>
+                        <li><a href="?temp=avwuma-zl">无码av</a></li>
+                        <li><a href="?temp=lifan-zl">里番整理</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="/static/temp/email.html">
+                        <i class="menu-icon icon-inbox"></i><span>Email</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)">
+                        <i class="menu-icon icon-code"></i><span>Forms</span><i class="accordion-icon fa fa-angle-left"></i>
+                    </a>
+                    <ul class="sub-menu">
+                        <li><a href="/static/temp/form-elements.html">Elements</a></li>
+                        <li><a href="/static/temp/form-wizard.html">Form Wizard</a></li>
+                        <li><a href="/static/temp/form-file-upload.html">File Upload</a></li>
+                        <li><a href="/static/temp/form-image-crop.html">Image Crop</a></li>
+                        <li><a href="/static/temp/form-image-zoom.html">Image Zoom</a></li>
+                        <li><a href="/static/temp/form-x-editable.html">X-editable</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="/static/temp/charts.html">
+                        <i class="menu-icon icon-show_chart"></i><span>Charts</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)">
+                        <i class="menu-icon icon-my_location"></i><span>Maps</span><i class="accordion-icon fa fa-angle-left"></i>
+                    </a>
+                    <ul class="sub-menu">
+                        <li><a href="maps-google.html">Google</a></li>
+                        <li><a href="maps-vector.html">Vector</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript:void(0)">
+                        <i class="menu-icon icon-star"></i><span>Extra</span><i class="accordion-icon fa fa-angle-left"></i>
+                    </a>
+                    <ul class="sub-menu">
+                        <li><a href="invoice.html">Invoice</a></li>
+                        <li><a href="/static/temp/404.html">404 Page</a></li>
+                        <li><a href="/static/temp/500.html">500 Page</a></li>
+                        <li><a href="profile.html">Profile</a></li>
+                        <li><a href="login.html">Login</a></li>
+                        <li><a href="register.html">Register</a></li>
+                        <li><a href="lockscreen.html">Lockscreen</a></li>
+                        <li><a href="/static/temp/todo.html">Todo</a></li>
+                        <li><a href="gallery.html">Gallery</a></li>
+                        <li><a href="pricing-tables.html">Pricing Tables</a></li>
+                        <li><a href="/static/temp/timeline.html">Timeline</a></li>
+                    </ul>
+                </li>
+                <li class="menu-divider"></li>
+                <li>
+                    <a href="index.html">
+                        <i class="menu-icon icon-help_outline"></i><span>Documentation</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="index.html">
+                        <i class="menu-icon icon-public"></i><span>Changelog</span><span class="label label-danger">1.0</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script>
+    (function(){
+
+        $("span:contains('{{active_menu}}')").parent().parent().addClass("active-page open");
+    })();
+</script>
+
+<!-- /Page Sidebar -->
+
+<!--temp-->
+<temp class="crawlers-menu-item">
+    <li><a href="/?temp=crawler-status&prefix={prefix}">{title}</a></li>
+
+</temp>
+
+{% endmacro %}

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}后台管理{% endblock %} - 暗黑漫画站</title>
+
+    <!-- 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- 共用CSS -->
+    <link rel="stylesheet" href="/static/common/css/variables.css">
+    <link rel="stylesheet" href="/static/common/css/reset.css">
+
+    <!-- 后台布局基础样式 -->
+    <style>
+        /* ========== 后台布局 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ========== 后台侧边栏 ========== */
+        .admin-sidebar {
+            width: 250px;
+            background-color: var(--bg-darker);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 15px 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            gap: 12px;
+        }
+
+        .sidebar-menu .menu-item:hover {
+            background-color: var(--bg-light);
+            color: var(--accent-color);
+        }
+
+        .sidebar-menu .menu-item.active {
+            background-color: var(--bg-light);
+            border-left-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .sidebar-menu .menu-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .sidebar-menu .menu-item span {
+            font-size: 0.95rem;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-return {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+            background-color: var(--accent-color);
+            color: white;
+            text-align: center;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .btn-return:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(106, 90, 205, 0.3);
+        }
+
+        /* ========== 后台主内容区 ========== */
+        .admin-main {
+            flex: 1;
+            margin-left: 250px;
+            padding: 30px;
+            background-color: var(--bg-dark);
+            min-height: 100vh;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .page-header h1 i {
+            color: var(--accent-color);
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* ========== 响应式 ========== */
+        @media (max-width: 992px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+
+            .admin-main {
+                margin-left: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-main {
+                padding: 15px;
+            }
+
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+
+    <!-- 后台CSS -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- 侧边栏 -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <h1><i class="fas fa-cogs"></i> 后台管理</h1>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="/admin" class="menu-item {% if request.endpoint in ['admin.index', 'admin.dashboard'] %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>仪表盘</span>
+                </a>
+                <a href="/admin/buckets" class="menu-item {% if request.endpoint == 'admin.buckets' %}active{% endif %}">
+                    <i class="fas fa-bucket"></i>
+                    <span>桶管理</span>
+                </a>
+                <a href="/admin/schedulers" class="menu-item {% if request.endpoint == 'admin.schedulers' %}active{% endif %}">
+                    <i class="fas fa-clock"></i>
+                    <span>定时任务</span>
+                </a>
+                <a href="/admin/config" class="menu-item {% if request.endpoint == 'admin.config' %}active{% endif %}">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>配置管理</span>
+                </a>
+                <a href="/admin/logs" class="menu-item {% if request.endpoint == 'admin.logs' %}active{% endif %}">
+                    <i class="fas fa-file-alt"></i>
+                    <span>系统日志</span>
+                </a>
+                <a href="/admin/proxy" class="menu-item {% if request.endpoint == 'admin.proxy' %}active{% endif %}">
+                    <i class="fas fa-globe"></i>
+                    <span>代理管理</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="/" class="btn-return">
+                    <i class="fas fa-arrow-left"></i> 返回前台
+                </a>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="admin-main">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- 移动端菜单按钮 -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" style="display: none; position: fixed; top: 20px; left: 20px; z-index: 101; background: var(--accent-color); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- 共用JS -->
+    <script src="/static/common/js/utils.js"></script>
+
+    <script>
+        // 移动端菜单切换
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const adminSidebar = document.getElementById('adminSidebar');
+
+        if (window.innerWidth <= 992) {
+            mobileMenuBtn.style.display = 'block';
+        }
+
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                adminSidebar.classList.toggle('show');
+            });
+        }
+
+        // 点击主内容区关闭侧边栏
+        document.querySelector('.admin-main').addEventListener('click', () => {
+            if (window.innerWidth <= 992) {
+                adminSidebar.classList.remove('show');
+            }
+        });
+
+        // 窗口大小改变时更新
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 992) {
+                mobileMenuBtn.style.display = 'block';
+            } else {
+                mobileMenuBtn.style.display = 'none';
+                adminSidebar.classList.remove('show');
+            }
+        });
+    </script>
+
+    <!-- 页面特定JS -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

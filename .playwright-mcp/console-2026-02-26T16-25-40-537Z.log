@@ -1,0 +1,6 @@
+[       5ms] [ERROR] WebSocket connection to 'ws://localhost:5000/socket.io/?EIO=4&transport=websocket' failed: Invalid frame header @ https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js:5
+[      13ms] [ERROR] Failed to load resource: the server responded with a status of 404 (NOT FOUND) @ http://localhost:5000/api/media/image?site=cm&aid=1302437&pid=1302437&page=124&type=content:0
+[      14ms] [ERROR] [阅读页] 第124页加载失败: /api/media/image?site=cm&aid=1302437&pid=1302437&page=124&type=content @ http://localhost:5000/static/frontend/js/read.js?v=4:1742
+[      14ms] [ERROR] [阅读页] 第124页加载失败: /api/media/image?site=cm&aid=1302437&pid=1302437&page=124&type=content @ http://localhost:5000/static/frontend/js/read.js?v=4:1742
+[    1168ms] missing ) after argument list
+[    1170ms] [ERROR] [阅读页] ReadPage 类未加载 @ http://localhost:5000/read.html?site=cm&aid=1302437&pid=1302437:1398

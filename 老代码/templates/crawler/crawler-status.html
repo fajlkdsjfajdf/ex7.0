@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% from 'head.html' import macro_head %}
+        {{ macro_head("爬虫详情") }}
+    </head>
+    <body>
+        <script src="static/js/pages/table-data.js"></script>
+        <link href="static/plugins/datatables/css/jquery.datatables.min.css" rel="stylesheet" type="text/css">
+        <!-- Page Container -->
+        <div class="page-container">
+            <!-- Page Sidebar -->
+            {% from 'page-sidebar.html' import macro_bar %}
+            {{ macro_bar("爬虫详情") }}
+            <!-- /Page Sidebar -->
+            
+            <!-- Page Content -->
+            <div class="page-content">            
+                <!-- Page Header -->
+                {% from 'page-head.html' import macro_head %}
+                {{ macro_head() }}
+                <!-- /Page Header -->
+                <!-- Page Inner -->
+                <div class="page-inner">
+                    <div class="page-title">
+                        <h3 class="breadcrumb-header">Data Tables</h3>
+                    </div>
+                <div id="main-wrapper">
+                    <div class="row">
+                        <div class="col-md-12 crawler-tables">
+
+
+
+                        </div>
+                    </div><!-- Row -->
+                </div><!-- Main Wrapper -->
+                </div><!-- /Page Inner -->
+
+
+            </div><!-- /Page Content -->
+        </div><!-- /Page Container -->
+
+
+    <temp class="crawler-table">
+        <div class="panel panel-white">
+            <div class="panel-heading clearfix">
+                <h4 class="panel-title">{prefix}</h4>
+            </div>
+            <div class="panel-body">
+               <div class="table-responsive">
+                <table id="{prefix}" class="display table" style="width: 100%; cellspacing: 0;">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>网址</th>
+                            <th>消息</th>
+                            <th>状态</th>
+                            <th>重试次数</th>
+                            <th>日期</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>序号</th>
+                            <th>网址</th>
+                            <th>消息</th>
+                            <th>状态</th>
+                            <th>重试次数</th>
+                            <th>日期</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+
+                    </tbody>
+                   </table>
+                </div>
+            </div>
+        </div>
+    </temp>
+
+    </body>
+</html>

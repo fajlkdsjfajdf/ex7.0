@@ -1,0 +1,5 @@
+{
+  "high_speed_max": 1000,
+  "low_speed_max": 100000,
+  "result_max": 1000
+}

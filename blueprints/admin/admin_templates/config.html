@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block title %}配置管理{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/common/css/admin.css">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-sliders-h"></i> 配置管理</h1>
+    <p class="page-subtitle">管理站点配置和系统配置</p>
+</div>
+
+<!-- 站点配置 -->
+<section class="dashboard-section">
+    <h2 class="section-title">
+        <i class="fas fa-globe"></i> 站点配置
+    </h2>
+
+    <div class="config-actions">
+        <button class="btn btn-primary" onclick="openAddSiteDialog()">
+            <i class="fas fa-plus"></i> 添加站点
+        </button>
+        <button class="btn btn-secondary" onclick="refreshSiteList()">
+            <i class="fas fa-sync-alt"></i> 刷新
+        </button>
+    </div>
+
+    <div class="site-list" id="siteList">
+        <!-- 站点列表将通过JavaScript动态加载 -->
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>暂无站点配置</p>
+        </div>
+    </div>
+</section>
+
+<!-- 系统配置 -->
+<section class="dashboard-section">
+    <h2 class="section-title">
+        <i class="fas fa-cogs"></i> 系统配置
+    </h2>
+
+    <form id="systemConfigForm" class="config-form">
+        <!-- 三桶容量配置 -->
+        <div class="config-group">
+            <h3 class="config-group-title">
+                <i class="fas fa-bucket"></i> 三桶容量配置
+            </h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">高速桶容量</label>
+                    <input type="number" name="high_speed_bucket_max_size" class="form-input" value="100" min="1">
+                    <span class="form-hint">高优先级任务队列最大容量</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">低速桶容量</label>
+                    <input type="number" name="low_speed_bucket_max_size" class="form-input" value="1000" min="1">
+                    <span class="form-hint">低优先级批量任务队列最大容量</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">结果桶容量</label>
+                    <input type="number" name="result_bucket_max_size" class="form-input" value="10000" min="1">
+                    <span class="form-hint">已完成任务记录最大容量</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 爬虫线程池配置 -->
+        <div class="config-group">
+            <h3 class="config-group-title">
+                <i class="fas fa-microchip"></i> 爬虫线程池配置
+            </h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">工作线程数</label>
+                    <input type="number" name="crawler_num_workers" class="form-input" value="4" min="1" max="16">
+                    <span class="form-hint">并发爬虫线程数量</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">超时时间（秒）</label>
+                    <input type="number" name="crawler_timeout" class="form-input" value="30" min="5" max="300">
+                    <span class="form-hint">单个请求超时时间</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">最大重试次数</label>
+                    <input type="number" name="crawler_max_retries" class="form-input" value="3" min="0" max="10">
+                    <span class="form-hint">请求失败时的重试次数</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 定时任务配置 -->
+        <div class="config-group">
+            <h3 class="config-group-title">
+                <i class="fas fa-clock"></i> 定时任务配置
+            </h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">启用调度器</label>
+                    <select name="scheduler_enabled" class="form-select">
+                        <option value="true">是</option>
+                        <option value="false">否</option>
+                    </select>
+                    <span class="form-hint">是否启用定时任务调度</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">调度间隔（小时）</label>
+                    <input type="number" name="scheduler_interval_hours" class="form-input" value="4" min="1" max="24">
+                    <span class="form-hint">定时任务执行间隔</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 日志配置 -->
+        <div class="config-group">
+            <h3 class="config-group-title">
+                <i class="fas fa-file-alt"></i> 日志配置
+            </h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">日志级别</label>
+                    <select name="log_level" class="form-select">
+                        <option value="DEBUG">DEBUG</option>
+                        <option value="INFO" selected>INFO</option>
+                        <option value="WARNING">WARNING</option>
+                        <option value="ERROR">ERROR</option>
+                    </select>
+                    <span class="form-hint">日志记录级别</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">日志文件大小限制（MB）</label>
+                    <input type="number" name="log_max_size" class="form-input" value="10" min="1" max="100">
+                    <span class="form-hint">单个日志文件最大大小</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MinIO配置 -->
+        <div class="config-group">
+            <h3 class="config-group-title">
+                <i class="fas fa-database"></i> MinIO配置
+            </h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">MinIO端点</label>
+                    <input type="text" name="minio_endpoint" class="form-input" placeholder="http://localhost:9000">
+                    <span class="form-hint">MinIO服务地址</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Access Key</label>
+                    <input type="text" name="minio_access_key" class="form-input" placeholder="minioadmin">
+                    <span class="form-hint">MinIO访问密钥</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Secret Key</label>
+                    <input type="password" name="minio_secret_key" class="form-input" placeholder="minioadmin">
+                    <span class="form-hint">MinIO秘密密钥</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">存储桶名称</label>
+                    <input type="text" name="minio_bucket_name" class="form-input" value="comics">
+                    <span class="form-hint">用于存储图片的桶名称</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 保存按钮 -->
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="resetSystemConfig()">
+                <i class="fas fa-undo"></i> 重置
+            </button>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> 保存配置
+            </button>
+        </div>
+    </form>
+</section>
+
+<!-- 添加/编辑站点对话框 -->
+<div id="siteDialog" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="siteDialogTitle">添加站点</h2>
+            <button class="modal-close" onclick="closeSiteDialog()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form id="siteConfigForm" class="modal-body">
+            <input type="hidden" id="editSiteId" name="site_id">
+
+            <div class="form-group">
+                <label class="form-label">站点ID <span class="required">*</span></label>
+                <input type="text" id="siteId" name="site_id" class="form-input" placeholder="例如: cm" required>
+                <span class="form-hint">站点唯一标识符（英文）</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">站点名称 <span class="required">*</span></label>
+                <input type="text" name="site_name" class="form-input" placeholder="例如: 成人漫画" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">域名URL <span class="required">*</span></label>
+                <input type="text" name="url" class="form-input" placeholder="https://example.com" required>
+                <span class="form-hint">站点主域名</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">IP地址列表</label>
+                <div id="ipList">
+                    <input type="text" class="form-input ip-input" placeholder="192.168.1.1">
+                </div>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="addIpField()">
+                    <i class="fas fa-plus"></i> 添加IP
+                </button>
+                <span class="form-hint">站点的IP地址（可选，用于域名解析失败时）</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">默认Cookies</label>
+                <textarea name="cookies" class="form-textarea" rows="3" placeholder='{"key": "value"}'></textarea>
+                <span class="form-hint">JSON格式的Cookies</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">代理设置</label>
+                <select name="proxy_enabled" class="form-select" onchange="toggleProxyFields()">
+                    <option value="false">不使用代理</option>
+                    <option value="true">使用代理</option>
+                </select>
+            </div>
+
+            <div id="proxyFields" style="display: none;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">代理类型</label>
+                        <select name="proxy_type" class="form-select">
+                            <option value="http">HTTP</option>
+                            <option value="https">HTTPS</option>
+                            <option value="socks5">SOCKS5</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">代理地址</label>
+                        <input type="text" name="proxy_host" class="form-input" placeholder="127.0.0.1">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">代理端口</label>
+                        <input type="number" name="proxy_port" class="form-input" placeholder="7890" min="1" max="65535">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">用户名（可选）</label>
+                        <input type="text" name="proxy_username" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">密码（可选）</label>
+                        <input type="password" name="proxy_password" class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-sliders-h"></i> 爬取数量限制
+                </label>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label-sm">列表页</label>
+                        <input type="number" name="crawl_limit_list_page_max" class="form-input" value="100" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label-sm">详情页</label>
+                        <input type="number" name="crawl_limit_info_page_max" class="form-input" value="500" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label-sm">内容页</label>
+                        <input type="number" name="crawl_limit_content_page_max" class="form-input" value="1000" min="1">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label-sm">评论页</label>
+                        <input type="number" name="crawl_limit_comment_page_max" class="form-input" value="50" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label-sm">封面图</label>
+                        <input type="number" name="crawl_limit_cover_image_max" class="form-input" value="500" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label-sm">缩略图</label>
+                        <input type="number" name="crawl_limit_thumbnail_image_max" class="form-input" value="1000" min="1">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label-sm">内容图</label>
+                        <input type="number" name="crawl_limit_content_image_max" class="form-input" value="5000" min="1">
+                    </div>
+                </div>
+                <span class="form-hint">各类爬取任务的最大数量限制</span>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeSiteDialog()">
+                    <i class="fas fa-times"></i> 取消
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> 保存
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/common/js/admin-config.js"></script>
+{% endblock %}

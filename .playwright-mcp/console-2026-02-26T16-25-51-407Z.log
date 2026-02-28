@@ -1,0 +1,3 @@
+[       5ms] [ERROR] WebSocket connection to 'ws://localhost:5000/socket.io/?EIO=4&transport=websocket' failed: Invalid frame header @ https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js:5
+[    1283ms] missing ) after argument list
+[    1282ms] [ERROR] [阅读页] ReadPage 类未加载 @ http://localhost:5000/read.html?site=cm&aid=1302437&pid=1302437:1398

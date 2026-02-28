@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>爬虫配置管理</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- CodeMirror for JSON formatting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+    
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5649c0;
+            --success: #00b894;
+            --info: #0984e3;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --dark: #1e272e;
+            --darker: #1a2026;
+            --darkest: #12161a;
+            --light: #f8f9fa;
+            --gray: #636e72;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--darkest);
+            color: var(--light);
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 240px;
+            min-height: 100vh;
+            background-color: var(--darker);
+            position: fixed;
+            z-index: 100;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-brand-icon {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-right: 12px;
+        }
+        
+        .sidebar-brand-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: white;
+        }
+        
+        .nav-item {
+            margin: 8px 12px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+        
+        .nav-link.active {
+            background-color: var(--primary-dark);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 主内容区 */
+        #content {
+            margin-left: 240px;
+            padding: 24px;
+            min-height: 100vh;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* 面板样式 */
+        .panel {
+            background-color: var(--dark);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        
+        .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .panel-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .panel-title i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+        
+        .panel-badge {
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .panel-body {
+            padding: 20px;
+        }
+        
+        /* 表格样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table thead th {
+            padding: 14px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .data-table tbody tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background-color 0.2s;
+        }
+        
+        .data-table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+        
+        .data-table tbody td {
+            padding: 14px 20px;
+            font-size: 0.95rem;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            outline: none;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #00a884;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c02b2b;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: var(--light);
+            border: 1px solid var(--gray);
+        }
+        
+        .btn-outline:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .form-control {
+            width: 99%;
+            padding: 10px 14px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--light);
+            font-family: 'Roboto', sans-serif;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        /* 配置编辑器样式 */
+        .config-editor {
+            margin-top: 30px;
+        }
+        
+        .config-tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .config-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--gray);
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .config-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .config-tab:hover:not(.active) {
+            color: var(--light);
+        }
+        
+        .config-section {
+            display: none;
+        }
+        
+        .config-section.active {
+            display: block;
+        }
+        
+        /* JSON编辑器容器 */
+        .json-editor-container {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .CodeMirror {
+            height: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 72px;
+            }
+            .sidebar-brand-text, .nav-link span {
+                display: none;
+            }
+            #content {
+                margin-left: 72px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            #content {
+                margin-left: 0;
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+        }
+		
+		select option {
+            background-color: #2d3436;
+            color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-icon">
+                <i class="fas fa-spider"></i>
+            </div>
+            <div class="sidebar-brand-text">爬虫管理</div>
+        </div>
+        
+        <div class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>总览仪表盘</span>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a class="nav-link active" href="#">
+                <i class="fas fa-cog"></i>
+                <span>配置管理</span>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="fas fa-tasks"></i>
+                <span>任务监控</span>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="fas fa-chart-line"></i>
+                <span>数据分析</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div id="content">
+        <!-- 配置列表面板 -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-list"></i>
+                    <span>爬虫配置列表</span>
+                </div>
+                <button id="addConfigBtn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> 添加配置
+                </button>
+            </div>
+            <div class="panel-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>网站缩写</th>
+                            <th>网站名称</th>
+                            <th>URL</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>EX</td>
+                            <td>ex漫画</td>
+                            <td>https://exhentai.org</td>
+                            <td>
+                                <button class="btn btn-outline btn-sm edit-btn" data-site="EX">
+                                    <i class="fas fa-edit"></i> 编辑
+                                </button>
+                                <button class="btn btn-outline btn-sm delete-btn" data-site="EX">
+                                    <i class="fas fa-trash"></i> 删除
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>CM</td>
+                            <td>禁漫天堂</td>
+                            <td>https://18comic-rajang.club</td>
+                            <td>
+                                <button class="btn btn-outline btn-sm edit-btn" data-site="CM">
+                                    <i class="fas fa-edit"></i> 编辑
+                                </button>
+                                <button class="btn btn-outline btn-sm delete-btn" data-site="CM">
+                                    <i class="fas fa-trash"></i> 删除
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 配置编辑器面板 (默认隐藏) -->
+        <div id="configEditorPanel" class="panel" style="display: none;">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-edit"></i>
+                    <span id="editorTitle">编辑配置</span>
+                </div>
+                <div>
+                    <button id="saveConfigBtn" class="btn btn-success">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                    <button id="cancelEditBtn" class="btn btn-outline">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="form-label">网站缩写</label>
+                    <input type="text" id="siteAbbr" class="form-control" placeholder="例如: EX, CM">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">网站名称</label>
+                    <input type="text" id="siteTitle" class="form-control" placeholder="例如: ex漫画">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">URL</label>
+                    <input type="text" id="siteUrl" class="form-control" placeholder="例如: https://exhentai.org">
+                </div>
+                
+                <div class="config-editor">
+                    <div class="config-tabs">
+                        <div class="config-tab active" data-tab="basic">基本配置</div>
+                        <div class="config-tab" data-tab="headers">Headers</div>
+                        <div class="config-tab" data-tab="cookies">Cookies</div>
+                        <div class="config-tab" data-tab="tags">标签配置</div>
+                        <div class="config-tab" data-tab="timers">定时器</div>
+                    </div>
+                    
+                    <div class="config-sections">
+                        <!-- 基本配置 -->
+                        <div class="config-section active" id="basic-section">
+                            <div class="form-group">
+                                <label class="form-label">最大线程数</label>
+                                <input type="number" id="threadCount" class="form-control" value="15">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">列表查询页数</label>
+                                <input type="number" id="listCount" class="form-control" value="100">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">主ID字段</label>
+                                <input type="text" id="mainId" class="form-control" value="gid">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">列表ID字段</label>
+                                <input type="text" id="listId" class="form-control" value="gid">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">是否显示</label>
+                                <select id="showConfig" class="form-control">
+                                    <option value="1">是</option>
+                                    <option value="0">否</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Headers配置 -->
+                        <div class="config-section" id="headers-section">
+                            <div class="form-group">
+                                <label class="form-label">主Header</label>
+                                <div class="json-editor-container">
+                                    <textarea id="headerJson" class="form-control form-textarea">{"host": "exhentai.org"}</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">缩略图Header</label>
+                                <div class="json-editor-container">
+                                    <textarea id="headerThumbJson" class="form-control form-textarea">{"host": "s.exhentai.org"}</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">IP列表</label>
+                                <div class="json-editor-container">
+                                    <textarea id="ipsJson" class="form-control form-textarea">["178.175.129.252", "178.175.129.254", "178.175.128.252", "178.175.132.20", "178.175.128.254", "178.175.132.22"]</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Cookies配置 -->
+                        <div class="config-section" id="cookies-section">
+                            <div class="form-group">
+                                <label class="form-label">Cookies</label>
+                                <div class="json-editor-container">
+                                    <textarea id="cookiesJson" class="form-control form-textarea">{"ipb_member_id": "659743","ipb_pass_hash": "be0d9201bc978c65a1de243619d46da0","sk": "l1mvcdjm6qn8x043yc37y7uvyv5j","hath_perks": "m1.m2.m3.a.t1.t2.t3.p1.p2.s.q-f242e45806","igneous": "gsky3xu3s4lgpp1hq"}</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">API Cookies</label>
+                                <div class="json-editor-container">
+                                    <textarea id="apiCookiesJson" class="form-control form-textarea">{"www.cdnmhwscc.vip": "{\"AVS\": \"blcdp3edpo36js5n93g2hs7nrl\", \"__cflb\": \"02DiuGtL2X2duonJSkPMyz9DQ7beueP9iH8RfzxDGv1Jt\", \"ipcountry\": \"CN\", \"ipm5\": \"773d93d009d95f515337db8ff1ab7f7f\", \"theme\": \"light\"}", "www.cdnblackmyth.club": "{\"AVS\": \"pagtdqk1to2662trgbmjrdurbp\", \"__cflb\": \"02DiuDrCjUEpXFNzLgvJ9ZjYfAQzzAsbnqNaZWj8LRSPv\", \"ipcountry\": \"CN\", \"ipm5\": \"b40cdf10973655b1574b8d6cfd7d936e\", \"theme\": \"light\"}", "www.cdnmhws.cc": "{\"AVS\": \"ro0j25r7e1l6rbansmkuh3vcac\", \"__cflb\": \"0H28unfMDq4q4appH9nUhwk6EMPe1eGqKkRn7e3aiSp\", \"ipcountry\": \"CN\", \"ipm5\": \"aa528c0878d20a8303d5c2f1b92b3349\", \"theme\": \"light\"}", "www.cdnuc.vip": "{\\"AVS\\": \\"3hbtaa92c94pqrtvmjuj5runl1\\", \\"ipcountry\\": \\"CN\\", \\"ipm5\\": \\"0443289dd100b080655b059fae5e8eae\\", \\"theme\\": \\"light\\"}"}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 标签配置 -->
+                        <div class="config-section" id="tags-section">
+                            <div class="form-group">
+                                <label class="form-label">查找标签</label>
+                                <div class="json-editor-container">
+                                    <textarea id="findTagsJson" class="form-control form-textarea">["pantyhose", "incest", "shotacon", "tall girl", "big breasts", "uncensored"]</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">黑名单标签</label>
+                                <div class="json-editor-container">
+                                    <textarea id="blackTagsJson" class="form-control form-textarea">["lolicon", "yaoi"]</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">部分配置</label>
+                                <div class="json-editor-container">
+                                    <textarea id="partJson" class="form-control form-textarea">[{"col": "title", "type": "jp", "fill": 1},{"col": "title_jpn", "type": "jp"}]</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">排序配置</label>
+                                <div class="json-editor-container">
+                                    <textarea id="orderJson" class="form-control form-textarea">[{"order_name": "日期", "order_field": "gid", "order_type": -1},{"order_name": "直连", "order_field": "original", "order_type": -1},{"order_name": "页数", "order_field": "filecount", "order_type": -1},{"order_name": "评分", "order_field": "rating", "order_type": -1},{"order_name": "随机", "order_field": "*random", "order_type": -1}]</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 定时器配置 -->
+                        <div class="config-section" id="timers-section">
+                            <div class="form-group">
+                                <label class="form-label">主定时器</label>
+                                <input type="number" id="timerMain" class="form-control" value="20">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">信息定时器</label>
+                                <input type="number" id="timerInfo" class="form-control" value="5">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">章节定时器</label>
+                                <input type="number" id="timerChapter" class="form-control" value="0">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">页面定时器</label>
+                                <input type="number" id="timerPage" class="form-control" value="5">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">缩略图定时器</label>
+                                <input type="number" id="timerThumb" class="form-control" value="5">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">下载定时器</label>
+                                <input type="number" id="timerDown" class="form-control" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部脚本 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-html.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // JSON编辑器实例
+            const jsonEditors = {};
+            const jsonTextareas = [
+                'headerJson', 'headerThumbJson', 'ipsJson', 
+                'cookiesJson', 'apiCookiesJson', 'findTagsJson', 
+                'blackTagsJson', 'partJson', 'orderJson'
+            ];
+            
+            // 初始化所有JSON编辑器
+            jsonTextareas.forEach(id => {
+                const textarea = document.getElementById(id);
+                jsonEditors[id] = CodeMirror.fromTextArea(textarea, {
+                    mode: "javascript",
+                    theme: "dracula",
+                    lineNumbers: true,
+                    indentUnit: 4,
+                    lineWrapping: true,
+                    autoCloseBrackets: true,
+                    matchBrackets: true,
+					// 初始显示内容
+					//value: document.getElementById('jsonEditor').value,
+					// 解决行号与内容间距问题
+					gutters: ["CodeMirror-linenumbers"],
+                    extraKeys: {
+                        "Ctrl-Enter": formatJson,
+                        "Cmd-Enter": formatJson
+                    }
+                });
+                
+                // 设置编辑器高度
+                jsonEditors[id].setSize(null, 200);
+                
+                // 初始格式化
+                formatJsonEditor(jsonEditors[id]);
+            });
+            
+            // 格式化JSON编辑器内容
+            function formatJsonEditor(editor) {
+                try {
+                    const json = editor.getValue();
+                    const formatted = js_beautify(json, { indent_size: 2 });
+                    editor.setValue(formatted);
+					editor.refresh();
+                } catch (e) {
+                    console.error("JSON格式化错误:", e);
+                }
+            }
+            
+            // 格式化JSON函数
+            function formatJson() {
+                const editor = this;
+                formatJsonEditor(editor);
+            }
+            
+            // 标签页切换
+            $('.config-tab').click(function() {
+                const tabId = $(this).data('tab');
+                
+                // 更新活动标签
+                $('.config-tab').removeClass('active');
+                $(this).addClass('active');
+                
+                // 更新活动内容区
+                $('.config-section').removeClass('active');
+                $(`#${tabId}-section`).addClass('active');
+            });
+            
+            // 编辑按钮点击
+            $('.edit-btn').click(function() {
+                const siteAbbr = $(this).data('site');
+                loadConfigForEdit(siteAbbr);
+            });
+            
+            // 添加配置按钮点击
+            $('#addConfigBtn').click(function() {
+                $('#editorTitle').text('添加新配置');
+                $('#configEditorPanel').show();
+                resetForm();
+            });
+            
+            // 取消编辑按钮点击
+            $('#cancelEditBtn').click(function() {
+                $('#configEditorPanel').hide();
+            });
+            
+            // 保存配置按钮点击
+            $('#saveConfigBtn').click(function() {
+                saveConfig();
+            });
+            
+            // 删除按钮点击
+            $('.delete-btn').click(function() {
+                const siteAbbr = $(this).data('site');
+                if (confirm(`确定要删除 ${siteAbbr} 的配置吗？`)) {
+                    // 这里应该是AJAX请求删除配置
+                    alert(`${siteAbbr} 配置已删除`);
+                    // 刷新列表
+                    location.reload();
+                }
+            });
+            
+            // 加载配置到编辑表单
+            function loadConfigForEdit(siteAbbr) {
+                // 这里应该是AJAX请求获取配置数据
+                // 模拟数据
+                let configData;
+                if (siteAbbr === 'EX') {
+                    configData = {
+                        siteAbbr: 'EX',
+                        siteTitle: 'ex漫画',
+                        siteUrl: 'https://exhentai.org',
+                        threadCount: 15,
+                        listCount: 100,
+                        mainId: 'gid',
+                        listId: 'id',
+                        showConfig: '1',
+                        header: '{"host": "exhentai.org"}',
+                        headerThumb: '{"host": "s.exhentai.org"}',
+                        ips: '["178.175.129.252", "178.175.129.254", "178.175.128.252", "178.175.132.20", "178.175.128.254", "178.175.132.22"]',
+                        cookies: '{"ipb_member_id": "659743","ipb_pass_hash": "be0d9201bc978c65a1de243619d46da0","sk": "l1mvcdjm6qn8x043yc37y7uvyv5j","hath_perks": "m1.m2.m3.a.t1.t2.t3.p1.p2.s.q-f242e45806","igneous": "gsky3xu3s4lgpp1hq"}',
+                        apiCookies: '{}',
+                        findTags: '["pantyhose", "incest", "shotacon", "tall girl", "big breasts", "uncensored"]',
+                        blackTags: '["lolicon", "yaoi"]',
+                        part: '[{"col": "title", "type": "jp", "fill": 1},{"col": "title_jpn", "type": "jp"}]',
+                        order: '[{"order_name": "日期", "order_field": "gid", "order_type": -1},{"order_name": "直连", "order_field": "original", "order_type": -1},{"order_name": "页数", "order_field": "filecount", "order_type": -1},{"order_name": "评分", "order_field": "rating", "order_type": -1},{"order_name": "随机", "order_field": "*random", "order_type": -1}]',
+                        timerMain: 20,
+                        timerInfo: 5,
+                        timerChapter: 0,
+                        timerPage: 5,
+                        timerThumb: 5,
+                        timerDown: 0
+                    };
+                } else if (siteAbbr === 'CM') {
+                    configData = {
+                        siteAbbr: 'CM',
+                        siteTitle: '禁漫天堂',
+                        siteUrl: 'https://18comic-rajang.club',
+                        threadCount: 15,
+                        listCount: 200,
+                        mainId: 'aid',
+                        listId: 'pid',
+                        showConfig: '1',
+                        header: '{"host": "18comic-rajang.club"}',
+                        headerThumb: '{}',
+                        ips: '[]',
+                        cookies: '{}',
+                        apiCookies: '{"www.cdnmhwscc.vip": "{\\"AVS\\": \\"blcdp3edpo36js5n93g2hs7nrl\\", \\"__cflb\\": \\"02DiuGtL2X2duonJSkPMyz9DQ7beueP9iH8RfzxDGv1Jt\\", \\"ipcountry\\": \\"CN\\", \\"ipm5\\": \\"773d93d009d95f515337db8ff1ab7f7f\\", \\"theme\\": \\"light\\"}", "www.cdnblackmyth.club": "{\\"AVS\\": \\"pagtdqk1to2662trgbmjrdurbp\\", \\"__cflb\\": \\"02DiuDrCjUEpXFNzLgvJ9ZjYfAQzzAsbnqNaZWj8LRSPv\\", \\"ipcountry\\": \\"CN\\", \\"ipm5\\": \\"b40cdf10973655b1574b8d6cfd7d936e\\", \\"theme\\": \\"light\\"}", "www.cdnmhws.cc": "{\\"AVS\\": \\"ro0j25r7e1l6rbansmkuh3vcac\\", \\"__cflb\\": \\"0H28unfMDq4q4appH9nUhwk6EMPe1eGqKkRn7e3aiSp\\", \\"ipcountry\\": \\"CN\\", \\"ipm5\\": \\"aa528c0878d20a8303d5c2f1b92b3349\\", \\"theme\\": \\"light\\"}", "www.cdnuc.vip": "{\\"AVS\\": \\"3hbtaa92c94pqrtvmjuj5runl1\\", \\"ipcountry\\": \\"CN\\", \\"ipm5\\": \\"0443289dd100b080655b059fae5e8eae\\", \\"theme\\": \\"light\\"}"}',
+                        findTags: '[]',
+                        blackTags: '[]',
+                        part: '[{"col": "title", "type": "jp"},{"col": "summary", "type": "cn", "fill": 1},{"col": "tags", "type": "tag"}]',
+                        order: '[{"order_name": "日期", "order_field": "update_time", "order_type": -1},{"order_name": "直连", "order_field": "original", "order_type": -1},{"order_name": "标题", "order_field": "title", "order_type": -1},{"order_name": "章节数", "order_field": "list_count", "order_type": -1},{"order_name": "喜爱数", "order_field": "albim_likes", "order_type": -1},{"order_name": "阅读数", "order_field": "readers", "order_type": -1},{"order_name": "页数", "order_field": "filecount", "order_type": -1},{"order_name": "随机", "order_field": "*random", "order_type": -1}]',
+                        timerMain: 20,
+                        timerInfo: 5,
+                        timerChapter: 0,
+                        timerPage: 5,
+                        timerThumb: 5,
+                        timerDown: 0
+                    };
+                }
+                
+                // 填充表单
+                $('#siteAbbr').val(configData.siteAbbr);
+                $('#siteTitle').val(configData.siteTitle);
+                $('#siteUrl').val(configData.siteUrl);
+                $('#threadCount').val(configData.threadCount);
+                $('#listCount').val(configData.listCount);
+                $('#mainId').val(configData.mainId);
+                $('#listId').val(configData.listId);
+                $('#showConfig').val(configData.showConfig);
+                $('#timerMain').val(configData.timerMain);
+                $('#timerInfo').val(configData.timerInfo);
+                $('#timerChapter').val(configData.timerChapter);
+                $('#timerPage').val(configData.timerPage);
+                $('#timerThumb').val(configData.timerThumb);
+                $('#timerDown').val(configData.timerDown);
+                
+                // 设置JSON编辑器内容
+                jsonEditors['headerJson'].setValue(configData.header);
+                jsonEditors['headerThumbJson'].setValue(configData.headerThumb);
+                jsonEditors['ipsJson'].setValue(configData.ips);
+                jsonEditors['cookiesJson'].setValue(configData.cookies);
+                jsonEditors['apiCookiesJson'].setValue(configData.apiCookies);
+                jsonEditors['findTagsJson'].setValue(configData.findTags);
+                jsonEditors['blackTagsJson'].setValue(configData.blackTags);
+                jsonEditors['partJson'].setValue(configData.part);
+                jsonEditors['orderJson'].setValue(configData.order);
+                
+                // 格式化所有JSON编辑器
+                jsonTextareas.forEach(id => {
+                    formatJsonEditor(jsonEditors[id]);
+                });
+                
+                // 显示编辑器
+                $('#editorTitle').text(`编辑配置 - ${configData.siteAbbr}`);
+                $('#configEditorPanel').show();
+            }
+            
+            // 重置表单
+            function resetForm() {
+                $('#siteAbbr').val('');
+                $('#siteTitle').val('');
+                $('#siteUrl').val('');
+                $('#threadCount').val(15);
+                $('#listCount').val(100);
+                $('#mainId').val('gid');
+                $('#listId').val('id');
+                $('#showConfig').val('1');
+                $('#timerMain').val(20);
+                $('#timerInfo').val(5);
+                $('#timerChapter').val(0);
+                $('#timerPage').val(5);
+                $('#timerThumb').val(5);
+                $('#timerDown').val(0);
+                
+                // 重置JSON编辑器
+                const defaultJson = '{}';
+                const defaultArray = '[]';
+                jsonEditors['headerJson'].setValue(defaultJson);
+                jsonEditors['headerThumbJson'].setValue(defaultJson);
+                jsonEditors['ipsJson'].setValue(defaultArray);
+                jsonEditors['cookiesJson'].setValue(defaultJson);
+                jsonEditors['apiCookiesJson'].setValue(defaultJson);
+                jsonEditors['findTagsJson'].setValue(defaultArray);
+                jsonEditors['blackTagsJson'].setValue(defaultArray);
+                jsonEditors['partJson'].setValue(defaultArray);
+                jsonEditors['orderJson'].setValue(defaultArray);
+                
+                // 格式化所有JSON编辑器
+                jsonTextareas.forEach(id => {
+                    formatJsonEditor(jsonEditors[id]);
+                });
+            }
+            
+            // 保存配置
+            function saveConfig() {
+                // 收集表单数据
+                const configData = {
+                    siteAbbr: $('#siteAbbr').val(),
+                    siteTitle: $('#siteTitle').val(),
+                    siteUrl: $('#siteUrl').val(),
+                    threadCount: $('#threadCount').val(),
+                    listCount: $('#listCount').val(),
+                    mainId: $('#mainId').val(),
+                    listId: $('#listId').val(),
+                    showConfig: $('#showConfig').val(),
+                    header: jsonEditors['headerJson'].getValue(),
+                    headerThumb: jsonEditors['headerThumbJson'].getValue(),
+                    ips: jsonEditors['ipsJson'].getValue(),
+                    cookies: jsonEditors['cookiesJson'].getValue(),
+                    apiCookies: jsonEditors['apiCookiesJson'].getValue(),
+                    findTags: jsonEditors['findTagsJson'].getValue(),
+                    blackTags: jsonEditors['blackTagsJson'].getValue(),
+                    part: jsonEditors['partJson'].getValue(),
+                    order: jsonEditors['orderJson'].getValue(),
+                    timerMain: $('#timerMain').val(),
+                    timerInfo: $('#timerInfo').val(),
+                    timerChapter: $('#timerChapter').val(),
+                    timerPage: $('#timerPage').val(),
+                    timerThumb: $('#timerThumb').val(),
+                    timerDown: $('#timerDown').val()
+                };
+                
+                // 验证必填字段
+                if (!configData.siteAbbr || !configData.siteTitle || !configData.siteUrl) {
+                    alert('网站缩写、网站名称和URL是必填项');
+                    return;
+                }
+                
+                // 验证JSON格式
+                try {
+                    JSON.parse(configData.header);
+                    JSON.parse(configData.headerThumb);
+                    JSON.parse(configData.ips);
+                    JSON.parse(configData.cookies);
+                    JSON.parse(configData.apiCookies);
+                    JSON.parse(configData.findTags);
+                    JSON.parse(configData.blackTags);
+                    JSON.parse(configData.part);
+                    JSON.parse(configData.order);
+                } catch (e) {
+                    alert('JSON格式不正确: ' + e.message);
+                    return;
+                }
+                
+                // 这里应该是AJAX请求保存配置
+                console.log('保存配置:', configData);
+                alert('配置保存成功');
+                
+                // 隐藏编辑器并刷新列表
+                $('#configEditorPanel').hide();
+                location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

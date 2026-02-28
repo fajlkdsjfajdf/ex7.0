@@ -1,0 +1,64 @@
+{# 头部引用 #}
+{% macro macro_head(title) %}
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Responsive Admin Dashboard Template">
+    <meta name="keywords" content="admin,dashboard">
+    <meta name="author" content="stacks">
+    <!-- The above 6 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <!-- Title -->
+    <title>{{title}}</title>
+
+    <!-- Styles -->
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+    <link href="static/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/plugins/toastr/toastr.css" rel="stylesheet">
+    <link href="static/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="static/plugins/icomoon/style.css" rel="stylesheet">
+    <link href="static/plugins/uniform/css/default.css" rel="stylesheet"/>
+    <link href="static/plugins/switchery/switchery.min.css" rel="stylesheet"/>
+    <link href="static/plugins/nvd3/nv.d3.min.css" rel="stylesheet">
+    <link href="static/plugins/jstree/themes/default/style.css" rel="stylesheet">
+
+    <!-- Theme Styles -->
+    <link href="static/css/space.min.css" rel="stylesheet">
+    <link href="static/css/custom.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+
+    <!-- Javascripts -->
+    <script src="static/plugins/jquery/jquery-3.1.0.min.js"></script>
+    <script src="static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script src="static/plugins/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+    <script src="static/plugins/toastr/toastr.min.js"></script>
+    <script src="static/plugins/uniform/js/jquery.uniform.standalone.js"></script>
+    <script src="static/plugins/switchery/switchery.min.js"></script>
+    <script src="static/plugins/d3/d3.min.js"></script>
+    <script src="static/plugins/nvd3/nv.d3.min.js"></script>
+    <script src="static/plugins/flot/jquery.flot.min.js"></script>
+    <script src="static/plugins/flot/jquery.flot.time.min.js"></script>
+    <script src="static/plugins/flot/jquery.flot.symbol.min.js"></script>
+    <script src="static/plugins/flot/jquery.flot.resize.min.js"></script>
+    <script src="static/plugins/flot/jquery.flot.tooltip.min.js"></script>
+    <script src="static/plugins/flot/jquery.flot.pie.min.js"></script>
+    <script src="static/plugins/chartjs/chart.min.js"></script>
+    <script src="static/plugins/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+    <script src="static/plugins/datatables/js/jquery.datatables.min.js"></script>
+    <script src="static/plugins/jstree/jstree.min.js"></script>
+
+    <script src="static/js/space.min.js"></script>
+    <script src="static/js/pages/sidebar.js"></script>
+    <script src="static/js/pages/type-change.js"></script>
+    <script src="static/js/pages/api.js"></script>
+    <script type="text/javascript">
+          toastr.options.positionClass = 'toast-bottom-center';
+    </script>
+
+</head>
+
+{% endmacro %}

@@ -1,0 +1,116 @@
+{% extends "admin_base.html" %}
+
+{% block title %}图片库管理{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-images"></i> 图片库管理</h1>
+    <p>管理系统中的所有图片存储库（DAT文件 + MongoDB）</p>
+</div>
+
+<!-- 存储路径配置 -->
+<section class="dashboard-section">
+    <h2 class="section-title">
+        <i class="fas fa-hdd"></i> 存储路径配置
+    </h2>
+    <div style="padding: 20px; background: var(--bg-secondary); border-radius: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span style="color: var(--text-secondary);">图片库总目录:</span>
+                <code id="storagePathDisplay" style="margin-left: 10px; font-size: 16px;">local_files</code>
+            </div>
+            <button id="setStoragePathBtn" class="btn btn-primary">
+                <i class="fas fa-edit"></i> 修改路径
+            </button>
+        </div>
+        <p style="margin-top: 10px; color: var(--text-secondary); font-size: 14px;">
+            <i class="fas fa-info-circle"></i> 修改后需要重启应用才能生效
+        </p>
+    </div>
+</section>
+
+<!-- 站点图片库列表 -->
+<section class="dashboard-section">
+    <h2 class="section-title">
+        <i class="fas fa-folder-open"></i> 站点图片库
+    </h2>
+    <div class="libraries-grid" id="siteLibrariesList">
+        <div class="loading">
+            <i class="fas fa-spinner fa-spin"></i> 加载中...
+        </div>
+    </div>
+</section>
+
+<!-- 图片浏览弹窗 -->
+<div id="imageGalleryModal" class="modal">
+    <div class="modal-content" style="max-width: 90vw; height: 90vh;">
+        <div class="modal-header">
+            <h2 id="imageGalleryTitle">图片浏览</h2>
+            <button class="modal-close" onclick="window.closeImageGallery()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" style="display: flex; flex-direction: column; height: calc(100% - 60px);">
+            <!-- 工具栏 -->
+            <div style="padding: 10px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span id="imageCounter">0 / 0</span>
+                    <span style="margin-left: 20px;">筛选类型:
+                        <select id="imageTypeFilter" onchange="window.filterImages()">
+                            <option value="">全部</option>
+                            <option value="cover">封面</option>
+                            <option value="thumbnail">缩略图</option>
+                            <option value="content">内容图</option>
+                        </select>
+                    </span>
+                </div>
+                <button class="btn btn-sm btn-secondary" onclick="window.loadGalleryImages()">
+                    <i class="fas fa-sync-alt"></i> 刷新
+                </button>
+            </div>
+
+            <!-- 图片网格 -->
+            <div id="imageGrid" style="flex: 1; overflow-y: auto; padding: 20px;">
+                <div style="text-align: center; padding: 50px;">
+                    <i class="fas fa-spinner fa-spin"></i> 加载中...
+                </div>
+            </div>
+
+            <!-- 分页 -->
+            <div style="padding: 10px; border-top: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; gap: 10px;">
+                <button class="btn btn-sm" id="prevPageBtn" onclick="window.prevPage()" disabled>
+                    <i class="fas fa-chevron-left"></i> 上一页
+                </button>
+                <span id="pageInfo">第 1 页</span>
+                <button class="btn btn-sm" id="nextPageBtn" onclick="window.nextPage()">
+                    下一页 <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 图片详情弹窗 -->
+<div id="imageDetailModal" class="modal">
+    <div class="modal-content" style="max-width: 90vw;">
+        <div class="modal-header">
+            <h2>图片详情</h2>
+            <button class="modal-close" onclick="window.closeImageDetail()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img id="detailImage" src="" style="max-width: 100%; max-height: 70vh; object-fit: contain;" alt="图片详情">
+            </div>
+            <div id="detailInfo" class="detail-section">
+                <!-- 图片信息将通过JavaScript填充 -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/common/js/admin-media-library.js"></script>
+{% endblock %}

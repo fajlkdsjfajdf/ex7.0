@@ -1,0 +1,155 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+    {% from 'head.html' import macro_head %}
+    {{ macro_head("仪表盘") }}
+    <body>
+        <script src="static/js/pages/dashboard.js"></script>
+        <!-- Page Container -->
+        <div class="page-container">
+            <!-- Page Sidebar -->
+            {% from 'page-sidebar.html' import macro_bar %}
+            {{ macro_bar("仪表盘") }}
+            <!-- /Page Sidebar -->
+            
+            <!-- Page Content -->
+            <div class="page-content">
+                <!-- Page Header -->
+                {% from 'page-head.html' import macro_head %}
+                {{ macro_head() }}
+                <!-- /Page Header -->
+                <!-- Page Inner -->
+                <div class="page-inner">
+                    <div class="page-title">
+                        <h3 class="breadcrumb-header">仪表盘</h3>
+{#                          <h5 class="ip-content"></h5>#}
+                        <button class="btn btn-small" onclick="javascript:biliblimanga_login();">登录bilibli漫画</button>
+{#                        <button class="btn btn-small" onclick="javascript:snap2();">对比快照</button>#}
+{#                        <button class="btn btn-small" onclick="javascript:snap3();">连接记录</button>#}
+                    </div>
+                    <div id="main-wrapper">
+{#                        <div class="row">#}
+{#                            <div class="col-md-12">#}
+{#                                <div class="panel panel-white">#}
+{#                                    <div class="panel-heading clearfix">#}
+{#                                        <h4 class="panel-title">爬取信息</h4>#}
+{#                                    </div>#}
+{#                                    <div class="panel-body crawler-list">#}
+{#                                        <div role="tabpanel">#}
+{#                                                <!-- Nav tabs -->#}
+{#                                                <ul class="nav nav-tabs" role="tablist">#}
+{##}
+{#                                                </ul>#}
+{#                                                <!-- Tab panes -->#}
+{#                                                <div class="tab-content">#}
+{##}
+{##}
+{#                                                </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+
+
+
+                        <div class="row">
+                            <div class="col-lg-8 col-md-12">
+                                <div class="panel panel-white">
+                                    <div class="panel-heading clearfix">
+                                        <h4 class="panel-title">服务器日志</h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <!--<div id="chart1"><svg></svg></div>-->
+                                        <div class="table-responsive invoice-table" style="overflow-y: auto;height: 280px;">
+                                          <table class="table" style="">
+                                                <tbody class="server-log-table">
+
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-12">
+                                <div class="panel panel-white">
+                                    <div class="panel-heading clearfix">
+                                        <h4 class="panel-title">服务器状态</h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="container-fluid">
+                                            <div class="server-load row">
+
+                                            </div>
+                                        </div>
+                                        <div id="chart2"><svg></svg></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- Row -->
+                        <div class="row">
+                            <div class="col-lg-5 col-md-12">
+                                <div class="panel panel-white">
+                                    <div class="panel-heading clearfix" style="border-bottom: 1px solid #e0e0e0;">
+                                        <h4 class="panel-title">完成状态</h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="task-list crawler-task-complete">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-7 col-md-12">
+                                <div class="panel panel-white">
+                                    <div class="panel-heading clearfix">
+                                        <h4 class="panel-title">运行状态</h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="table-responsive invoice-table">
+                                            <table class="table">
+                                                <tbody class="crawler-task-status">
+
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- Row -->
+
+                    </div><!-- Main Wrapper -->
+
+                </div><!-- /Page Inner -->
+
+
+            </div><!-- /Page Content -->
+        </div><!-- /Page Container -->
+
+
+        <!-- 模态框（Modal） -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title" id="myModalLabel">模态框（Modal）标题</h4>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+        
+    <!--模板-->
+    <div>
+        {% from 'child/dashboard-temp.html' import macro_dashboardtemp %}
+        {{ macro_dashboardtemp() }}
+    </div>
+    </body>
+</html>

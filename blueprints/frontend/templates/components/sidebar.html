@@ -1,0 +1,60 @@
+<!-- 侧边栏组件 -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h1>暗黑漫画</h1>
+        <p class="sidebar-welcome">
+            欢迎回来, <span id="currentUser">{{ session.username or '游客' }}</span>
+        </p>
+    </div>
+
+    <nav class="sidebar-menu">
+        <div class="menu-item active" data-page="home">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
+        </div>
+        <div class="menu-item" data-page="history">
+            <i class="fas fa-history"></i>
+            <span>历史记录</span>
+        </div>
+        <div class="menu-item" data-page="bookmarks">
+            <i class="fas fa-bookmark"></i>
+            <span>收藏夹</span>
+        </div>
+        <div class="menu-item" data-page="settings">
+            <i class="fas fa-cog"></i>
+            <span>设置</span>
+        </div>
+        <div class="menu-item" data-page="logout">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>退出登录</span>
+        </div>
+    </nav>
+
+    <!-- 移动端视图控制 -->
+    <div class="sidebar-view-controls mobile-only">
+        <div class="sidebar-view-section">
+            <h3>视图模式</h3>
+            <div class="view-mode">
+                <button class="view-mode-btn active" id="portraitBtnMobile" title="竖版">
+                    <i class="fas fa-portrait"></i> 竖版
+                </button>
+                <button class="view-mode-btn" id="landscapeBtnMobile" title="横版">
+                    <i class="fas fa-landscape"></i> 横版
+                </button>
+            </div>
+        </div>
+        <div class="sidebar-view-section">
+            <h3>列数</h3>
+            <div class="slider-container">
+                <input type="range" min="1" max="10" value="4" class="slider" id="columnSliderMobile">
+                <span class="slider-value" id="sliderValueMobile">4</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-footer">
+        <button id="sidebarSearchBtn" class="sidebar-search-btn">
+            <i class="fas fa-search"></i> 搜索漫画
+        </button>
+    </div>
+</aside>

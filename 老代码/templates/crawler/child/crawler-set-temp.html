@@ -1,0 +1,201 @@
+
+{# 爬虫单一设置单元 #}
+{% macro macro_crawlerset() %}
+<temp class="hide crawler-temp">
+
+<div class="panel panel-primary">
+    <div class="panel-heading" role="tab" id="{prefix}-head">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion2" href="#{prefix}" aria-expanded="true" aria-controls="collapseOne">
+                爬虫名称
+            </a>
+        </h4>
+    </div>
+    <div id="{prefix}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="{prefix}-head">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            <label for="title">爬虫名称</label>
+                            <input type="text" class="form-control" name="title" placeholder="爬虫名称">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="prefix">爬虫简写</label>
+                            <input type="text" class="form-control" name="prefix" placeholder="爬虫简写(字母)">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="fun">爬虫方法</label>
+                            <input type="text" class="form-control" name="fun" placeholder="爬虫方法">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="db">数据库名称</label>
+                            <input type="text" class="form-control" name="db" placeholder="数据库名称">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="index">索引名</label>
+                            <input type="text" class="form-control" name="index" placeholder="索引名(indexname)">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="skip">爬取间隔</label>
+                            <input type="text" class="form-control" name="skip" placeholder="爬取间隔(小时)">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="count">爬取总数</label>
+                            <input type="text" class="form-control" name="count" placeholder="爬取总数">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="thread">最大线程</label>
+                            <input type="text" class="form-control" name="thread" placeholder="最大线程">
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label for="url">网址</label>
+                            <input type="text" class="form-control" name="url" placeholder="网址">
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label for="ips">DNS指定IP</label>
+                            <input type="text" class="form-control" name="ips" placeholder="DNS指定IP(,分割)">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="header">header</label>
+                            <textarea type="text" class="form-control" rows="10" name="header" placeholder="header"></textarea>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="cookie">cookie</label>
+                            <textarea type="text" class="form-control" rows="10" name="cookie" placeholder="cookie"></textarea>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <h3>info子爬虫</h3>
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="skip-info">爬取间隔</label>
+                            <input type="text" class="form-control" name="skip-info" placeholder="爬取间隔">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="count-info">爬取总数</label>
+                            <input type="text" class="form-control" name="count-info" placeholder="爬取总数">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="thread-info">最大线程</label>
+                            <input type="text" class="form-control" name="thread-info" placeholder="最大线程">
+                        </div>
+
+                        <div class="form-group col-md-12">
+                            <h3>page子爬虫</h3>
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="skip-page">爬取间隔</label>
+                            <input type="text" class="form-control" name="skip-page" placeholder="爬取间隔">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="count-page">爬取总数</label>
+                            <input type="text" class="form-control" name="count-page" placeholder="爬取总数">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="thread-page">最大线程</label>
+                            <input type="text" class="form-control" name="thread-page" placeholder="最大线程">
+                        </div>
+
+                        <div class="form-group col-md-12">
+                            <h3>thumb子爬虫</h3>
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="skip-thumb">爬取间隔</label>
+                            <input type="text" class="form-control" name="skip-thumb" placeholder="爬取间隔">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="count-thumb">爬取总数</label>
+                            <input type="text" class="form-control" name="count-thumb" placeholder="爬取总数">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="thread-thumb">最大线程</label>
+                            <input type="text" class="form-control" name="thread-thumb" placeholder="最大线程">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="down-thumb">保存位置</label>
+                            <input type="text" class="form-control" name="path-thumb" placeholder="保存位置">
+                        </div>
+
+                        <div class="form-group col-md-12">
+                            <h3>image子爬虫</h3>
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="skip-image">爬取间隔</label>
+                            <input type="text" class="form-control" name="skip-image" placeholder="爬取间隔">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="count-image">爬取总数</label>
+                            <input type="text" class="form-control" name="count-image" placeholder="爬取总数">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="thread-image">最大线程</label>
+                            <input type="text" class="form-control" name="thread-image" placeholder="最大线程">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="down-image">保存位置</label>
+                            <input type="text" class="form-control" name="path-image" placeholder="保存位置">
+                        </div>
+                        <div class="form-group col-md-12">
+                            <h3>评论子爬虫</h3>
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="skip-comment">爬取间隔</label>
+                            <input type="text" class="form-control" name="skip-comment" placeholder="爬取间隔">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="count-comment">爬取总数</label>
+                            <input type="text" class="form-control" name="count-comment" placeholder="爬取总数">
+                        </div>
+                        <div class="form-group  col-md-3">
+                            <label for="thread-comment">最大线程</label>
+                            <input type="text" class="form-control" name="thread-comment" placeholder="最大线程">
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div class="col-md-6">
+                    <h3>网页源代码</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-m-3 text-center">
+                    <button type="button" class="btn btn-default btn-lg crawler-set">确定</button>
+                    <button type="button" class="btn btn-default btn-lg">预览</button>
+                    <button type="button" class="btn btn-default btn-lg">删除</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</temp>
+
+<temp class="nav-head-temp">
+    <li role="presentation" class=""><a href="#{key}" role="tab" data-toggle="tab" aria-expanded="false">{key}</a></li>
+</temp>
+
+<temp class="nav-body-temp">
+   <div role="tabpanel" class="tab-pane fade" id="{key}">
+
+   </div>
+</temp>
+
+<temp class="nav-input-temp">
+    <div class="form-group col-md-2">
+<label for="title">{key}</label>
+<input type="text" class="form-control" name="{key}">
+    </div>
+</temp>
+
+<temp class="nav-textarea-temp">
+    <div class="form-group col-md-4">
+        <label for="title">{key}</label>
+        <textarea type="text" class="form-control" rows="8" name="{key}"> </textarea>
+    </div>
+</temp>
+
+{% endmacro %}

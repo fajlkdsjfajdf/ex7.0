@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="jsencrypt.min.js"></script>
+
+</head>
+<body>
+
+</body>
+
+<script>
+
+
+
+    const x1 = "{\"url\":\"https://v.youku.com/v_show/id_XNjQ0NTk1MDgyNA==.html?spm=a2hja.14919748_WEBMOVIE_JINGXUAN.drawer3.d_zj1_1&s=acea0b2d245547738af2&scm=20140719.apircmd.4424.show_acea0b2d245547738af2&s=acea0b2d245547738af2\"}";
+    const x2 = "kedou@8989!63239";
+    const x3 = "a2Vkb3VAODk4OSE2MzIzMw==";
+
+    const key = CryptoJS.enc.Utf8.parse(x2);
+    const iv = CryptoJS.enc.Utf8.parse(atob(x3));
+
+
+    console.log(key);
+    console.log(iv);
+
+    let y = CryptoJS.AES.encrypt(x1, key, {
+        iv: iv,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7
+    }).toString()
+    console.log(y);
+    "wH8KKAgaq0LVgw7WMcFrKp9Wq9DB42dXKSyZCGBzMWIhPfbfWJEd4TdaTzN17NM30cNEUjxFkFpUkeCr2m1TqxV0Qy7+it6UYtgy71Ok0oqTQStKBGCshPMuN65vItk5ABbmPLld/WkaJ2YbU1rd9bwV9nXyQ67E+UWi7WdjxHFVN0V9nhQGlK4ujNFH7g6l2QUh555LTxIkJ7DL50b+F+VHcaGUMZlHzBiWOeTUVO7N1eEyOI48FcI+1C9UeKq0v8hftKF377tdhxBV8k88JWpvX2l9gY1FhGniB5zmf+8=";
+
+    function rsa(d){
+        let publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkJZWIUIje8VjJ3okESY8stCs/a95hTUqK3fD/AST0F8mf7rTLoHCaW+AjmrqVR9NM/tvQNni67b5tGC5z3PD6oROJJ24QfcAW9urz8WjtrS/pTAfGeP/2AMCZfCu9eECidy16U2oQzBl9Q0SPoz0paJ9AfgcrHa0Zm3RVPL7JvOUzscL4AnirYImPsdaHZ52hAwz5y9bYoiWzUkuG7LvnAxO6JHQ71B3VTzM3ZmstS7wBsQ4lIbD318b49x+baaXVmC3yPW/E4Ol+OBZIBMWhzl7FgwIpgbGmsJSsqrOq3D8IgjS12K5CgkOT7EB/sil7lscgc22E5DckRpMYRG8dwIDAQAB"
+        let encrypt = new JSEncrypt();
+        encrypt.setPublicKey(publicKey);
+        let data = encrypt.encryptLong(d) + "";
+        return data;
+    }
+
+
+    console.log(rsa(y));
+
+
+</script>
+
+<script>
+
+</script>
+
+
+</html>

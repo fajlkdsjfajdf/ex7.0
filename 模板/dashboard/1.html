@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL处理器 - 仪表盘</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5649c0;
+            --success: #00b894;
+            --info: #0984e3;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --dark: #1e272e;
+            --darker: #1a2026;
+            --darkest: #12161a;
+            --light: #f8f9fa;
+            --gray: #636e72;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--darkest);
+            color: var(--light);
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 240px;
+            min-height: 100vh;
+            background-color: var(--darker);
+            position: fixed;
+            z-index: 100;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-brand-icon {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-right: 12px;
+        }
+        
+        .sidebar-brand-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: white;
+        }
+        
+        .nav-item {
+            margin: 8px 12px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+        
+        .nav-link.active {
+            background-color: var(--primary-dark);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 主内容区 */
+        #content {
+            margin-left: 240px;
+            padding: 24px;
+            min-height: 100vh;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* 状态卡片 */
+        .stat-card {
+            background-color: var(--dark);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stat-card.primary { border-left-color: var(--primary); }
+        .stat-card.success { border-left-color: var(--success); }
+        .stat-card.warning { border-left-color: var(--warning); }
+        .stat-card.danger { border-left-color: var(--danger); }
+        
+        .stat-card .title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+        
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-card .icon {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 1.8rem;
+            opacity: 0.3;
+        }
+        
+        /* 面板样式 */
+        .panel {
+            background-color: var(--dark);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        
+        .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .panel-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .panel-title i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+        
+        .panel-badge {
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .panel-body {
+            padding: 0;
+        }
+        
+        /* 表格样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table thead th {
+            padding: 14px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .data-table tbody tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background-color 0.2s;
+        }
+        
+        .data-table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+        
+        .data-table tbody td {
+            padding: 14px 20px;
+            font-size: 0.95rem;
+        }
+        
+        .data-table .url-cell {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .data-table .url-cell .meta {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-top: 4px;
+        }
+        
+        /* 进度条 */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 3px;
+            background-color: var(--warning);
+        }
+        
+        /* 状态标签 */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-badge.success {
+            background-color: rgba(0, 184, 148, 0.2);
+            color: var(--success);
+        }
+        
+        .status-badge.warning {
+            background-color: rgba(253, 203, 110, 0.2);
+            color: var(--warning);
+        }
+        
+        .status-badge.danger {
+            background-color: rgba(214, 48, 49, 0.2);
+            color: var(--danger);
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 72px;
+            }
+            .sidebar-brand-text, .nav-link span {
+                display: none;
+            }
+            #content {
+                margin-left: 72px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            #content {
+                margin-left: 0;
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-icon">
+                <i class="fas fa-server"></i>
+            </div>
+            <div class="sidebar-brand-text">服务器监控</div>
+        </div>
+        
+        <div class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>总览仪表盘</span>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a class="nav-link active" href="#">
+                <i class="fas fa-desktop"></i>
+                <span>服务器监控</span>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="fas fa-spider"></i>
+                <span>爬虫管理</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div id="content">
+        <!-- 状态卡片行 -->
+        <div class="row" style="display: flex; flex-wrap: wrap; margin: -12px;">
+            <div style="flex: 1; min-width: 240px; padding: 12px;">
+                <div class="stat-card primary">
+                    <div class="title">工作线程</div>
+                    <div class="value">5</div>
+                    <div class="trend">+2 运行中</div>
+                    <!-- <i class="fas fa-microchip icon"></i> -->
+                </div>
+            </div>
+            
+            <div style="flex: 1; min-width: 240px; padding: 12px;">
+                <div class="stat-card success">
+                    <div class="title">已完成请求</div>
+                    <div class="value">128/130</div>
+                    <div class="trend">98% 成功率</div>
+                    <!-- <i class="fas fa-check-circle icon"></i> -->
+                </div>
+            </div>
+            
+            <div style="flex: 1; min-width: 240px; padding: 12px;">
+                <div class="stat-card warning">
+                    <div class="title">队列中请求</div>
+                    <div class="value">7</div>
+                    <div class="trend">3 高优先级</div>
+                    <!-- <i class="fas fa-list-ol icon"></i> -->
+                </div>
+            </div>
+            
+            <div style="flex: 1; min-width: 240px; padding: 12px;">
+                <div class="stat-card danger">
+                    <div class="title">处理中请求</div>
+                    <div class="value">3</div>
+                    <div class="trend">1 失败</div>
+                    <!-- <i class="fas fa-spinner icon"></i> -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 活动请求面板 -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-spinner"></i>
+                    <span>活动请求</span>
+                </div>
+                <div class="panel-badge">3 进行中</div>
+            </div>
+            <div class="panel-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>URL</th>
+                            <th>进度</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="url-cell">
+                                <div>https://api.service.com/data/export</div>
+                                <div class="meta">IP: 192.168.1.100</div>
+                            </td>
+                            <td>
+                                <div class="progress-container">
+                                    <div class="progress-bar" style="width: 33%"></div>
+                                </div>
+                                <div style="font-size: 0.8rem; margin-top: 4px;">1/3 尝试</div>
+                            </td>
+                            <td>
+                                <span class="status-badge warning">处理中</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="url-cell">
+                                <div>https://example.com/api/v1/users</div>
+                                <div class="meta">IP: 10.0.0.15</div>
+                            </td>
+                            <td>
+                                <div class="progress-container">
+                                    <div class="progress-bar" style="width: 66%"></div>
+                                </div>
+                                <div style="font-size: 0.8rem; margin-top: 4px;">2/3 尝试</div>
+                            </td>
+                            <td>
+                                <span class="status-badge warning">处理中</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="url-cell">
+                                <div>https://test.domain.com/ping</div>
+                            </td>
+                            <td>
+                                <div class="progress-container">
+                                    <div class="progress-bar" style="width: 0%"></div>
+                                </div>
+                                <div style="font-size: 0.8rem; margin-top: 4px;">0/2 尝试</div>
+                            </td>
+                            <td>
+                                <span class="status-badge warning">处理中</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 最近请求面板 -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-history"></i>
+                    <span>最近请求</span>
+                </div>
+                <div class="panel-badge">5 记录</div>
+            </div>
+            <div class="panel-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>URL</th>
+                            <th>状态</th>
+                            <th>详情</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="url-cell">
+                                <div>https://service.com/api/data</div>
+                                <div class="meta">数据导入</div>
+                            </td>
+                            <td>
+                                <span class="status-badge success">成功</span>
+                            </td>
+                            <td>
+                                <div>1.23s</div>
+                                <div class="meta">重试: 0</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="url-cell">
+                                <div>https://old.api.com/legacy</div>
+                            </td>
+                            <td>
+                                <span class="status-badge danger">失败</span>
+                            </td>
+                            <td>
+                                <div>5.67s</div>
+                                <div class="meta">重试: 2</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="url-cell">
+                                <div>https://cdn.resource.com/file.zip</div>
+                                <div class="meta">文件下载</div>
+                            </td>
+                            <td>
+                                <span class="status-badge success">成功</span>
+                            </td>
+                            <td>
+                                <div>12.34s</div>
+                                <div class="meta">重试: 1</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="url-cell">
+                                <div>https://auth.service.com/token</div>
+                            </td>
+                            <td>
+                                <span class="status-badge success">成功</span>
+                            </td>
+                            <td>
+                                <div>0.45s</div>
+                                <div class="meta">重试: 0</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="url-cell">
+                                <div>https://deprecated.api.com/v1</div>
+                            </td>
+                            <td>
+                                <span class="status-badge danger">失败</span>
+                            </td>
+                            <td>
+                                <div>3.21s</div>
+                                <div class="meta">重试: 3</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部脚本 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // 侧边栏折叠控制
+        $(document).ready(function() {
+            // 自动刷新控制
+            let refreshInterval = 10; // 秒
+            let timer;
+            
+            function startAutoRefresh() {
+                timer = setInterval(() => {
+                    if (!document.hidden) {
+                        console.log('自动刷新数据...');
+                        // 实际项目中这里应该是AJAX请求更新数据
+                    }
+                }, refreshInterval * 1000);
+            }
+            
+            // 启动自动刷新
+            startAutoRefresh();
+            
+            // 表格行点击效果
+            $('.data-table tbody tr').click(function() {
+                // 实际项目中可以跳转到详情页
+                console.log('查看详情:', $(this).find('.url-cell div').first().text());
+            });
+        });
+    </script>
+</body>
+</html>

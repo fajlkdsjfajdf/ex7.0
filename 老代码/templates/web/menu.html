@@ -1,0 +1,103 @@
+{# menu单元 #}
+{% macro macro_menu() %}
+
+<div id="menu">
+    <div class="menu-bolock hidden-xs hidden-sm" style="display: none;">
+         <ul style="list-style:none;">
+            <li>
+               <a class="menu-open" href="javascript:void(0);"><i class="fa fa-sort-down"></i><span>收合</span></a>
+            </li>
+         </ul>
+        <!-------------菜单栏--------------------->
+         <ul class="menu-bolock-ul" style="list-style: none; display: block;">
+             <li>
+               <a class="book-mark" href="javascript:toList();"><i class="fa fa-home"></i><span>首页</span></a>
+            </li>
+             <li>
+               <a class="book-mark" href="javascript:toHistory();"><i class="fa fa-history"></i><span>历史页</span></a>
+            </li>
+            <li>
+               <a class="book-mark" href="javascript:toMark();"><i class="fa fa-bookmark"></i><span>收藏页</span></a>
+            </li>
+             <li>
+               <a class="book-mark" href="javascript:toInfo();"><i class="fa fa-info"></i><span>信息页</span></a>
+            </li>
+            <li>
+               <a class="book-mark" href="javascript:toPage();"><i class="fa fa-image"></i><span>图片页</span></a>
+            </li>
+             <div class="page-change">
+                 <li class="ph-active" id="page-big" >
+                   <a href="javascript:pageBig();"><i class="fa fa-arrows-alt"></i><span>放大</span></a>
+                </li>
+
+                 <li class="ph-active" >
+                   <a class="pre-page" href="javascript:startGifPlayer();"><i class="fa fa-columns"></i><span>翻页</span></a>
+                </li>
+
+                 <li class="ph-active" >
+                   <a class="pre-page" href="javascript:toVolumn('-1');"><i class="fa fa-angle-double-left"></i><span>上一页</span></a>
+                </li>
+                 <li class="ph-active" >
+                   <a class="next-page" href="javascript:toVolumn('+1');"><i class="fa fa-angle-double-right"></i><span>下一页</span></a>
+                </li>
+                <li class="ph-active" >
+                    <select id="pageselect">
+                    </select>
+                </li>
+
+                 <!--<li class="ph-active" >
+                   <a class="test-button" href="javascript:toptest();"><i class="fa fa-teeth"></i><span>测试</span></a>
+                </li>-->
+             </div>
+         </ul>
+    </div>
+
+
+
+    <div class=" phpage-bottom switch-group phpage-bottom-menu hidden-lg">
+
+        <ul class="mb-2 mt-1 page-change" style="display: none">
+            <li class="ph-active text-center page-num phpage-num" style="width:100%;color:white;">3/35</li>
+            <li class="ph-active" >
+               <a class="pre-page" href="javascript:toVolumn('-1')"><i class="fa fa-angle-double-left"></i></a>
+            </li>
+            <li class="ph-active slider" style="width:60%;">
+                <p></p>
+            </li>
+            <li class="ph-active" >
+               <a class="next-page" href="javascript:toVolumn('+1');"><i class="fa fa-angle-double-right"></i></a>
+            </li>
+        </ul>
+
+         <ul>
+             <li class="ph-active" >
+               <a class="return-home"  href="javascript:toList();" class="book-mark"><i style="color: #ffffff" class="fa fa-home"></i><span>主页</span></a>
+            </li>
+             <li class="ph-active" >
+               <a class="return-info" href="javascript:toHistory();"><i style="color: #ffffff" class="fa fa-history"></i><span>历史</span></a>
+            </li>
+            <li class="ph-active"  >
+               <a class="book-mark"  href="javascript:toMark();"><i class="fa fa-bookmark"></i><span>收藏</span></a>
+            </li>
+             <li class="ph-active"  >
+               <a class="book-mark"  href="javascript:toInfo();"><i class="fa fa-info"></i><span>信息</span></a>
+            </li>
+             <li class="ph-active"  >
+               <a class="book-mark"  href="javascript:toPage();"><i class="fa fa-image"></i><span>图片</span></a>
+            </li>
+             <!--
+             <li class="ph-active" >
+               <a class="pre-page" href="javascript:toVolumn('-1')"><i class="fa fa-angle-double-left"></i><span>上一页</span></a>
+            </li>
+             <li class="ph-active" >
+               <a class="next-page" href="javascript:toVolumn('+1');"><i class="fa fa-angle-double-right"></i><span>下一页</span></a>
+            </li>
+                -->
+         </ul>
+    </div>
+
+
+</div>
+
+
+{% endmacro %}

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>服务器监控 - 仪表盘</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5649c0;
+            --success: #00b894;
+            --info: #0984e3;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --dark: #1e272e;
+            --darker: #1a2026;
+            --darkest: #12161a;
+            --light: #f8f9fa;
+            --gray: #636e72;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--darkest);
+            color: var(--light);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 240px;
+            min-height: 100vh;
+            background-color: var(--darker);
+            position: fixed;
+            z-index: 100;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-brand-icon {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-right: 12px;
+        }
+        
+        .sidebar-brand-text {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: white;
+        }
+        
+        .nav-item {
+            margin: 8px 12px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+        
+        .nav-link.active {
+            background-color: var(--primary-dark);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 主内容区 */
+        #content {
+            margin-left: 240px;
+            padding: 24px;
+            min-height: 100vh;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* 监控面板网格布局 */
+        .monitor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        /* 面板样式 */
+        .panel {
+            background-color: var(--dark);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .panel-maxheight {
+            height: 500px;
+            overflow-y: auto;
+        }
+        
+        .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .panel-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .panel-title i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+        
+        .panel-badge {
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .panel-body {
+            padding: 15px;
+        }
+        
+        /* 日志条目样式 */
+        .log-entry {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            margin-bottom: 10px;
+            line-height: 1.5;
+            padding: 8px;
+            border-radius: 4px;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        .log-info {
+            color: var(--info);
+        }
+        
+        /* 服务器状态卡片 */
+        .server-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 5px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* 图表容器 */
+        .chart-container {
+            height: 180px;
+            width: 100%;
+            position: relative;
+        }
+        
+        /* 爬虫表格样式 */
+        .crawler-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .crawler-table th {
+            text-align: left;
+            padding: 12px 15px;
+            font-size: 0.85rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .crawler-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.95rem;
+        }
+        
+        /* 进度条 */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 3px;
+            background-color: var(--info);
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 1200px) {
+            .monitor-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-icon">
+                <i class="fas fa-server"></i>
+            </div>
+            <div class="sidebar-brand-text">服务器监控</div>
+        </div>
+        
+        <div class="nav-item">
+            <a class="nav-link  active" href="#">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>总览仪表盘</span>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="fas fa-desktop"></i>
+                <span>服务器监控</span>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="fas fa-spider"></i>
+                <span>爬虫管理</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div id="content">
+        <h2 style="margin-top: 0; font-weight: 600;">
+            <i class="fas fa-desktop" style="color: var(--primary); margin-right: 10px;"></i>
+            服务器监控面板
+        </h2>
+        
+        <div class="monitor-grid">
+            <!-- 左上：服务器日志 -->
+            <div class="panel panel-maxheight">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-terminal"></i>
+                        <span>服务器日志</span>
+                    </div>
+                    <div class="panel-badge">实时更新</div>
+                </div>
+                <div class="panel-body">
+                    <div class="log-entry log-info">INFO 2025-06-28 17:11:25</div>
+                    <div class="log-entry">结束运行 KmInfoCrawlerProcess</div>
+                    <div class="log-entry log-info">INFO 2025-06-28 17:12:25</div>
+                    <div class="log-entry log-info">INFO 2025-06-28 17:14:44</div>
+                    <div class="log-entry">结束运行 JbCrawlerProcess</div>
+                    <div class="log-entry log-info">INFO 2025-06-28 17:14:44</div>
+                    <div class="log-entry">定时任务 FastestWebsiteChecker 第302次开始运行</div>
+                    <div class="log-entry log-info">INFO 2025-06-28 17:15:01</div>
+                    <div class="log-entry">启动 ExCrawlerProcess</div>
+                    <div class="log-entry">内存使用量达到警戒线：3.6/4.0GB</div>
+                    <div class="log-entry log-info">INFO 2025-06-28 17:18:45</div>
+                    <div class="log-entry">定时任务 Cleanup 第128次开始运行</div>
+                </div>
+            </div>
+            
+            <!-- 右上：服务器状态 -->
+            <div class="panel panel-maxheight">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-chart-line"></i>
+                        <span>服务器状态</span>
+                    </div>
+                    <div class="panel-badge">Linux</div>
+                </div>
+                <div class="panel-body">
+                    <div class="server-stats">
+                        <div class="stat-card">
+                            <div class="stat-label">操作系统</div>
+                            <div class="stat-value">Linux</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">程序内存</div>
+                            <div class="stat-value">3.6 GB</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">总内存</div>
+                            <div class="stat-value">17.5/47GB</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">CPU</div>
+                            <div class="stat-value">34.8%</div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="cpuChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 左下：爬虫进度 -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-tasks"></i>
+                        <span>爬虫进度</span>
+                    </div>
+                    <div class="panel-badge">4 个任务</div>
+                </div>
+                <div class="panel-body">
+                    <table class="crawler-table">
+                        <thead>
+                            <tr>
+                                <th>爬虫名称</th>
+                                <th>进度</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>ExCrawlerProcess</td>
+                                <td>
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 45%"></div>
+                                    </div>
+                                    <div style="font-size: 0.8rem; margin-top: 5px;">45%</div>
+                                </td>
+                                <td>运行中</td>
+                            </tr>
+                            <tr>
+                                <td>ExInfoCrawlerProcess</td>
+                                <td>
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 80%"></div>
+                                    </div>
+                                    <div style="font-size: 0.8rem; margin-top: 5px;">80%</div>
+                                </td>
+                                <td>运行中</td>
+                            </tr>
+                            <tr>
+                                <td>ExPageCrawlerProcess</td>
+                                <td>
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 0%"></div>
+                                    </div>
+                                    <div style="font-size: 0.8rem; margin-top: 5px;">等待中</div>
+                                </td>
+                                <td>等待</td>
+                            </tr>
+                            <tr>
+                                <td>ExThumbCrawlerProcess</td>
+                                <td>
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 100%"></div>
+                                    </div>
+                                    <div style="font-size: 0.8rem; margin-top: 5px;">已完成</div>
+                                </td>
+                                <td>完成</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- 右下：爬虫控制器 -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-play-circle"></i>
+                        <span>爬虫控制器</span>
+                    </div>
+                    <div class="panel-badge">6 个爬虫</div>
+                </div>
+                <div class="panel-body">
+                    <table class="crawler-table">
+                        <thead>
+                            <tr>
+                                <th>爬虫名称</th>
+                                <th>上次运行</th>
+                                <th>运行总数</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>ExCrawlerProcess</td>
+                                <td>2025-06-28 17:15:01</td>
+                                <td>128</td>
+                                <td><button class="btn btn-primary">启动</button></td>
+                            </tr>
+                            <tr>
+                                <td>ExInfoCrawlerProcess</td>
+                                <td>2025-06-28 16:30:45</td>
+                                <td>302</td>
+                                <td><button class="btn btn-primary">启动</button></td>
+                            </tr>
+                            <tr>
+                                <td>ExPageCrawlerProcess</td>
+                                <td>2025-06-28 15:18:22</td>
+                                <td>87</td>
+                                <td><button class="btn btn-primary">启动</button></td>
+                            </tr>
+                            <tr>
+                                <td>ExThumbCrawlerProcess</td>
+                                <td>2025-06-28 14:05:33</td>
+                                <td>156</td>
+                                <td><button class="btn btn-primary">启动</button></td>
+                            </tr>
+                            <tr>
+                                <td>KmInfoCrawlerProcess</td>
+                                <td>2025-06-28 17:11:25</td>
+                                <td>245</td>
+                                <td><button class="btn" disabled>运行中</button></td>
+                            </tr>
+                            <tr>
+                                <td>JbCrawlerProcess</td>
+                                <td>2025-06-28 17:14:44</td>
+                                <td>189</td>
+                                <td><button class="btn btn-primary">启动</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CPU图表配置
+        const cpuCtx = document.getElementById('cpuChart').getContext('2d');
+        const cpuChart = new Chart(cpuCtx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 30}, (_, i) => ''),
+                datasets: [{
+                    label: 'CPU使用率',
+                    data: Array.from({length: 30}, () => Math.floor(Math.random() * 30) + 20),
+                    borderColor: '#6c5ce7',
+                    backgroundColor: 'rgba(108, 92, 231, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            },
+                            color: '#636e72'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'CPU: ' + context.parsed.y + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 实时更新CPU数据
+        setInterval(() => {
+            cpuChart.data.datasets[0].data.shift();
+            cpuChart.data.datasets[0].data.push(Math.floor(Math.random() * 30) + 20);
+            cpuChart.update('none');
+        }, 1000);
+
+        // 模拟日志自动更新
+        function addLogEntry() {
+            const logs = [
+                {type: "info", msg: "INFO " + new Date().toISOString().replace('T', ' ').substr(0, 19)},
+                {msg: "定时任务 AutoCleaner 第" + Math.floor(Math.random()*100) + "次开始运行"},
+                {msg: "内存使用量稳定在：" + (3.5 + Math.random()*0.5).toFixed(1) + "/4.0GB"},
+                {msg: "结束运行 ExInfoCrawlerProcess"},
+                {msg: "启动 JbCrawlerProcess"}
+            ];
+            
+            const log = logs[Math.floor(Math.random()*logs.length)];
+            const panel = document.querySelector('.panel-body');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry' + (log.type ? ' log-' + log.type : '');
+            entry.textContent = log.msg;
+            
+            panel.insertBefore(entry, panel.firstChild);
+            
+            // 保持日志面板自动滚动到底部
+            panel.scrollTop = 0;
+        }
+
+        // 每3秒添加一条新日志
+        setInterval(addLogEntry, 3000);
+
+        // 启动爬虫按钮点击事件
+        document.querySelectorAll('.btn-primary').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const crawlerName = this.closest('tr').querySelector('td').textContent;
+                alert('正在启动爬虫: ' + crawlerName);
+                this.disabled = true;
+                this.textContent = '运行中';
+                this.classList.remove('btn-primary');
+                
+                // 模拟运行结束
+                setTimeout(() => {
+                    this.disabled = false;
+                    this.textContent = '启动';
+                    this.classList.add('btn-primary');
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>

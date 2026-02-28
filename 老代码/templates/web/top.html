@@ -1,0 +1,256 @@
+{# 列表单元 #}
+{% macro macro_top() %}
+
+<!--loading -->
+<div class="loading">
+
+    <button type="button" class="load-close">
+        <i class="icon_close"></i>
+    </button>
+    <div class="circle"></div>
+</div>
+<!--/-->
+
+<div id="top">
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container-fluid">
+        <!--logo-->
+        <div class="logo">
+            <a href="#" class="top-logo">
+                <img src="/static/img/logo.png" alt="">
+            </a>
+        </div>
+        <!--/-->
+
+        <!--navbar-collapse-->
+{#        <div class="collapse navbar-collapse" id="main_nav">#}
+{#            <ul class="navbar-nav ml-auto mr-auto">#}
+{#                <li class="nav-item dropdown">#}
+{#                    <a class="nav-link dropdown-toggle active" href="index.html" data-toggle="dropdown"> 网站类型 </a>#}
+{#                    <ul class="dropdown-menu fade-up webs">#}
+{#                        <!--webs li-->#}
+{#                    </ul>#}
+{#                </li>#}
+{##}
+{#                <li class="nav-item dropdown">#}
+{#                    <a class="nav-link  dropdown-toggle" href="javascript:changeColumnCount(8)" data-toggle="dropdown">排序模式</a>#}
+{#                    <ul class="dropdown-menu fade-up orders">#}
+{##}
+{##}
+{#                    </ul>#}
+{#                </li>#}
+{#                <li class="nav-item dropdown">#}
+{#                    <a class="nav-link  dropdown-toggle" href="javascript:changeColumnCount(8)" data-toggle="dropdown">每行显示</a>#}
+{#                    <ul class="dropdown-menu fade-up">#}
+{#                        <li>#}
+{#                            <a class="dropdown-item" col="10" href="javascript:changeColumnCount(10)">10列</a>#}
+{#                        </li>#}
+{#                        <li>#}
+{#                            <a class="dropdown-item" col="8" href="javascript:changeColumnCount(8)">8列</a>#}
+{#                        </li>#}
+{#                        <li>#}
+{#                            <a class="dropdown-item" col="6"  href="javascript:changeColumnCount(6)">6列</a>#}
+{#                        </li>#}
+{#                        <li>#}
+{#                            <a class="dropdown-item" col="4"  href="javascript:changeColumnCount(4)">4列</a>#}
+{#                        </li>#}
+{#                        <li>#}
+{#                            <a class="dropdown-item" col="2"  href="javascript:changeColumnCount(2)">2列</a>#}
+{#                        </li>#}
+{#                        <li>#}
+{#                            <a class="dropdown-item" col="1"  href="javascript:changeColumnCount(1)">1列</a>#}
+{#                        </li>#}
+{#                    </ul>#}
+{#                </li>#}
+{##}
+{##}
+{##}
+{##}
+{##}
+{#                 <li class="nav-item dropdown">#}
+{#                    <a class="nav-link  dropdown-toggle" href="javascript:changeColumnCount(8)" data-toggle="dropdown">全局配置</a>#}
+{#                    <ul class="dropdown-menu fade-up" id="opt_menu">#}
+{##}
+{##}
+{#                    </ul>#}
+{#                </li>#}
+{#                <li class="nav-item dropdown">#}
+{#                    <a class="nav-link  dropdown-toggle" href="javascript:changeColumnCount(8)" data-toggle="dropdown">实际网站</a>#}
+{#                    <ul class="dropdown-menu fade-up real-webs">#}
+{##}
+{#                    </ul>#}
+{#                </li>#}
+{#                <li class="nav-item">#}
+{#                    <button class="nav-link"> 系统配置 </button>#}
+{#                </li>#}
+{#            </ul>#}
+{#        </div>#}
+        <!--/-->
+
+        <!--navbar-right-->
+        <div class="navbar-right ml-auto">
+            <div class="social-icones">
+                <ul class="list-inline">
+                    <li>
+                        <a href="javascript:toList();">
+                            <i class="fa fa-home"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:toHistory();">
+                            <i class="fa fa-history"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:toMark();">
+                            <i class="fa fa-bookmark"></i>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="javascript:toInfo();">
+                            <i class="fa fa-info"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:toPage();">
+                            <i class="fa fa-image"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+
+            <div class="tool-icon">
+                <i class="icon_tool"></i>
+            </div>
+
+            <div class="search-icon">
+                <i class="icon_search"></i>
+            </div>
+
+
+            <div class="chat-icon" onclick="showForum();">
+                <i class="icon_chat"></i>
+            </div>
+            <div class="chat-icon gif-icon">
+                <i class="icon_image"></i>
+            </div>
+
+{#            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main_nav" aria-expanded="false" aria-label="Toggle navigation">#}
+{#                <span class="navbar-toggler-icon"></span>#}
+{#            </button>#}
+        </div>
+    </div>
+</nav>
+
+</div>
+
+
+<!--Search-form-->
+<div class="search">
+    <div class="container-fluid">
+        <div class="row">
+            <button type="button" class="close">
+                <i class="icon_close"></i>
+            </button>
+
+            <div class="search-form2 col-lg-6 col-sm-8 col-xs-10">
+                <input type="search" value="" placeholder="请输入查找内容,查评论请在前面加c:" class="search-input">
+                <button type="submit" class="search-btn">search</button>
+
+            </div>
+
+             <div class="search-tag col-lg-6 offset-lg-3 col-sm-8 offset-sm-2 col-10">
+                <div class="tags">
+<!--                    <button class="btn btn-info btn-comment mt-3">查评论</button>-->
+
+                    <ul class="list-inline active active-tag-list mt-10">
+
+                    </ul>
+                    <!--------------搜索历史--------------------->
+                    <div class="row">
+                        <div class="col-md-12 mb-1">
+                          <div class="card">
+                            <div class="card-header p-0" id="headinghistory">
+                              <h5 class="mb-0">
+                                <a class="d-block p-3 text-uppercase" href="#" data-toggle="collapse" data-target="#collapsehistory" aria-expanded="true" aria-controls="collapsehistory">
+                                    搜索历史
+                                </a>
+                              </h5>
+                            </div>
+                            <div id="collapsehistory" class="collapse" aria-labelledby="headinghistory">
+                              <div class="card-body search-history">
+
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                    <!-------------搜索历史结束------------------->
+                    <!-------------标签搜索---------------------->
+                        <div class="row tag-search-div" style="display: none;">
+                            <div class="col-md-12 mb-1">
+                              <div class="card">
+                                <div class="card-header p-0" id="headingtagsearch">
+                                  <h5 class="mb-0">
+                                    <a class="d-block p-3 text-uppercase" href="#" data-toggle="collapse" data-target="#collapsetagsearch" aria-expanded="true" aria-controls="collapsetagsearch">
+                                        标签搜索
+                                    </a>
+                                  </h5>
+                                </div>
+                                <div id="collapsetagsearch" class="collapse" aria-labelledby="headingtagsearch">
+                                  <div class="card-body tag-search">
+                                      <div class="form-group">
+                                          <label for="input">输入查询tag</label>
+                                          <input type="text" class="form-control" id="input" placeholder="输入字符...">
+<!--                                          <div class="list-group" id="list"></div>-->
+                                          <ul class="list-inline search_tags"></ul>
+                                        </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                        </div>
+                        <!-------------标签搜索结束---------------------->
+
+                    <!--------------折叠形式的tag栏------------------>
+                    <div class="accordion cell_tag_list row">
+
+
+                    </div>
+
+                    <!--------------折叠形式的tag栏结束------------------>
+                    <ul class="list-inline tag-list">
+
+
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!--/-->
+
+<!--评论框-->
+<!-- 模态框（Modal） -->
+<div class="modal fade forum" id="forum-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">评论</h4>
+            </div>
+            <div class="modal-body comment-body">
+                <ul class="list-group">
+
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+{% endmacro %}

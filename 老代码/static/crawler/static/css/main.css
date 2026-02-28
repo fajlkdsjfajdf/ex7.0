@@ -1,0 +1,26 @@
+#data-table{
+  max-height: 600px;
+  overflow-y: auto;
+}
+#data-table table {
+  border-collapse: collapse;
+}
+
+#data-table table td {
+  border: 1px solid black;
+  cursor: pointer;
+}
+
+#data-table table .check{
+  background: antiquewhite;
+}
+
+#data-table table td:hover {
+  background-color: #f5f5f5;
+
+}
+
+.search_action li{
+  cursor: pointer;
+}
+

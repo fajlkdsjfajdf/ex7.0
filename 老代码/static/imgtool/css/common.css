@@ -1,0 +1,93 @@
+:root {
+    --primary-color: #4e73df;
+    --secondary-color: #858796;
+    --success-color: #1cc88a;
+    --info-color: #36b9cc;
+    --warning-color: #f6c23e;
+    --danger-color: #e74a3b;
+    --light-color: #f8f9fc;
+    --dark-color: #5a5c69;
+}
+
+body {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+                 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f8f9fc;
+}
+
+.header-section {
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 2rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #224abe 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, var(--success-color) 0%, #0a7e56 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, var(--info-color) 0%, #258ea6 100%);
+}
+
+.card {
+    border: none;
+    transition: all 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.folder-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+}
+
+.image-icon {
+    font-size: 2rem;
+    color: var(--info-color);
+}
+
+.stat-card {
+    transition: all 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--secondary-color);
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .header-section .display-5 {
+        font-size: 2rem;
+    }
+    
+    .header-section .lead {
+        font-size: 1rem;
+    }
+}

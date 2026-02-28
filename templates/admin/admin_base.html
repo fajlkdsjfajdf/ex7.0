@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}后台管理{% endblock %} - 暗黑漫画站</title>
+
+    <!-- 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- 共用CSS -->
+    <link rel="stylesheet" href="/static/common/css/variables.css">
+    <link rel="stylesheet" href="/static/common/css/reset.css">
+    <link rel="stylesheet" href="/static/common/css/admin.css">
+
+    <!-- 后台CSS -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- 侧边栏 -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <h1><i class="fas fa-cogs"></i> 后台管理</h1>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="/admin" class="menu-item {% if request.endpoint in ['admin.index', 'admin.dashboard'] %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>仪表盘</span>
+                </a>
+                <a href="/admin/buckets" class="menu-item {% if request.endpoint == 'admin.buckets' %}active{% endif %}">
+                    <i class="fas fa-bucket"></i>
+                    <span>桶管理</span>
+                </a>
+                <a href="/admin/scheduled-tasks" class="menu-item {% if request.endpoint in ['admin.scheduled_tasks', 'admin.schedulers'] %}active{% endif %}">
+                    <i class="fas fa-clock"></i>
+                    <span>定时任务</span>
+                </a>
+                <a href="/admin/config" class="menu-item {% if request.endpoint == 'admin.config' %}active{% endif %}">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>配置管理</span>
+                </a>
+                <a href="/admin/media-library" class="menu-item {% if request.endpoint == 'admin.media_library' %}active{% endif %}">
+                    <i class="fas fa-images"></i>
+                    <span>图片库管理</span>
+                </a>
+                <a href="/admin/logs" class="menu-item {% if request.endpoint == 'admin.logs' %}active{% endif %}">
+                    <i class="fas fa-file-alt"></i>
+                    <span>系统日志</span>
+                </a>
+                <a href="/admin/proxy" class="menu-item {% if request.endpoint == 'admin.proxy' %}active{% endif %}">
+                    <i class="fas fa-globe"></i>
+                    <span>代理管理</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="/" class="btn-return">
+                    <i class="fas fa-arrow-left"></i> 返回前台
+                </a>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="admin-main">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- 移动端菜单按钮 -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- 共用JS -->
+    <script src="/static/common/js/utils.js"></script>
+    <script src="/static/common/js/admin-base.js"></script>
+
+    <!-- 页面特定JS -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

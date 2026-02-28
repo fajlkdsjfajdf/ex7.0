@@ -1,0 +1,223 @@
+{% extends "frontend_base.html" %}
+
+{% block title %}设置 - 暗黑漫画站{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/common/css/settings.css">
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <div class="settings-header">
+        <h1><i class="fas fa-cog"></i> 设置</h1>
+        <p class="settings-subtitle">个性化您的阅读体验</p>
+    </div>
+
+    <div class="settings-sections">
+        <!-- 显示设置 -->
+        <section class="settings-section">
+            <h2 class="section-title">
+                <i class="fas fa-desktop"></i> 显示设置
+            </h2>
+
+            <!-- 排序模式 -->
+            <div class="setting-item">
+                <div class="setting-label">
+                    <i class="fas fa-sort"></i>
+                    <span>排序模式</span>
+                </div>
+                <div class="setting-control">
+                    <div class="btn-group" id="sortModeGroup">
+                        <button class="btn-group-item active" data-value="latest">
+                            <i class="fas fa-clock"></i> 最新
+                        </button>
+                        <button class="btn-group-item" data-value="hottest">
+                            <i class="fas fa-fire"></i> 最热
+                        </button>
+                        <button class="btn-group-item" data-value="favorite">
+                            <i class="fas fa-heart"></i> 喜欢
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 每行显示 -->
+            <div class="setting-item">
+                <div class="setting-label">
+                    <i class="fas fa-th"></i>
+                    <span>每行显示</span>
+                </div>
+                <div class="setting-control">
+                    <div class="btn-group" id="columnsGroup">
+                        <button class="btn-group-item" data-value="10">10</button>
+                        <button class="btn-group-item" data-value="8">8</button>
+                        <button class="btn-group-item" data-value="6">6</button>
+                        <button class="btn-group-item active" data-value="4">4</button>
+                        <button class="btn-group-item" data-value="2">2</button>
+                        <button class="btn-group-item" data-value="1">1</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 图片模式 -->
+            <div class="setting-item">
+                <div class="setting-label">
+                    <i class="fas fa-image"></i>
+                    <span>图片模式</span>
+                </div>
+                <div class="setting-control">
+                    <div class="btn-group" id="imageModeGroup">
+                        <button class="btn-group-item active" data-value="full">
+                            <i class="fas fa-expand"></i> 完整
+                        </button>
+                        <button class="btn-group-item" data-value="half">
+                            <i class="fas fa-compress-alt"></i> 切半
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 阅读设置 -->
+        <section class="settings-section">
+            <h2 class="section-title">
+                <i class="fas fa-book-open"></i> 阅读设置
+            </h2>
+
+            <!-- 阅读模式 -->
+            <div class="setting-item">
+                <div class="setting-label">
+                    <i class="fas fa-file-alt"></i>
+                    <span>阅读模式</span>
+                </div>
+                <div class="setting-control">
+                    <div class="btn-group btn-group-vertical" id="readModeGroup">
+                        <button class="btn-group-item active" data-value="scroll">
+                            <i class="fas fa-arrows-alt-v"></i> 下拉式
+                        </button>
+                        <button class="btn-group-item" data-value="scroll-seamless">
+                            <i class="fas fa-arrows-alt-v"></i> 下拉式无缝
+                        </button>
+                        <button class="btn-group-item" data-value="page-flip">
+                            <i class="fas fa-book"></i> 翻页式
+                        </button>
+                        <button class="btn-group-item" data-value="page-flip-multi">
+                            <i class="fas fa-copy"></i> 翻页式多页
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 阅读尺寸 -->
+            <div class="setting-item">
+                <div class="setting-label">
+                    <i class="fas fa-text-height"></i>
+                    <span>阅读尺寸</span>
+                </div>
+                <div class="setting-control">
+                    <div class="btn-group" id="readSizeGroup">
+                        <button class="btn-group-item" data-value="large">
+                            <i class="fas fa-plus"></i> 大
+                        </button>
+                        <button class="btn-group-item active" data-value="medium">
+                            <i class="fas fa-minus"></i> 中
+                        </button>
+                        <button class="btn-group-item" data-value="small">
+                            <i class="fas fa-search-minus"></i> 小
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 主题设置 -->
+        <section class="settings-section">
+            <h2 class="section-title">
+                <i class="fas fa-palette"></i> 主题设置
+            </h2>
+
+            <!-- 背景颜色 -->
+            <div class="setting-item">
+                <div class="setting-label">
+                    <i class="fas fa-fill-drip"></i>
+                    <span>背景颜色</span>
+                </div>
+                <div class="setting-control">
+                    <div class="btn-group" id="bgColorGroup">
+                        <button class="btn-group-item" data-value="white">
+                            <i class="fas fa-sun"></i> 白色
+                        </button>
+                        <button class="btn-group-item active" data-value="black">
+                            <i class="fas fa-moon"></i> 黑色
+                        </button>
+                        <button class="btn-group-item" data-value="eye-care">
+                            <i class="fas fa-eye"></i> 护眼
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 高级设置 -->
+        <section class="settings-section">
+            <h2 class="section-title">
+                <i class="fas fa-cogs"></i> 高级设置
+            </h2>
+
+            <!-- 缓存代理 -->
+            <div class="setting-item">
+                <div class="setting-label">
+                    <i class="fas fa-globe"></i>
+                    <span>缓存代理</span>
+                </div>
+                <div class="setting-control">
+                    <div class="btn-group" id="proxyGroup">
+                        <button class="btn-group-item active" data-value="disabled">
+                            <i class="fas fa-ban"></i> 停用
+                        </button>
+                        <button class="btn-group-item" data-value="domestic">
+                            <i class="fas fa-home"></i> 国内
+                        </button>
+                        <button class="btn-group-item" data-value="foreign">
+                            <i class="fas fa-plane"></i> 国外
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 后台管理 -->
+        <section class="settings-section admin-section">
+            <h2 class="section-title">
+                <i class="fas fa-user-shield"></i> 后台管理
+            </h2>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <i class="fas fa-tools"></i>
+                    <span>管理功能</span>
+                </div>
+                <div class="setting-control">
+                    <button class="btn-admin" id="gotoAdminBtn">
+                        <i class="fas fa-arrow-right"></i> 前往后台
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="settings-actions">
+        <button class="btn btn-secondary" id="resetBtn">
+            <i class="fas fa-undo"></i> 恢复默认
+        </button>
+        <button class="btn btn-primary" id="saveBtn">
+            <i class="fas fa-save"></i> 保存设置
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/common/js/settings.js"></script>
+{% endblock %}

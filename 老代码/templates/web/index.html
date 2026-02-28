@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Meta -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--    <meta http-equiv="X-UA-Compatible" content="ie=edge">-->
+
+    <!-- favicon -->
+    <link rel="icon" sizes="16x16" href="/static/img/favicon.ico">
+
+    <!-- Title -->
+    <title>我的绅士站</title>
+
+
+
+    <!-- CSS Plugins -->
+    <link rel="stylesheet" href="/static/css/all.css">
+    <link rel="stylesheet" href="/static/css/elegant-font-icons.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-slider.min.css">
+    <link rel="stylesheet" href="/static/css/owl.carousel.css">
+    <link rel="stylesheet" href="/static/css/toastr.min.css">
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<!--    <script src="/static/js/jquery-3.5.0.min.js"></script>-->
+    <script src="/static/js/jquery-3.4.1.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/bootstrap-slider.min.js"></script>
+    <!-- JS Plugins  -->
+
+    <script src="/static/js/owl.carousel.min.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/jquery.lazyload.js"></script>
+    <script src="/static/js/tkdecode.js"></script>
+    <script src="/static/js/toastr.min.js"></script>
+        <script type="text/javascript">
+          toastr.options.positionClass = 'toast-bottom-center';
+          toastr.options.tapToDismiss = true;
+    </script>
+
+    <!-- brython  -->
+<!--    <script type="text/javascript" src="/static/js/brython.min.js"></script>-->
+<!--    <script type="text/javascript" src="/static/js/brython_stdlib.js"></script>-->
+
+
+    <!-- main style -->
+    <link rel="stylesheet" href="/static/css/style.css?v=1.05">
+    <link rel="stylesheet" href="/static/css/main.css?v=1.02">
+
+    <!-- main js-->
+    <script src="/static/js/type.js?v=1.02"></script>
+    <script src="/static/js/api.js?v=1.02"></script>
+    <script src="/static/js/touch.js?v=1.19"></script>
+    <script src="/static/js/top.js?v=1.01"></script>
+    <script src="/static/js/nav.js?v=1.01"></script>
+     <script src="/static/js/setting.js"></script>
+    <script src="/static/js/web-tools.js?v=1.03"></script>
+    <script src="/static/js/list.js?v=1.03"></script>
+    <script src="/static/js/info.js?v=1.03"></script>
+    <script src="/static/js/page.js?v=1.03"></script>
+    <script src="/static/js/scroll.js?v=1.03"></script>
+    <script src="/static/js/tran-img.js?v=1.03"></script>
+    <script src="/static/js/img-player.js?v=1.03"></script>
+    <!-- video.js-->
+    <link href="https://unpkg.com/video.js@7.10.2/dist/video-js.min.css" rel="stylesheet" />
+    <script src="https://unpkg.com/video.js@7.10.2/dist/video.min.js"></script>
+</head>
+
+<body>
+
+
+<script>
+
+//window.onload = function () {
+//
+//document.write("浏览器宽:"+window.screen.width +
+//
+//"<br />浏览器高:"+window.screen.height)
+//
+//}
+
+</script>
+
+<!-------------顶菜单--------------------->
+{% from 'top.html' import macro_top %}
+{{ macro_top() }}
+
+<!-------------列表项--------------------->
+{% from 'list.html' import macro_list %}
+{{ macro_list() }}
+
+<!-------------info项--------------------->
+{% from 'info.html' import macro_info %}
+{{ macro_info() }}
+
+<!-------------page项--------------------->
+{% from 'page.html' import macro_page %}
+{{ macro_page() }}
+
+<!-------------setting项--------------------->
+{% from 'setting.html' import macro_setting %}
+{{ macro_setting() }}
+
+<!-------------temp项--------------------->
+{% from 'temp.html' import macro_temp %}
+{{ macro_temp() }}
+
+<!-------------菜单栏--------------------->
+{% from 'menu.html' import macro_menu %}
+{{ macro_menu() }}
+
+
+
+
+
+</body>
+
+</html>

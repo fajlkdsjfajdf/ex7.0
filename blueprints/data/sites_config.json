@@ -1,0 +1,26 @@
+{
+  "cm": {
+    "site_id": "cm",
+    "site_name": "CM18",
+    "urls": [
+      "https://www.cdngwc.cc"
+    ],
+    "cdn_urls": [
+      "https://cdn-msp2.jmapiproxy3.cc",
+      "https://cdn-msp3.jmdanjonproxy.vip"
+    ],
+    "schedule": {
+      "list_page": 12,
+      "info_page": 2,
+      "content_page": 2,
+      "comment_page": 0,
+      "cover_image": 2,
+      "thumbnail_image": 0,
+      "content_image": 10
+    },
+    "ips": [],
+    "proxy_mode": "none",
+    "cookies": {},
+    "enabled": true
+  }
+}

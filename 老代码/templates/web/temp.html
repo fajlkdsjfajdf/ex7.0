@@ -1,0 +1,2129 @@
+{# 模板单元 #}
+{% macro macro_temp() %}
+
+<div id="temp">
+
+    <temp class="temp-card-ex">
+        <div class="card">
+            <div class="post-card" style="{background}">
+                <div class="post-card-image">
+                    <a href="javascript:getInfo('{_id}');">
+                    <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                    <div class="label-loveicon">
+                        <span>{rating}</span>
+                    </div>
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+                    <a href="javascript:void(0);" class="categorie"> {language}</a>
+                    <a href="javascript:void(0);" class="categorie"> {category}</a>
+                    <a href="javascript:void(0);" class="categorie"> {filecount}页</a>
+
+                    <h5>
+                        <a href="javascript:getInfo('{_id}');">{title}</a>
+                    </h5>
+                    <h7 class="">
+                        <a href="javascript:getInfo('{_id}');">{comment}</a>
+                    </h7>
+
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+
+
+    <temp class="temp-card-av">
+        <div class="card">
+            <div class="post-card">
+                <div class="post-card-image">
+                    <a href="javascript:getInfo('{_id}');">
+                    <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                    <div class="label-loveicon">
+                        <span>{fanhao}</span>
+                    </div>
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+                    <a href="javascript:void(0);" class="categorie"> {star1}</a>
+                    <a href="javascript:void(0);" class="categorie"> {star2}</a>
+                    <a href="javascript:void(0);" class="categorie"> {star3}</a>
+                    <h5>
+                        <a href="javascript:getInfo('{_id}');">{title}</a>
+                    </h5>
+
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+
+    <temp class="temp-card-jv">
+        <div class="card">
+            <div class="post-card">
+                <div class="post-card-image">
+                    <a href="javascript:getInfo('{_id}');">
+                    <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                    <div class="label-loveicon">
+                        <span>{fanhao}</span>
+                    </div>
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+                    <a href="javascript:void(0);" class="categorie"> {type}</a>
+                    <a href="javascript:void(0);" class="categorie"> {star1}</a>
+                    <a href="javascript:void(0);" class="categorie"> {star2}</a>
+                    <a href="javascript:void(0);" class="categorie"> {star3}</a>
+                    <h5>
+                        <a href="javascript:getInfo('{_id}');">{title}</a>
+                    </h5>
+
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+    <temp class="temp-card-jb">
+        <div class="card">
+            <div class="post-card"   style="{background}">
+                <div class="post-card-image">
+                    <a href="javascript:getInfo('{_id}');">
+                    <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                    <div class="label-loveicon">
+                        <span>{fanhao}</span>
+                    </div>
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+                    <a href="javascript:void(0);" class="categorie"> {type}</a>
+                    <a href="javascript:void(0);" class="categorie"> {star1}</a>
+                    <a href="javascript:void(0);" class="categorie"> {star2}</a>
+                    <a href="javascript:void(0);" class="categorie"> {star3}</a>
+                    <h5>
+                        <a href="javascript:getInfo('{_id}');">{title}</a>
+                    </h5>
+
+                    <h7 class="">
+                        <a href="javascript:getInfo('{_id}');">{tk}</a>
+                    </h7>
+
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+
+    <temp class="temp-card-lf">
+        <div class="card">
+            <div class="post-card">
+                <div class="post-card-image">
+                    <a href="javascript:getInfo('{_id}');">
+                    <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                    <div class="label-loveicon">
+                        <span>{rating}</span>
+                    </div>
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+                    <a href="javascript:void(0);" class="categorie"> {eps}集</a>
+                    <h5>
+                        <a href="javascript:getInfo('{_id}');">{title}</a>
+                    </h5>
+
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+
+    <temp class="temp-card-tk">
+        <div class="card">
+            <div class="post-card">
+                <div class="post-card-image">
+                    <a href="javascript:getInfo('{_id}');">
+                    <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                    <div class="label-loveicon">
+                        <span><!--番号--></span>
+                    </div>
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+                    <a href="javascript:void(0);" class="categorie"> {type}</a>
+                    <a href="javascript:void(0);" class="categorie"> {star1}</a>
+                    <h5>
+                        <a href="javascript:getInfo('{_id}');">{title}</a>
+                    </h5>
+
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+
+     <temp class="temp-card-ty">
+        <div class="card">
+            <div class="post-card">
+                <div class="post-card-image">
+                    <a href="javascript:getInfo('{_id}');">
+                    <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                    <div class="label-loveicon">
+                        <span>{fanhao}</span>
+                    </div>
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+                    <a href="javascript:void(0);" class="categorie"> {star1}</a>
+                    <a href="javascript:void(0);" class="categorie"> {star2}</a>
+                    <a href="javascript:void(0);" class="categorie"> {star3}</a>
+                    <h5>
+                        <a href="javascript:getInfo('{_id}');">{title}</a>
+                    </h5>
+
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+    <temp class="temp-card-cm">
+        <div class="card">
+            <div class="post-card" style="{background}">
+                <div class="post-card-image">
+                    <a href="javascript:getInfo('{_id}');">
+                    <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                    <div class="label-loveicon">
+                        <span>{rating}</span>
+                    </div>
+                    <div class="label-loveicon" style="bottom:33px;">
+                        <span>{readers}</span>
+                    </div>
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+                    <a href="javascript:void(0);" class="categorie"> {type1}</a>
+                    <a href="javascript:void(0);" class="categorie"> {type2}</a>
+                    <a href="javascript:void(0);" class="categorie"> {listcount}章</a>
+                    <a href="javascript:void(0);" class="categorie"> {filecount}页</a>
+                    <h5>
+                        <a href="javascript:getInfo('{_id}');">{title}</a>
+                    </h5>
+                    <h7 class="">
+                        <a href="javascript:getInfo('{_id}');">{list_title}</a>
+                    </h7>
+                    <h7 class="">
+                        <a href="javascript:getInfo('{_id}');">{comment}</a>
+                    </h7>
+
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+    <temp class="temp-card-bs">
+        <div class="card">
+            <div class="post-card" style="{background}">
+                <div class="post-card-image">
+                    <a href="javascript:getInfo('{_id}');">
+                    <img src="/static/images/waitindexpic.gif" data-original="{pic}" thumb_load="10" class="lazy">
+                    <div class="label-loveicon">
+                        <span>{rating}</span>
+                    </div>
+
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+
+                    <a href="javascript:void(0);" class="categorie"> {listcount}章</a>
+
+                    <h5>
+                        <a href="javascript:getInfo('{_id}');">{title}</a>
+                    </h5>
+                    <h7 class="">
+                        <a href="javascript:getInfo('{_id}');">{list_title}</a>
+                    </h7>
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+
+    <temp class="temp-card-cb">
+        <div class="card">
+            <div class="post-card" style="{background}">
+                <div class="post-card-image">
+                    <a href="javascript:getInfo('{_id}');">
+                    <img src="/static/images/waitindexpic.gif" data-original="{img}"  thumb_load="10" id="{_id}">
+
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+                    <a href="javascript:void(0);" class="categorie"> {type1}</a>
+                    <a href="javascript:void(0);" class="categorie"> {type2}</a>
+
+                    <h5>
+                        <a href="javascript:getInfo('{_id}');">{title}</a>
+                    </h5>
+                    <h7 class="">
+                        <a href="javascript:getInfo('{_id}');">{list_title}</a>
+                    </h7>
+
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+
+
+
+    <temp class="temp-card-bk">
+        <div class="card">
+            <div class="post-card" style="{background}">
+                <div class="post-card-image">
+                    <a href="javascript:getInfo('{_id}');">
+                    <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                    <div class="label-loveicon">
+                        <span>{rating}</span>
+                    </div>
+                    <div class="label-loveicon" style="bottom:33px;">
+                        <span>{readers}</span>
+                    </div>
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+                    <a href="javascript:void(0);" class="categorie"> {type1}</a>
+                    <a href="javascript:void(0);" class="categorie"> {type2}</a>
+                    <a href="javascript:void(0);" class="categorie"> {type3}</a>
+                    <a href="javascript:void(0);" class="categorie"> {listcount}章</a>
+                    <a href="javascript:void(0);" class="categorie"> {filecount}页</a>
+                    <h5>
+                        <a href="javascript:getInfo('{_id}');">{title}</a>
+                    </h5>
+                    <h7 class="">
+                        <a href="javascript:getInfo('{_id}');">{list_title}</a>
+                    </h7>
+
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+    <temp class="temp-card-mh">
+        <div class="card">
+            <div class="post-card" style="{background}">
+                <div class="post-card-image">
+                    <a href="javascript:getInfo('{_id}');">
+                    <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                    <div class="label-loveicon">
+                        <span>{rating}</span>
+                    </div>
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+
+                    <a href="javascript:void(0);" class="categorie"> {volumes}章</a>
+
+                    <h5>
+                        <a href="javascript:getInfo('{_id}');">{title}</a>
+                    </h5>
+
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+
+
+    <temp class="temp-card-lm">
+        <div class="card">
+            <div class="post-card" style="{background}">
+                <div class="post-card-image">
+                    <a href="javascript:getInfo('{_id}');">
+                    <img src="/static/images/waitindexpic.gif" data-original="{img}"  thumb_load="10" id="{_id}"  class="lazy">
+                    <div class="label-loveicon">
+
+                    </div>
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+
+                    <a href="javascript:void(0);" class="categorie"> {volumes}章</a>
+
+                    <h5>
+                        <a href="javascript:getInfo('{_id}');">{title}</a>
+                    </h5>
+
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+
+    <temp class="temp-card-mg">
+        <div class="card">
+            <div class="post-card" style="{background}">
+                <div class="post-card-image">
+                    <a href="javascript:getInfo('{_id}');">
+                    <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                    <div class="label-loveicon">
+                        <span>{rating}</span>
+                    </div>
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+                    <a href="javascript:void(0);" class="categorie"> {type1}</a>
+                    <a href="javascript:void(0);" class="categorie"> {type2}</a>
+
+                    <h5>
+                        <a href="javascript:getInfo('{_id}');">{title}</a>
+                    </h5>
+                    <h7 class="">
+                        <a href="javascript:getInfo('{_id}');">{list_title}</a>
+                    </h7>
+
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+    <temp class="temp-card-km">
+        <div class="card">
+            <div class="post-card" style="{background}">
+                <div class="post-card-image">
+                    <a href="javascript:getInfo('{_id}');">
+                    <img src="/static/images/waitindexpic.gif" data-original="{img}"  thumb_load="10">
+                    <div class="label-loveicon">
+                        <span>{rating}</span>
+                    </div>
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+                    <a href="javascript:void(0);" class="categorie"> {type1}</a>
+                    <a href="javascript:void(0);" class="categorie"> {type2}</a>
+
+                    <h5>
+                        <a href="javascript:getInfo('{_id}');">{title}</a>
+                    </h5>
+                    <h7 class="">
+                        <a href="javascript:getInfo('{_id}');">{list_title}</a>
+                    </h7>
+
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+    <temp class="temp-card-ym">
+        <div class="card">
+            <div class="post-card" style="{background}">
+                <div class="post-card-image">
+                    <a href="javascript:getInfo('{_id}');">
+                    <img src="/static/images/waitindexpic.gif" data-original="{img}"  thumb_load="10">
+                    <div class="label-loveicon">
+                        <span>{rating}</span>
+                    </div>
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+                    <a href="javascript:void(0);" class="categorie"> {type1}</a>
+                    <a href="javascript:void(0);" class="categorie"> {type2}</a>
+
+                    <h5>
+                        <a href="javascript:getInfo('{_id}');">{title}</a>
+                    </h5>
+                    <h7 class="">
+                        <a href="javascript:getInfo('{_id}');">{list_title}</a>
+                    </h7>
+
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+    <temp  class="temp-info-cm">
+    <!--post-default-->
+        <section class="section pt-55 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 offset-lg-1 mb-20">
+                        <!--Post-single-->
+                        <div class="post-single">
+                            <div class="post-single-image center">
+                                <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                            </div>
+                            <div class="post-single-content">
+                                <search key="types" type="in" class="categorie">{type1}</search>
+                                <search key="types" type="in" class="categorie">{type2}</search>
+                                <h4><search key="title" type="search">{title}</search>
+                                    <button onclick="javascript:boomark({bookmark});" class="btn {btn_type} btn-bookmark">
+                                        <i class="icon_star"></i>
+                                        <span>{bookmark_state}</span>
+                                    </button>
+                                </h4>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>创建时间: </li>
+                                        <li>{create_time}</li>
+
+                                    </ul>
+                                </div>
+                                 <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>更新时间: </li>
+                                        <li>{update_time}</li>
+                                    </ul>
+                                </div>
+
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li><a href="{url}/album/{aid}" target="_blank">aid: {aid}</a></li>
+                                        <li class="dot"></li>
+                                        <li>页数: {filecount}</li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>喜爱数: {rating}</li>
+                                        <li class="dot"></li>
+                                        <li>阅读数: {readers}</li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>作者: </li>
+
+                                        <li><search key="author" type="in">{author1}</search></li>
+
+                                        <li><search key="author" type="in">{author2}</search></li>
+
+                                        <li><search key="author" type="in">{author3}</search></li>
+
+                                        <li><search key="author" type="in">{author4}</search></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="post-single-body">
+                                {summary}
+                            </div>
+
+                            <div class="post-single-footer">
+                                <div class="tags">
+                                    <ul class="list-inline">
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div> <!--/-->
+                        <!--widget-comments-->
+                        <div class="widget mb-50 overflow-hidden">
+                            <div class="title">
+                                <h5>
+                                    共{list_count}章节
+                                    <button onclick="javascript:clearHistory('{_id}');" class="btn btn-success">
+                                        <i class="icon_close_alt"></i>
+                                        <span>清除记录</span>
+                                    </button>
+                                </h5>
+                            </div>
+                            <table class="table chapters">
+                                <thead>
+                                <tr>
+                                    <th>章节名称</th>
+                                    <th>pid</th>
+                                    <th>更新日期</th>
+                                    <th>阅读日期</th>
+                                    <th>文件状态</th>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!--/-->
+    </temp>
+
+    <temp  class="temp-info-bs">
+    <!--post-default-->
+        <section class="section pt-55 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 offset-lg-1 mb-20">
+                        <!--Post-single-->
+                        <div class="post-single">
+                            <div class="post-single-image center">
+                                <img src="/static/images/waitindexpic.gif" data-original="{img}"  thumb_load="10">
+                            </div>
+                            <div class="post-single-content">
+
+                                <h4><search key="title" type="search">{title}</search>
+                                    <button onclick="javascript:boomark({bookmark});" class="btn {btn_type} btn-bookmark">
+                                        <i class="icon_star"></i>
+                                        <span>{bookmark_state}</span>
+                                    </button>
+                                </h4>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>更新时间: </li>
+                                        <li>{update_time}</li>
+
+                                    </ul>
+                                </div>
+
+
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>喜爱数: {rating}</li>
+
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>作者: </li>
+
+                                        <li><search key="author" type="in">{author}</search></li>
+
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="post-single-body">
+                                {summary}
+                            </div>
+
+                            <div class="post-single-footer">
+                                <div class="tags">
+                                    <ul class="list-inline">
+
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div> <!--/-->
+                        <!--widget-comments-->
+                        <div class="widget mb-50 overflow-hidden">
+                            <div class="title">
+                                <h5>
+                                    共{list_count}章节
+                                    <button onclick="javascript:clearHistory('{_id}');" class="btn btn-success">
+                                        <i class="icon_close_alt"></i>
+                                        <span>清除记录</span>
+                                    </button>
+                                </h5>
+                            </div>
+                            <table class="table chapters">
+                                <thead>
+                                <tr>
+                                    <th>卷名</th>
+                                    <th>章节</th>
+                                    <th>阅读日期</th>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!--/-->
+    </temp>
+
+
+    <temp  class="temp-info-lf">
+    <!--post-default-->
+        <section class="section pt-55 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 offset-lg-1 mb-20">
+                        <!--Post-single-->
+                        <div class="post-single">
+                            <div class="post-single-image center">
+                                <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                            </div>
+                            <div class="post-single-content">
+
+                                <h4><search key="title" type="search">{title}</search>
+                                    <button onclick="javascript:boomark({bookmark});" class="btn {btn_type} btn-bookmark">
+                                        <i class="icon_star"></i>
+                                        <span>{bookmark_state}</span>
+                                    </button>
+                                </h4>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>创建时间: </li>
+                                        <li>{create_time}</li>
+
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="post-single-body">
+                                {summary}
+                            </div>
+
+                            <div class="post-single-footer">
+                                <div class="tags">
+                                    <ul class="list-inline">
+
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div> <!--/-->
+                        <!--widget-comments-->
+                        <div class="widget mb-50 overflow-hidden">
+                            <div class="title">
+                                <h5>
+                                    共{list_count}集
+                                </h5>
+                            </div>
+                            <table class="table chapters">
+                                <thead>
+                                <tr>
+                                    <th>ep</th>
+                                    <th>分类</th>
+                                    <th>分辨率</th>
+                                    <th>解码状态</th>
+                                    <th>解码设备</th>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!--/-->
+    </temp>
+
+    <temp  class="temp-info-bk">
+    <!--post-default-->
+        <section class="section pt-55 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 offset-lg-1 mb-20">
+                        <!--Post-single-->
+                        <div class="post-single">
+                            <div class="post-single-image center">
+                                <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                            </div>
+                            <div class="post-single-content">
+                                <search key="categories" type="in" class="categorie">{type1}</search>
+                                <search key="categories" type="in" class="categorie">{type2}</search>
+                                <search key="categories" type="in" class="categorie">{type3}</search>
+                                <h4><search key="title" type="search">{title}</search>
+                                    <button onclick="javascript:boomark({bookmark});" class="btn {btn_type} btn-bookmark">
+                                        <i class="icon_star"></i>
+                                        <span>{bookmark_state}</span>
+                                    </button>
+                                </h4>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>创建时间: </li>
+                                        <li>{create_time}</li>
+
+                                    </ul>
+                                </div>
+                                 <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>更新时间: </li>
+                                        <li>{update_time}</li>
+                                    </ul>
+                                </div>
+
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li><a href="{url}/album/{cid}" target="_blank">cid: {cid}</a></li>
+                                        <li class="dot"></li>
+                                        <li>页数: {filecount}</li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>喜爱数: {rating}</li>
+                                        <li class="dot"></li>
+                                        <li>阅读数: {readers}</li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>作者: </li>
+
+                                        <li><search key="author" type="lk">{author1}</search></li>
+
+                                        <li><search key="author" type="lk">{author2}</search></li>
+
+                                        <li><search key="author" type="lk">{author3}</search></li>
+
+                                        <li><search key="author" type="lk">{author4}</search></li>
+                                    </ul>
+                                </div>
+                                 <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>汉化: </li>
+                                        <li><search key="chineseTeam" type="lk">{chineseTeam1}</search></li>
+                                        <li><search key="chineseTeam" type="lk">{chineseTeam2}</search></li>
+                                        <li><search key="chineseTeam" type="lk">{chineseTeam3}</search></li>
+                                        <li><search key="chineseTeam" type="lk">{chineseTeam4}</search></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="post-single-body">
+                                {summary}
+                            </div>
+
+                            <div class="post-single-footer">
+                                <div class="tags">
+                                    <ul class="list-inline">
+
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div> <!--/-->
+                        <!--widget-comments-->
+                        <div class="widget mb-50 overflow-hidden">
+                            <div class="title">
+                                <h5>
+                                    共{list_count}章节
+                                    <button onclick="javascript:clearHistory('{_id}');" class="btn btn-success">
+                                        <i class="icon_close_alt"></i>
+                                        <span>清除记录</span>
+                                    </button>
+                                </h5>
+                            </div>
+                            <table class="table chapters">
+                                <thead>
+                                <tr>
+                                    <th>章节名称</th>
+                                    <th>更新日期</th>
+                                    <th>阅读日期</th>
+                                    <th>文件状态</th>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!--/-->
+    </temp>
+
+
+    <temp  class="temp-info-mg">
+    <!--post-default-->
+        <section class="section pt-55 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 offset-lg-1 mb-20">
+                        <!--Post-single-->
+                        <div class="post-single">
+                            <div class="post-single-image center">
+                                <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                            </div>
+                            <div class="post-single-content">
+
+                                <h4><search key="title" type="search">{title}</search>
+                                    <button onclick="javascript:boomark({bookmark});" class="btn {btn_type} btn-bookmark">
+                                        <i class="icon_star"></i>
+                                        <span>{bookmark_state}</span>
+                                    </button>
+                                </h4>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>更新时间: </li>
+                                        <li>{update_time}</li>
+
+                                    </ul>
+                                </div>
+
+
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>评分: {rating}</li>
+
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>作者: </li>
+
+                                        <li><search key="author" type="in">{author1}</search></li>
+
+                                        <li><search key="author" type="in">{author2}</search></li>
+
+                                        <li><search key="author" type="in">{author3}</search></li>
+
+                                        <li><search key="author" type="in">{author4}</search></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="post-single-body">
+                                {summary}
+                            </div>
+
+                            <div class="post-single-footer">
+                                <div class="tags">
+                                    <ul class="list-inline">
+
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div> <!--/-->
+                        <!--widget-comments-->
+                        <div class="widget mb-50 overflow-hidden">
+                            <div class="title">
+                                <h5>
+                                    共{list_count}章节
+                                    <button onclick="javascript:clearHistory('{_id}');" class="btn btn-success">
+                                        <i class="icon_close_alt"></i>
+                                        <span>清除记录</span>
+                                    </button>
+                                </h5>
+                            </div>
+                            <table class="table chapters">
+                                <thead>
+                                <tr>
+                                    <th>章节名称</th>
+                                    <th>更新日期</th>
+                                    <th>阅读日期</th>
+                                    <th>文件状态</th>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!--/-->
+    </temp>
+
+
+    <temp  class="temp-info-km">
+    <!--post-default-->
+        <section class="section pt-55 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 offset-lg-1 mb-20">
+                        <!--Post-single-->
+                        <div class="post-single">
+                            <div class="post-single-image center">
+                                <img src="/static/images/waitindexpic.gif" data-original="{img}" thumb_load="10">
+                            </div>
+                            <div class="post-single-content">
+
+                                <h4><search key="title" type="search">{title}</search>
+                                    <button onclick="javascript:boomark({bookmark});" class="btn {btn_type} btn-bookmark">
+                                        <i class="icon_star"></i>
+                                        <span>{bookmark_state}</span>
+                                    </button>
+                                </h4>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>更新时间: </li>
+                                        <li>{update_time}</li>
+
+                                    </ul>
+                                </div>
+
+
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>阅读数: {views}</li>
+                                        <li>喜爱数: {favoriteCount}</li>
+                                        <li>连载状态: {status}</li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="post-single-body">
+                                <!--{summary}-->
+                            </div>
+
+                            <div class="post-single-footer">
+                                <div class="tags">
+                                    <ul class="list-inline">
+
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div> <!--/-->
+                        <!--widget-comments-->
+                        <div class="widget mb-50 overflow-hidden">
+                            <div class="title">
+                                <h5>
+                                    共{list_count}章节
+                                    <button onclick="javascript:clearHistory('{_id}');" class="btn btn-success">
+                                        <i class="icon_close_alt"></i>
+                                        <span>清除记录</span>
+                                    </button>
+                                </h5>
+                            </div>
+                            <table class="table chapters">
+                                <thead>
+                                <tr>
+                                    <th>章节名称</th>
+                                    <th>更新日期</th>
+                                    <th>阅读日期</th>
+                                    <th>文件状态</th>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!--/-->
+    </temp>
+
+
+    <temp  class="temp-info-ym">
+    <!--post-default-->
+        <section class="section pt-55 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 offset-lg-1 mb-20">
+                        <!--Post-single-->
+                        <div class="post-single">
+                            <div class="post-single-image center">
+                                <img src="/static/images/waitindexpic.gif" data-original="{img}" thumb_load="10">
+                            </div>
+                            <div class="post-single-content">
+
+                                <h4><search key="title" type="search">{title}</search>
+                                    <button onclick="javascript:boomark({bookmark});" class="btn {btn_type} btn-bookmark">
+                                        <i class="icon_star"></i>
+                                        <span>{bookmark_state}</span>
+                                    </button>
+                                </h4>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>更新时间: </li>
+                                        <li>{update_time}</li>
+
+                                    </ul>
+                                </div>
+
+
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="post-single-body">
+                                <!--{summary}-->
+                            </div>
+
+                            <div class="post-single-footer">
+                                <div class="tags">
+                                    <ul class="list-inline">
+
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div> <!--/-->
+                        <!--widget-comments-->
+                        <div class="widget mb-50 overflow-hidden">
+                            <div class="title">
+                                <h5>
+                                    共{list_count}章节
+                                    <button onclick="javascript:clearHistory('{_id}');" class="btn btn-success">
+                                        <i class="icon_close_alt"></i>
+                                        <span>清除记录</span>
+                                    </button>
+                                </h5>
+                            </div>
+                            <table class="table chapters">
+                                <thead>
+                                <tr>
+                                    <th>章节名称</th>
+                                    <th>更新日期</th>
+                                    <th>阅读日期</th>
+                                    <th>文件状态</th>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!--/-->
+    </temp>
+
+    <temp  class="temp-info-mh">
+    <!--post-default-->
+        <section class="section pt-55 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 offset-lg-1 mb-20">
+                        <!--Post-single-->
+                        <div class="post-single">
+                            <div class="post-single-image center">
+                                <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                            </div>
+                            <div class="post-single-content">
+                                <h4>{title}
+                                    <button onclick="javascript:boomark({bookmark});" class="btn {btn_type} btn-bookmark">
+                                        <i class="icon_star"></i>
+                                        <span>{bookmark_state}</span>
+                                    </button>
+                                </h4>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>连载开始: </li>
+                                        <li>{date}</li>
+                                    </ul>
+                                </div>
+                                 <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>连载完结: </li>
+                                        <li>{end_date}</li>
+                                    </ul>
+                                </div>
+
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li><a target="_blank" href="https://bgm.tv/subject/{id}">bid: {id}</a></li>
+                                        <li class="dot"></li>
+                                        <li>
+                                            章节:
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>评分: {rating}</li>
+                                        <li class="dot"></li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>作者: </li>
+                                        <li><a>{author1}</a></li>
+                                        <li><a>{author2}</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="post-single-body">
+                                {summary}
+                            </div>
+
+                            <div class="post-single-footer">
+                                <div class="tags">
+                                    <ul class="list-inline">
+
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div> <!--/-->
+                        <!--widget-comments-->
+                        <div class="widget mb-50 overflow-hidden">
+                            <div class="title">
+                                <h5>
+                                    共{list_count}章节
+                                    <button onclick="javascript:clearHistory('{_id}');" class="btn btn-success">
+                                        <i class="icon_close_alt"></i>
+                                        <span>清除记录</span>
+                                    </button>
+                                </h5>
+                            </div>
+                            <table class="table chapters">
+                                <thead>
+                                <tr>
+                                    <th>章节名称</th>
+                                    <th>更新日期</th>
+                                    <th>阅读日期</th>
+                                    <th>文件状态</th>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!--/-->
+    </temp>
+
+
+
+    <temp  class="temp-info-cb">
+    <!--post-default-->
+        <section class="section pt-55 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 offset-lg-1 mb-20">
+                        <!--Post-single-->
+                        <div class="post-single">
+                            <div class="post-single-image center">
+                                <img src="/static/images/waitindexpic.gif" data-original="{img}"  thumb_load="10" id="{_id}">
+                            </div>
+                            <div class="post-single-content">
+                                <h4>{title}
+                                    <button onclick="javascript:boomark({bookmark});" class="btn {btn_type} btn-bookmark">
+                                        <i class="icon_star"></i>
+                                        <span>{bookmark_state}</span>
+                                    </button>
+                                </h4>
+
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>分类: </li>
+                                        <li><a><search key="type" type="eq">{type}</search></a></li>
+                                        <li>作者: </li>
+                                        <li><a><search key="author" type="eq">{author}</search></a></li>
+
+                                    </ul>
+                                </div>
+
+
+                            </div>
+
+                            <div class="post-single-body">
+                                {summary}
+                            </div>
+
+                            <div class="post-single-footer">
+                                <div class="tags">
+                                    <ul class="list-inline">
+
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div> <!--/-->
+                        <!--widget-comments-->
+                        <div class="widget mb-50 overflow-hidden">
+                            <div class="title">
+                                <h5>
+                                    评论
+                                </h5>
+                            </div>
+                            <div>
+                                {comments2}
+                            </div>
+
+
+                        </div>
+                        <div class="widget mb-50 overflow-hidden">
+                            <div class="title">
+                                <h5>
+                                    关联
+                                </h5>
+                            </div>
+                            <div class="cards"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!--/-->
+    </temp>
+
+
+
+
+    <temp  class="temp-info-lm">
+    <!--post-default-->
+        <section class="section pt-55 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 offset-lg-1 mb-20">
+                        <!--Post-single-->
+                        <div class="post-single">
+                            <div class="post-single-image center">
+                                <img id="{_id}" src="/static/images/waitindexpic.gif" data-original="{img}"  thumb_load="10"  class="lazy">
+                            </div>
+                            <div class="post-single-content">
+                                <h4>{title}
+                                    <button onclick="javascript:boomark({bookmark});" class="btn {btn_type} btn-bookmark">
+                                        <i class="icon_star"></i>
+                                        <span>{bookmark_state}</span>
+                                    </button>
+                                </h4>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>连载开始: </li>
+                                        <li>{date}</li>
+                                    </ul>
+                                </div>
+                                 <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>连载完结: </li>
+                                        <li>{end_date}</li>
+                                    </ul>
+                                </div>
+
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li><a target="_blank" href="https://bgm.tv/subject/{id}">bid: {id}</a></li>
+                                        <li class="dot"></li>
+                                        <li>
+                                            章节:
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>评分: {rating}</li>
+                                        <li class="dot"></li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>作者: </li>
+                                        <li><a>{author1}</a></li>
+                                        <li><a>{author2}</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="post-single-body">
+                                {summary}
+                            </div>
+
+                            <div class="post-single-footer">
+                                <div class="tags">
+                                    <ul class="list-inline">
+
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div> <!--/-->
+                        <!--widget-comments-->
+                        <div class="widget mb-50 overflow-hidden">
+                            <div class="title">
+                                <h5>
+                                    共{list_count}章节
+                                    <button onclick="javascript:clearHistory('{_id}');" class="btn btn-success">
+                                        <i class="icon_close_alt"></i>
+                                        <span>清除记录</span>
+                                    </button>
+                                </h5>
+                            </div>
+                            <table class="table chapters">
+                                <thead>
+                                <tr>
+                                    <th>章节名称</th>
+                                    <th>更新日期</th>
+                                    <th>阅读日期</th>
+                                    <th>文件状态</th>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!--/-->
+    </temp>
+
+    <temp  class="temp-info-ex">
+    <!--post-default-->
+        <section class="section pt-55 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 offset-lg-1 mb-20">
+                        <!--Post-single-->
+                        <div class="post-single">
+                            <div class="post-single-image center">
+                                <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                            </div>
+                            <div class="post-single-content">
+                                <h4>日文标题: <search key="title_jpn" type="search">{title_jpn}</search></h4>
+                                <h4>英文标题: <search key="title"  type="search">{title}</search>
+                                    <button onclick="javascript:boomark({bookmark});" class="btn {btn_type} btn-bookmark">
+                                        <i class="icon_star"></i>
+                                        <span>{bookmark_state}</span>
+                                    </button>
+                                </h4>
+                                 <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>上传时间: </li>
+                                        <li>{date}</li>
+
+                                    </ul>
+                                </div>
+
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>gid: {gid}</li>
+                                        <li class="dot"></li>
+                                        <li>token: {token}</li>
+                                        <li class="dot"></li>
+                                        <li>页数: {filecount}</li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>评分: {rating}</li>
+                                        <li class="dot"></li>
+                                        <li>类别: <search key="category">{category}</search></li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>上传者: </li>
+                                        <li><search key="uploader">{uploader}</search></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+
+                            <div class="post-single-footer">
+                                <div class="tags">
+                                    <ul class="list-inline">
+
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div> <!--/-->
+
+                        <div class="widget mb-50 overflow-hidden">
+                           <h4>预览</h4>
+                            <div class="pics row">
+
+                            </div>
+
+                           <!--Leave-comments-->
+
+                        </div>
+
+                        <!--widget-comments-->
+                        <div class="widget mb-50 overflow-hidden">
+                            <div class="title">
+                                <h5>
+                                    共{list_count}章节
+                                    <button onclick="javascript:clearHistory('{_id}');" class="btn btn-success">
+                                        <i class="icon_close_alt"></i>
+                                        <span>清除记录</span>
+                                    </button>
+                                </h5>
+                            </div>
+                            <table class="table chapters">
+                                <thead>
+                                <tr>
+                                    <th>章节名称</th>
+                                    <th>更新日期</th>
+                                    <th>阅读日期</th>
+                                    <th>文件状态</th>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!--/-->
+    </temp>
+
+
+    <temp  class="temp-info-av">
+    <!--post-default-->
+        <section class="section pt-55 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 offset-lg-1 mb-20">
+                        <!--Post-single-->
+                        <div class="post-single">
+                            <div class="post-single-image center">
+                                <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                            </div>
+                            <div class="post-single-content">
+                                <a href="#" class="categorie">{fanhao}</a>
+                                <h4>{title}
+
+                                </h4>
+                                 <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>发行时间: </li>
+                                        <li>{date}</li>
+                                    </ul>
+                                </div>
+
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>长度: {Length}分钟</li>
+                                        <li class="dot"></li>
+                                        <li>导演: {Director}</li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>制作商: {Studio}</li>
+                                        <li class="dot"></li>
+                                        <li>发行商: {Label}</li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>系列: </li>
+                                        <li><a>{Series}</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+
+                            <div class="post-single-footer">
+                                <div class="tags">
+                                    <ul class="list-inline">
+
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div> <!--/-->
+                        <!--widget-comments-->
+                        <div class="widget mb-50 overflow-hidden">
+                           <h4>出演女优</h4>
+                            <div class="stars row"></div>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                        <div class="widget mb-50 overflow-hidden">
+                           <h4>剧照</h4>
+                            <div class="pics row"></div>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!--/-->
+    </temp>
+
+
+
+
+    <temp  class="temp-info-jv">
+    <!--post-default-->
+        <section class="section pt-55 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 offset-lg-1 mb-20">
+                        <!--Post-single-->
+                        <div class="post-single">
+                            <div class="post-single-image center">
+                                <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                            </div>
+                            <div class="post-single-content">
+                                <a href="#" class="categorie">{type}</a>
+                                <a href="#" class="categorie">{fanhao}</a>
+                                <h4>{title}
+
+                                </h4>
+                                 <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>发行时间: </li>
+                                        <li>{date}</li>
+                                    </ul>
+                                </div>
+
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>长度: {Length}分钟</li>
+                                        <li class="dot"></li>
+                                        <li>导演: {Director}</li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>制作商: {Studio}</li>
+                                        <li class="dot"></li>
+                                        <li>发行商: {Label}</li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>系列: </li>
+                                        <li><a>{Series}</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+
+                            <div class="post-single-footer">
+                                <div class="tags">
+                                    <ul class="list-inline">
+
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div> <!--/-->
+                        <!--widget-comments-->
+
+                        <div class="widget mb-50 overflow-hidden">
+                           <h4>剧照</h4>
+                            <div class="pics row"></div>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!--/-->
+    </temp>
+
+
+    <temp  class="temp-info-jb">
+    <!--post-default-->
+        <section class="section pt-55 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 offset-lg-1 mb-20">
+                        <!--Post-single-->
+                        <div class="post-single">
+                            <div class="post-single-image center">
+
+                                <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                            </div>
+                            <div class="post-single-content">
+                                <a href="#" class="categorie">{type}</a>
+                                <a href="#" class="categorie">{fanhao}</a>
+                                <h4>{title}
+                                </h4>
+                                 <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>发行时间: </li>
+                                        <li>{date}</li>
+                                    </ul>
+                                </div>
+
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>长度: {Length}分钟</li>
+                                        <li class="dot"></li>
+                                        <li>导演: {Director}</li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>制作商: {Studio}</li>
+                                        <li class="dot"></li>
+                                        <li>发行商: {Label}</li>
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>系列: </li>
+                                        <li><a>{Series}</a></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                   <ul class="list-inline">
+                                        {other_info}
+                                    </ul>
+                                </div>
+                            </div>
+
+
+                            <div class="post-single-footer">
+                                <div class="tags">
+                                    <ul class="list-inline">
+
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div> <!--/-->
+                        <!--widget-comments-->
+
+                        <div class="widget mb-50 overflow-hidden">
+                           <h4>剧照</h4>
+                            <div class="pics row"></div>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!--/-->
+    </temp>
+
+    <temp  class="temp-info-tk">
+    <!--post-default-->
+        <section class="section pt-55 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 offset-lg-1 mb-20">
+                        <!--Post-single-->
+                        <div class="post-single">
+                            <div class="post-single-image center ">
+                                <video id="myVideo" controls="" webkit-playsinline="true" playsinline="true" x5-video-player-type="h5-page" x5-playsinline style="display: none; max-width: 90%;">
+                                  <source type="video/mp4">
+                                </video>
+
+                                <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                            </div>
+                            <div class="post-single-content">
+                                <search key="types" type="in" class="categorie">{type}</search>
+                                <h4>{title}
+                                    <button onclick="javascript:boomark({bookmark});" class="btn {btn_type} btn-bookmark">
+                                        <i class="icon_star"></i>
+                                        <span>{bookmark_state}</span>
+                                    </button>
+                                </h4>
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>长度: {Length}</li>
+                                        <li class="dot"></li>
+                                        <li>aid: {aid}</li>
+
+
+                                    </ul>
+                                </div>
+                                <div class="post-single-info">
+                                    <ul class="list-inline infotk">
+                                    </ul>
+                                </div>
+                            </div>
+
+
+                            <div class="post-single-footer">
+                                <div class="tags">
+                                    <ul class="list-inline">
+
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                            <div class="post-single-body">
+                                {summary}
+
+                            </div>
+                        </div> <!--/-->
+
+                        <div class="widget mb-50 overflow-hidden">
+                           <h4>剧照</h4>
+                            <div class="pics row"></div>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!--/-->
+    </temp>
+
+
+    <temp  class="temp-info-ty">
+    <!--post-default-->
+        <section class="section pt-55 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 offset-lg-1 mb-20">
+                        <!--Post-single-->
+                        <div class="post-single">
+                            <div class="post-single-image center">
+                                <img src="/static/images/waitindexpic.gif" id="{_id}" thumb_load="{thumb_load}"  class="lazy">
+                            </div>
+                            <div class="post-single-content">
+                                <a href="#" class="categorie">{fanhao}</a>
+                                <h4>{title}</h4>
+                                 <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>发行时间: </li>
+                                        <li>{date}</li>
+                                    </ul>
+                                </div>
+
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>长度: {Length}</li>
+                                    </ul>
+                                </div>
+
+                                <div class="post-single-info">
+                                    <ul class="list-inline">
+                                        <li>系列: </li>
+                                        <li><a>{Series}</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+
+                            <div class="post-single-footer">
+                                <div class="tags">
+                                    <ul class="list-inline">
+
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div> <!--/-->
+                        <!--widget-comments-->
+                        <div class="widget mb-50 overflow-hidden">
+                           <h4>出演女优</h4>
+                            <div class="stars row"></div>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                        <div class="widget mb-50 overflow-hidden">
+                           <h4>写真</h4>
+                            <div class="pics1 row"></div>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                        <div class="widget mb-50 overflow-hidden">
+                           <h4>剧照</h4>
+                            <div class="pics2 row"></div>
+
+                           <!--Leave-comments-->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!--/-->
+    </temp>
+
+
+    <temp class="temp-chapters">
+        <li class="comment-item {class}">
+            <div class="content">
+                <ul class="list-inline">
+                    <li>上传日期:{update_time}</li>
+                    <li class="dot"></li>
+                    <li>阅读日期:{read_time} </li>
+                    <li class="dot"></li>
+                    <li>文件状态:{file_state} </li>
+                </ul>
+                <p>
+                    {file_title}
+                </p>
+            </div>
+        </li>
+    </temp>
+
+    <temp class="temp-stars">
+        <div class="card col-lg-2 col-md-4 col-sm-6  mb-10">
+            <img data-src="{StarPic}" class="card-img-top">
+            <div class="card-body center">
+            <span class="card-title center">{StarName}</span>
+            </div>
+        </div>
+    </temp>
+
+    <temp class="temp-pics">
+        <div class="col-lg-6 col-sm-12 mb-10">
+            <img data-src="{pic}">
+        </div>
+    </temp>
+
+    <temp class="temp-nail">
+        <div class="col-lg-3 col-sm-4 col-6 mb-2">
+            <img src="/static/images/wait.gif" onerror="this.onerror=null;this.src='/static/images/wait.gif';" page="{page}">
+        </div>
+    </temp>
+
+
+    <temp class="temp-page-img-cm1">
+        <img src="/static/images/wait.gif" data-original="{image}" page="{index}" id="{id}" pid="{pid}" cut="{cut}" class="lazy">
+    </temp>
+
+    <temp class="temp-page-img-cm2">
+        <img src="/static/images/wait.gif" data-original="{url}" page="{index}" class="lazy">
+    </temp>
+
+
+
+    <temp class="temp-page-img-ex">
+        <img src="/static/images/wait.gif" data-original="{url}" page="{index}" class="lazy">
+    </temp>
+
+    <temp class="temp-page-img-all">
+        <img src="/static/images/wait.gif" data-original="{url}" id="{id}" page="{index}" class="lazy">
+    </temp>
+
+
+    <temp class="temp-page-img-ex2">
+        <img src="/static/images/wait.gif" data-original="/static/images/wait.gif" page="{index}" class="lazy">
+    </temp>
+
+    <temp class="temp-page-img-ex3">
+        <img src="/static/images/wait.gif" data-original="{url}" page="{index}"  index="{index}" class="lazy">
+    </temp>
+
+    <temp class="temp-page-img">
+        <img src="/static/images/wait.gif" data-original="{url}" onerror="this.onerror=null;this.src='/static/images/wait.gif';" id="{id}" page="{index}"  class="lazy"  loop="true" autoplay="true">
+    </temp>
+
+    <temp class="temp-page-img-mh">
+        <img src="/static/images/wait.gif" data-original="{url}" page="{index}" id="{id}" class="lazy">
+    </temp>
+
+    <temp class="temp-sliderinput">
+        <input id="{input_id}" data-slider-id='{slider_id}' type="text" data-slider-min="{min}" data-slider-max="{max}" data-slider-step="1" data-slider-value="{value}"/>
+    </temp>
+    <temp class="temp-player-button-tk">
+        <li class="mt-5">
+            <button video="{video}" class="btn btn-success btn-player">
+                <i class="icon_drive"></i>
+                <span>播放{pixed}</span>
+            </button>
+        </li>
+    </temp>
+
+    <temp class="temp-cell-tag-list">
+        <div class="col-md-12">
+      <div class="card">
+        <div class="card-header p-0" id="heading{namespace}">
+          <h5 class="mb-0">
+            <a class="d-block p-3 text-uppercase" href="#" data-toggle="collapse" data-target="#collapse{namespace}" aria-expanded="true" aria-controls="collapse{namespace}">
+                {namespace_cn}
+            </a>
+          </h5>
+        </div>
+        <div id="collapse{namespace}" class="collapse" aria-labelledby="heading{namespace}">
+          <div class="card-body">
+            <ul class="list-inline tag-list">
+            </ul>
+          </div>
+        </div>
+      </div>
+            </div>
+    </temp>
+
+
+    <temp class="list-wait">
+        <div class="custom-spinner list-wait-div">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    </temp>
+
+
+    <temp class="temp-list-cb">
+        <div class="card">
+            <div class="post-card" style="{background}">
+                <div class="post-card-image">
+                    <a href="{url}" target="_blank">
+                    <img src="/static/images/wait.gif" data-original="{img}" thumb_load="10"  class="lazy">
+                    <div class="label-loveicon">
+                        <span>{rating}</span>
+                    </div>
+                    <div class="label-loveicon" style="bottom:33px;">
+                        <span>{readers}</span>
+                    </div>
+                    </a>
+
+                </div>
+                <div class="post-card-content">
+                    <a href="javascript:void(0);" class="categorie"> {type1}</a>
+                    <a href="javascript:void(0);" class="categorie"> {type2}</a>
+                    <a href="javascript:void(0);" class="categorie"> {listcount}章</a>
+                    <a href="javascript:void(0);" class="categorie"> {filecount}页</a>
+                    <h5>
+                        <a href="{url}">{title}</a>
+                    </h5>
+                    <h7 class="">
+                        <a href="{url}">{list_title}</a>
+                    </h7>
+
+                    <div class="post-card-info">
+                        <ul class="list-inline">
+                            <li>{date}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--/-->
+    </temp>
+
+
+</div>
+{% endmacro %}

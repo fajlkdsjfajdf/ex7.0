@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漫画高级搜索</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-darker: #0a0a0a;
+            --bg-light: #1e1e1e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent-color: #6a5acd;
+            --accent-hover: #7b68ee;
+            --border-color: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 搜索框区域 */
+        .search-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px 15px;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .search-button {
+            padding: 0 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background-color 0.2s;
+        }
+
+        .search-button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* 已选标签区域 */
+        .selected-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 15px;
+            min-height: 32px;
+            padding: 8px;
+            background-color: var(--bg-light);
+            border-radius: 6px;
+        }
+
+        .selected-tag {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            line-height: 1.2;
+        }
+
+        .selected-tag .remove-tag {
+            margin-left: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        /* 标签搜索区域 */
+        .tag-search-container {
+            margin-bottom: 15px;
+        }
+
+        .tag-search-input {
+            width: 100%;
+            padding: 10px 15px;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            margin-bottom: 8px;
+        }
+
+        .tag-search-input:focus {
+            border-color: var(--accent-color);
+        }
+
+        /* 标签分类区域 - 关键修正 */
+        .tag-categories {
+            margin-bottom: 20px;
+        }
+
+        .tag-category {
+            margin-bottom: 12px;
+            background-color: var(--bg-light);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .category-title {
+            font-size: 0.95rem;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .category-title i {
+            margin-right: 6px;
+            font-size: 0.9rem;
+        }
+
+        .category-toggle {
+            font-size: 0.9rem;
+            transition: transform 0.3s;
+        }
+
+        /* 关键修正：将category-content改为flex布局 */
+        .category-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 12px;
+        }
+
+        .category-content.active {
+            max-height: 500px;
+            padding: 0 12px 12px;
+        }
+
+        /* 标签样式 */
+        .tag {
+            padding: 5px 10px;
+            background-color: var(--bg-darker);
+            border-radius: 12px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .tag:hover {
+            border-color: var(--accent-color);
+        }
+
+        .tag.selected {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* 标签搜索建议 */
+        .tag-suggestions {
+            display: none;
+            background-color: var(--bg-darker);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-top: 4px;
+        }
+
+        .tag-suggestions.active {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 0.85rem;
+            line-height: 1.3;
+        }
+
+        .suggestion-item:hover {
+            background-color: var(--bg-light);
+        }
+
+        .suggestion-category {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-left: 5px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .search-header {
+                flex-direction: column;
+            }
+            
+            .search-button {
+                width: 100%;
+                padding: 10px;
+                margin-top: 8px;
+            }
+            
+            .category-content {
+                gap: 4px;
+            }
+            
+            .tag {
+                padding: 4px 8px;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 搜索框区域 -->
+        <div class="search-header">
+            <input type="text" class="search-input" id="searchInput" placeholder="搜索漫画标题、作者...">
+            <button class="search-button" id="searchButton">
+                <i class="fas fa-search"></i> 搜索
+            </button>
+        </div>
+
+        <!-- 已选标签区域 -->
+        <div class="selected-tags" id="selectedTags">
+            <!-- 选中的标签会动态添加到这里 -->
+        </div>
+
+        <!-- 标签搜索区域 -->
+        <div class="tag-search-container">
+            <input type="text" class="tag-search-input" id="tagSearchInput" placeholder="搜索标签...">
+            <div class="tag-suggestions" id="tagSuggestions">
+                <!-- 标签建议会动态添加到这里 -->
+            </div>
+        </div>
+
+        <!-- 标签分类区域 -->
+        <div class="tag-categories" id="tagCategories">
+            <!-- 分类会通过JavaScript动态加载 -->
+        </div>
+    </div>
+
+    <script>
+        // 模拟数据 - 实际应用中应该从API获取
+        const tagCategories = [
+            {
+                id: 'genre',
+                name: '题材',
+                icon: 'fa-book',
+                tags: ['冒险', '奇幻', '科幻', '恋爱', '校园', '悬疑', '恐怖', '搞笑', '历史', '战争', '运动', '美食', '音乐', '职场', '日常', '推理', '侦探', '超能力', '时间旅行', '重生']
+            },
+            {
+                id: 'gender',
+                name: '受众',
+                icon: 'fa-venus-mars',
+                tags: ['男性向', '女性向', '全年龄', 'BL', 'GL', '百合', '耽美', '后宫', '逆后宫', '成人向', '青年向', '少年向', '少女向']
+            },
+            {
+                id: 'style',
+                name: '风格',
+                icon: 'fa-paint-brush',
+                tags: ['热血', '治愈', '黑暗', '欢乐', '致郁', '硬核', '轻松', '严肃', '文艺', '猎奇', '搞笑', '讽刺', '哲理', '现实主义', '浪漫主义']
+            },
+            {
+                id: 'format',
+                name: '形式',
+                icon: 'fa-file-alt',
+                tags: ['连载中', '已完结', '短篇', '四格', '全彩', '黑白', '条漫', '页漫', '竖版', '横版', '单行本', '网络连载', '杂志连载']
+            },
+            {
+                id: 'theme',
+                name: '主题',
+                icon: 'fa-tags',
+                tags: ['穿越', '重生', '系统', '异能', '魔法', '仙侠', '武侠', '机甲', '丧尸', '吸血鬼', '妖怪', '侦探', '警察', '医生', '学生', '教师', '厨师', '运动员']
+            }
+        ];
+
+        // 所有标签的完整列表（用于搜索建议）
+        const allTags = [];
+        tagCategories.forEach(category => {
+            category.tags.forEach(tag => {
+                allTags.push({
+                    name: tag,
+                    category: category.name
+                });
+            });
+        });
+
+        // 已选标签数组
+        let selectedTags = [];
+        
+        // DOM元素
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const selectedTagsContainer = document.getElementById('selectedTags');
+        const tagSearchInput = document.getElementById('tagSearchInput');
+        const tagSuggestions = document.getElementById('tagSuggestions');
+        const tagCategoriesContainer = document.getElementById('tagCategories');
+
+        // 初始化标签分类
+        function initTagCategories() {
+            tagCategories.forEach(category => {
+                const categoryElement = document.createElement('div');
+                categoryElement.className = 'tag-category';
+                categoryElement.innerHTML = `
+                    <div class="category-header">
+                        <div class="category-title">
+                            <i class="fas ${category.icon}"></i> ${category.name}
+                        </div>
+                        <div class="category-toggle">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="category-content"></div>
+                `;
+                
+                const categoryContent = categoryElement.querySelector('.category-content');
+                const categoryToggle = categoryElement.querySelector('.category-toggle');
+                
+                // 添加标签
+                category.tags.forEach(tag => {
+                    const tagElement = document.createElement('div');
+                    tagElement.className = 'tag';
+                    tagElement.textContent = tag;
+                    tagElement.setAttribute('data-category', category.id);
+                    tagElement.setAttribute('data-tag', tag);
+                    
+                    tagElement.addEventListener('click', () => {
+                        toggleTagSelection(tag, category.id);
+                    });
+                    
+                    categoryContent.appendChild(tagElement);
+                });
+                
+                // 切换分类展开/折叠
+                categoryElement.querySelector('.category-header').addEventListener('click', () => {
+                    categoryContent.classList.toggle('active');
+                    categoryToggle.innerHTML = categoryContent.classList.contains('active') ? 
+                        '<i class="fas fa-chevron-up"></i>' : '<i class="fas fa-chevron-down"></i>';
+                });
+                
+                tagCategoriesContainer.appendChild(categoryElement);
+            });
+        }
+
+        // 切换标签选中状态
+        function toggleTagSelection(tagText, categoryId) {
+            if (selectedTags.includes(tagText)) {
+                removeTag(tagText);
+            } else {
+                addTag(tagText);
+            }
+            updateTagButtonState(tagText);
+        }
+
+        // 更新标签按钮的选中状态
+        function updateTagButtonState(tagText) {
+            const tagButtons = document.querySelectorAll(`.tag[data-tag="${tagText}"]`);
+            tagButtons.forEach(button => {
+                button.classList.toggle('selected', selectedTags.includes(tagText));
+            });
+        }
+
+        // 添加标签
+        function addTag(tagText) {
+            if (!selectedTags.includes(tagText)) {
+                selectedTags.push(tagText);
+                updateSelectedTagsDisplay();
+            }
+        }
+
+        // 移除标签
+        function removeTag(tagText) {
+            selectedTags = selectedTags.filter(tag => tag !== tagText);
+            updateSelectedTagsDisplay();
+            updateTagButtonState(tagText);
+        }
+
+        // 更新已选标签显示
+        function updateSelectedTagsDisplay() {
+            selectedTagsContainer.innerHTML = '';
+            
+            selectedTags.forEach(tagText => {
+                const tagElement = document.createElement('div');
+                tagElement.className = 'selected-tag';
+                tagElement.innerHTML = `
+                    ${tagText}
+                    <span class="remove-tag" data-tag="${tagText}">×</span>
+                `;
+                selectedTagsContainer.appendChild(tagElement);
+                
+                tagElement.querySelector('.remove-tag').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeTag(tagText);
+                });
+            });
+        }
+
+        // 标签搜索输入事件
+        tagSearchInput.addEventListener('input', () => {
+            const searchText = tagSearchInput.value.trim().toLowerCase();
+            
+            if (searchText === '') {
+                tagSuggestions.classList.remove('active');
+                return;
+            }
+            
+            const matchedTags = allTags.filter(tag => 
+                tag.name.toLowerCase().includes(searchText) && !selectedTags.includes(tag.name)
+            );
+            
+            if (matchedTags.length > 0) {
+                tagSuggestions.innerHTML = '';
+                
+                matchedTags.forEach(tag => {
+                    const suggestion = document.createElement('div');
+                    suggestion.className = 'suggestion-item';
+                    suggestion.innerHTML = `
+                        ${tag.name} <span class="suggestion-category">${tag.category}</span>
+                    `;
+                    suggestion.addEventListener('click', () => {
+                        addTag(tag.name);
+                        tagSearchInput.value = '';
+                        tagSuggestions.classList.remove('active');
+                        updateTagButtonState(tag.name);
+                    });
+                    
+                    tagSuggestions.appendChild(suggestion);
+                });
+                
+                tagSuggestions.classList.add('active');
+            } else {
+                tagSuggestions.classList.remove('active');
+            }
+        });
+
+        // 点击页面其他地方关闭建议
+        document.addEventListener('click', (e) => {
+            if (!tagSearchInput.contains(e.target) && !tagSuggestions.contains(e.target)) {
+                tagSuggestions.classList.remove('active');
+            }
+        });
+
+        // 搜索按钮点击事件
+        searchButton.addEventListener('click', () => {
+            const searchText = searchInput.value.trim();
+            console.log('搜索:', searchText, '标签:', selectedTags);
+            alert(`执行搜索: ${searchText || "无文本"}, 标签: ${selectedTags.join(", ") || "无标签"}`);
+        });
+
+        // 初始化页面
+        initTagCategories();
+    </script>
+</body>
+</html>

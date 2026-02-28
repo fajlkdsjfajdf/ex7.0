@@ -1,0 +1,13 @@
+[  410897ms] [ERROR] 加载系统状态失败: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON @ http://localhost:5000/static/common/js/admin-dashboard.js:40
+[  410898ms] TypeError: Cannot read properties of undefined (reading 'count')
+    at updateSingleBucket (http://localhost:5000/static/common/js/admin-dashboard.js:126:40)
+    at updateBucketStatus (http://localhost:5000/static/common/js/admin-dashboard.js:115:9)
+    at loadSystemStatus (http://localhost:5000/static/common/js/admin-dashboard.js:56:13)
+[  410960ms] [ERROR] 加载站点调度器状态失败: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON @ http://localhost:5000/static/common/js/admin-dashboard.js:150
+[  415925ms] [ERROR] 加载系统状态失败: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON @ http://localhost:5000/static/common/js/admin-dashboard.js:40
+[  415926ms] TypeError: Cannot read properties of undefined (reading 'count')
+    at updateSingleBucket (http://localhost:5000/static/common/js/admin-dashboard.js:126:40)
+    at updateBucketStatus (http://localhost:5000/static/common/js/admin-dashboard.js:115:9)
+    at loadSystemStatus (http://localhost:5000/static/common/js/admin-dashboard.js:56:13)
+[  596073ms] [ERROR] Failed to load resource: the server responded with a status of 404 (NOT FOUND) @ http://localhost:5000/api/media/image?site=cm&aid=1308180&type=content&page=1:0
+[  628363ms] Identifier 'Utils' has already been declared

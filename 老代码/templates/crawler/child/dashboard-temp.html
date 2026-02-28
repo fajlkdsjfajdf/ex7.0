@@ -1,0 +1,117 @@
+{# 爬虫单一设置单元 #}
+{% macro macro_dashboardtemp() %}
+
+
+
+
+<temp class="server-status">
+    <div class="server-stat col-sm-3">
+    <p>{system_info}</p>
+    <span>操作系统</span>
+    </div>
+    <div class="server-stat col-sm-3">
+    <p>{use_memory}</p>
+    <span>程序内存</span>
+    </div>
+    <div class="server-stat col-sm-3">
+    <p>{memory}</p>
+    <span>总内存</span>
+    </div>
+    <div class="server-stat col-sm-3">
+    <p>{cpu}</p>
+    <span>CPU</span>
+    </div>
+</temp>
+
+<temp class="crawler-list-tab">
+    <li role="presentation"><a href="#{prefix}" role="tab" data-toggle="tab">{title}</a></li>
+</temp>
+
+<temp class="crawler-list-tab-content">
+    <div role="tabpanel" class="tab-pane" id="{prefix}">
+        <div class="row">
+            <div class="col-lg-3 col-md-6">
+                <div class="panel panel-white stats-widget">
+                    <div class="panel-body">
+                        <div class="pull-left">
+                            <span class="stats-number">{data_count}</span>
+                            <p class="stats-info">数据总量</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="panel panel-white stats-widget">
+                    <div class="panel-body">
+                        <div class="pull-left">
+                            <span class="stats-number">{down_count}</span>
+                            <p class="stats-info">缓存总量</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="panel panel-white stats-widget">
+                    <div class="panel-body">
+                        <div class="pull-left">
+                            <span class="stats-number">{run_count}</span>
+                            <p class="stats-info">运行次数</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="panel panel-white stats-widget">
+                    <div class="panel-body">
+                        <div class="pull-left">
+                            <span class="stats-number">{image_count}</span>
+                            <p class="stats-info">下载次数</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- Row -->
+    </div>
+
+</temp>
+
+<temp class="task-item">
+
+    <div class="task-item">
+        <span class="task-name">{title}<i class="fa {check}"></i></span>
+        <div class="progress  progress-md">
+            <div class="progress-bar {bar}" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width:{width}">
+                {width}
+            </div>
+        </div>
+    </div>
+
+</temp>
+
+<temp class="task-status">
+    <table>
+    <tr>
+        <th scope="row"><a href="/?temp=crawler-status&prefix={prefix}">{title}</a></th>
+        <td>{next}</td>
+        <td>{run_time}</td>
+        <td><span class="label {label_status}">{run_status}</span></td>
+        <td>{data_count}</td>
+        <!--<td><a href="javascript:getMemorys({index});">{all_memory}</a></td>-->
+        <td>{button}{stop_button}</td>
+
+    </tr>
+    </table>
+</temp>
+
+
+
+
+<temp class="start_button">
+    <button type="button" onclick="startCrawler('{prefix}', '{child}')"  class="btn btn-info btn-addon btn-start"><i class="fa fa-play"></i> 启动</button>
+</temp>
+
+<temp class="stop_button">
+    <button type="button" onclick="stopCrawler('{prefix}', '{child}')"  class="btn btn-danger btn-addon btn-stop"><i class="fa fa-stop"></i> 停止</button>
+</temp>
+
+{% endmacro %}

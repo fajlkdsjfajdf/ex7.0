@@ -1,0 +1,24 @@
+.folder-card {
+    border-left: 0.25rem solid var(--primary-color) !important;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.folder-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.folder-card .folder-icon {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+}
+
+.folder-card .card-title {
+    color: var(--dark-color);
+    font-weight: 600;
+}
+
+.folder-card .card-footer {
+    border-top: 1px dashed #ddd;
+}

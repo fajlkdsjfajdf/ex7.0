@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+    {% from 'head.html' import macro_head %}
+    {{ macro_head("爬虫设置") }}
+    <body>
+        <script src="static/js/pages/setting.js"></script>
+        <!-- Page Container -->
+        <div class="page-container">
+            <!-- Page Sidebar -->
+            {% from 'page-sidebar.html' import macro_bar %}
+            {{ macro_bar("设置") }}
+            <!-- /Page Sidebar -->
+            
+            <!-- Page Content -->
+            <div class="page-content">            
+                <!-- Page Header -->
+                {% from 'page-head.html' import macro_head %}
+                {{ macro_head() }}
+                <!-- /Page Header -->
+                <!-- Page Inner -->
+                <div class="page-inner">
+
+                    <div id="main-wrapper">
+                        <div class="row">
+                            <div class="col-m-12">
+                                <div class="panel panel-white">
+                                    <div class="panel-heading clearfix">
+                                        <h4 class="panel-title">全局设置</h4>
+                                    </div>
+                                    <div class="panel-body all-set">
+                                        <div class="tabs-left" role="tabpanel">
+                                                <!-- Nav tabs -->
+                                                <ul class="nav nav-tabs" role="tablist">
+
+                                                </ul>
+                                                <!-- Tab panes -->
+                                                <div class="tab-content">
+                                                </div>
+                                        </div>
+                                    </div>
+                                   <div class="col-m-3 text-center">
+                                        <button type="button" class="btn btn-default btn-lg all-set-save">保存</button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-m-12">
+                                <div class="panel panel-white">
+                                    <div class="panel-heading clearfix">
+                                        <h4 class="panel-title">爬虫设置</h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="panel-group" id="accordion2" role="tablist" aria-multiselectable="true">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-m-12 text-center">
+                                <button type="button" class="btn btn-default btn-lg add-crawler">添加一个爬虫脚本</button>
+                            </div>
+
+
+                        </div><!-- Row -->
+                    </div><!-- Main Wrapper -->
+
+                </div><!-- /Page Inner -->
+
+
+            </div><!-- /Page Content -->
+        </div><!-- /Page Container -->
+
+
+
+    <!-----------额外载入的html------------------------>
+    <div>
+        {% from 'child/crawler-set-temp.html' import macro_crawlerset %}
+        {{ macro_crawlerset() }}
+    </div>
+    </body>
+
+</html>
