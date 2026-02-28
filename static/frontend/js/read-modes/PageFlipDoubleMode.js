@@ -23,6 +23,8 @@ class PageFlipDoubleMode extends ReadModeBase {
         this.resizeTimeout = null;
         this.timeSkip = 200; // 防抖时间
         this.gifFlag = false; // 防止重复触发
+        this.isAnimating = false; // 动画状态
+        this.animationDuration = 600; // 翻页动画时长(ms)
     }
 
     /**
@@ -202,8 +204,15 @@ class PageFlipDoubleMode extends ReadModeBase {
 
         if (picWidth === 0 || picHeight === 0) return;
 
-        const divWidth = viewport.offsetWidth * 0.98;
-        const divHeight = viewport.offsetHeight * 0.98;
+        // 移动端/平板使用更小的边距(6px)，PC端使用2%
+        const isMobileOrTablet = window.innerWidth <= 1024;
+        const margin = isMobileOrTablet ? 6 : 0.02;
+        const divWidth = isMobileOrTablet
+            ? viewport.offsetWidth - margin
+            : viewport.offsetWidth * (1 - margin);
+        const divHeight = isMobileOrTablet
+            ? viewport.offsetHeight - margin
+            : viewport.offsetHeight * (1 - margin);
 
         // 计算img元素的最终宽度和高度（完全参考老代码逻辑）
         let imgWidth, imgHeight;
@@ -438,11 +447,11 @@ class PageFlipDoubleMode extends ReadModeBase {
     }
 
     /**
-     * 上一页（参考老代码的gifImgLoad）
+     * 上一页（带3D翻页动画）
      * @private
      */
     _prevSection() {
-        if (this.gifFlag) return;
+        if (this.gifFlag || this.isAnimating) return;
 
         this.gifFlag = true;
         setTimeout(() => {
@@ -451,24 +460,29 @@ class PageFlipDoubleMode extends ReadModeBase {
 
         if (this.currentPage > 1) {
             // 根据当前是否双页决定退几页
-            this.currentPage -= (this.currentDoubleShow ? 2 : 1);
-            if (this.currentPage < 1) this.currentPage = 1;
+            const newPage = this.currentPage - (this.currentDoubleShow ? 2 : 1);
+            if (newPage < 1) {
+                this.gifFlag = false;
+                return;
+            }
 
-            // 转换为section索引
-            this.currentSection = this.currentPage - 1;
-
-            this._loadCurrentSection();
-            this._updateSection();
-            this._onPageAction();
+            // 执行3D翻页动画
+            this._animateFlip('prev', () => {
+                this.currentPage = newPage;
+                this.currentSection = this.currentPage - 1;
+                this._loadCurrentSection();
+                this._updateSection();
+                this._onPageAction();
+            });
         }
     }
 
     /**
-     * 下一页（参考老代码的gifImgLoad）
+     * 下一页（带3D翻页动画）
      * @private
      */
     _nextSection() {
-        if (this.gifFlag) return;
+        if (this.gifFlag || this.isAnimating) return;
 
         this.gifFlag = true;
         setTimeout(() => {
@@ -477,17 +491,20 @@ class PageFlipDoubleMode extends ReadModeBase {
 
         if (this.currentPage < this.pageSections.length) {
             // 根据当前是否双页决定进几页
-            this.currentPage += (this.currentDoubleShow ? 2 : 1);
-            if (this.currentPage > this.pageSections.length) {
-                this.currentPage = this.pageSections.length;
+            const newPage = this.currentPage + (this.currentDoubleShow ? 2 : 1);
+            if (newPage > this.pageSections.length) {
+                this.gifFlag = false;
+                return;
             }
 
-            // 转换为section索引
-            this.currentSection = this.currentPage - 1;
-
-            this._loadCurrentSection();
-            this._updateSection();
-            this._onPageAction();
+            // 执行3D翻页动画
+            this._animateFlip('next', () => {
+                this.currentPage = newPage;
+                this.currentSection = this.currentPage - 1;
+                this._loadCurrentSection();
+                this._updateSection();
+                this._onPageAction();
+            });
         }
     }
 
@@ -550,6 +567,110 @@ class PageFlipDoubleMode extends ReadModeBase {
     _updateBodyClass() {
         document.body.classList.remove('scroll-mode', 'scroll-seamless-mode');
         document.body.classList.add('page-flip-mode');
+    }
+
+    /**
+     * 单页前翻（一次只翻一页，不受双页模式影响）
+     */
+    flipSinglePrev() {
+        if (this.gifFlag || this.isAnimating) return;
+        if (this.currentPage <= 1) return;
+
+        this.gifFlag = true;
+        setTimeout(() => { this.gifFlag = false; }, this.timeSkip);
+
+        // 单页前翻
+        this.currentPage -= 1;
+        this.currentSection = this.currentPage - 1;
+
+        // 添加翻页动画
+        this._animateFlip('prev', () => {
+            this._loadCurrentSection();
+            this._updateSection();
+            this._onPageAction();
+        });
+    }
+
+    /**
+     * 单页后翻（一次只翻一页，不受双页模式影响）
+     */
+    flipSingleNext() {
+        if (this.gifFlag || this.isAnimating) return;
+        if (this.currentPage >= this.pageSections.length) return;
+
+        this.gifFlag = true;
+        setTimeout(() => { this.gifFlag = false; }, this.timeSkip);
+
+        // 单页后翻
+        this.currentPage += 1;
+        this.currentSection = this.currentPage - 1;
+
+        // 添加翻页动画
+        this._animateFlip('next', () => {
+            this._loadCurrentSection();
+            this._updateSection();
+            this._onPageAction();
+        });
+    }
+
+    /**
+     * 跳转到指定页
+     * @param {number} pageIndex - 页码索引（0-based）
+     */
+    goToPage(pageIndex) {
+        if (pageIndex < 0 || pageIndex >= this.pageSections.length) return;
+        const targetPage = pageIndex + 1; // 转为1-based
+        if (targetPage === this.currentPage) return;
+
+        this.currentPage = targetPage;
+        this.currentSection = pageIndex;
+        this._loadCurrentSection();
+        this._updateSection();
+        this._onPageAction();
+        console.log('[PageFlipDoubleMode] 跳转到第', this.currentPage, '页');
+    }
+
+    /**
+     * 执行3D翻页动画 - 真正的翻书效果
+     * @private
+     */
+    _animateFlip(direction, callback) {
+        const div1 = document.getElementById('pageFlip-div1');
+        if (!div1) {
+            callback();
+            return;
+        }
+
+        this.isAnimating = true;
+
+        // 设置3D环境
+        const viewport = this.container.querySelector('.comic-pager-viewport');
+        if (viewport) {
+            viewport.style.perspective = '2000px';
+            viewport.style.perspectiveOrigin = 'center center';
+        }
+        div1.style.transformStyle = 'preserve-3d';
+        div1.style.backfaceVisibility = 'hidden';
+
+        if (direction === 'next') {
+            // 向后翻页（下一页）- 当前页从右向左翻转
+            div1.style.transformOrigin = 'left center';
+            div1.style.transition = `transform ${this.animationDuration}ms cubic-bezier(0.645, 0.045, 0.355, 1)`;
+            div1.style.transform = 'rotateY(-180deg)';
+        } else {
+            // 向前翻页（上一页）- 当前页从左向右翻转
+            div1.style.transformOrigin = 'right center';
+            div1.style.transition = `transform ${this.animationDuration}ms cubic-bezier(0.645, 0.045, 0.355, 1)`;
+            div1.style.transform = 'rotateY(180deg)';
+        }
+
+        // 动画结束后恢复并回调
+        setTimeout(() => {
+            div1.style.transition = 'none';
+            div1.style.transform = 'rotateY(0deg)';
+            this.isAnimating = false;
+            callback();
+        }, this.animationDuration);
     }
 
     /**

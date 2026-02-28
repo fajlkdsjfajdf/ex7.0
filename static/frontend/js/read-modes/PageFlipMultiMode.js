@@ -8,6 +8,9 @@ class PageFlipMultiMode extends ReadModeBase {
         this.modeName = 'page-flip-multi';
         this.pageSections = [];
         this.currentSection = 0;
+        this.isAnimating = false; // 动画状态
+        this.animationDuration = 600; // 翻页动画时长(ms)
+        this.currentPageIndex = 0; // 当前页码索引（0-based，用于单页翻）
     }
 
     /**
@@ -60,32 +63,49 @@ class PageFlipMultiMode extends ReadModeBase {
 
         // 创建视口
         const viewport = document.createElement('div');
-        viewport.className = 'comic-pager-viewport';
+        viewport.className = 'comic-pager-viewport flip-book-viewport';
+        this._viewport = viewport; // 保存引用
 
-        // 创建滑动器
+        // 创建容器（不再使用slider滑动方式）
         const slider = document.createElement('div');
         slider.className = 'comic-pager-slider';
+        slider.style.display = 'block';
+        slider.style.width = '100%';
+        slider.style.height = '100%';
 
         // 存储section信息
         this.pageSections = [];
+        this._imagesData = images; // 保存图片数据
 
         // 添加每个图片页（可能是单页或双页）
         let i = 0;
+        let sectionIndex = 0;
         while (i < images.length) {
             const currentImage = images[i];
             const nextImage = images[i + 1];
 
             const pageSection = document.createElement('div');
-            pageSection.className = 'pager-section';
-            pageSection.dataset.index = this.pageSections.length;
+            pageSection.className = 'pager-section flip-page';
+            pageSection.dataset.index = sectionIndex;
+
+            // 默认只显示第一个section
+            if (sectionIndex === 0) {
+                pageSection.style.display = '';
+            } else {
+                pageSection.style.display = 'none';
+            }
 
             // 当前图片
             const img1 = this.imageLoader.createImageElement(currentImage, i);
+            img1.style.borderRadius = '12px';
+            img1.className = 'flip-page-image';
             pageSection.appendChild(img1);
 
             // 检查是否有下一张图片
             if (nextImage) {
                 const img2 = this.imageLoader.createImageElement(nextImage, i + 1);
+                img2.style.borderRadius = '12px';
+                img2.className = 'flip-page-image';
                 pageSection.appendChild(img2);
                 pageSection.dataset.pages = `${currentImage.page},${nextImage.page}`;
             } else {
@@ -96,12 +116,15 @@ class PageFlipMultiMode extends ReadModeBase {
                 section: pageSection,
                 img1: img1,
                 img2: pageSection.querySelector('img[data-index="' + (i + 1) + '"]'),
-                hasTwoImages: !!nextImage
+                hasTwoImages: !!nextImage,
+                startPageIndex: i, // 起始页码索引
+                endPageIndex: nextImage ? i + 1 : i // 结束页码索引
             });
 
             slider.appendChild(pageSection);
 
             i += nextImage ? 2 : 1;
+            sectionIndex++;
         }
 
         viewport.appendChild(slider);
@@ -150,8 +173,23 @@ class PageFlipMultiMode extends ReadModeBase {
             }
         });
 
+        // 滚轮翻页支持
+        this._addEventListener(flipContainer, 'wheel', (e) => {
+            e.preventDefault();
+            if (this.isAnimating) return;
+
+            if (e.deltaY > 0) {
+                this._nextSection();
+            } else if (e.deltaY < 0) {
+                this._prevSection();
+            }
+        }, { passive: false });
+
         // 触摸滑动支持
         this._initTouchSupport(flipContainer);
+
+        // 初始化图片尺寸
+        setTimeout(() => this._resizeImages(), 100);
     }
 
     /**
@@ -198,25 +236,214 @@ class PageFlipMultiMode extends ReadModeBase {
     }
 
     /**
-     * 上一节
+     * 上一节（带3D翻页动画）
      * @private
      */
     _prevSection() {
-        if (this.currentSection > 0) {
+        if (this.isAnimating) return;
+        if (this.currentSection <= 0) return;
+
+        this.isAnimating = true;
+
+        // 先执行动画，再更新内容
+        this._animateFlip('prev', () => {
             this.currentSection--;
             this._updateSection();
+            this.isAnimating = false;
+        });
+    }
+
+    /**
+     * 下一节（带3D翻页动画）
+     * @private
+     */
+    _nextSection() {
+        if (this.isAnimating) return;
+        if (this.currentSection >= this.pageSections.length - 1) return;
+
+        this.isAnimating = true;
+
+        // 先执行动画，再更新内容
+        this._animateFlip('next', () => {
+            this.currentSection++;
+            this._updateSection();
+            this.isAnimating = false;
+        });
+    }
+
+    /**
+     * 执行3D翻页动画 - 真正的翻书效果
+     * @private
+     */
+    _animateFlip(direction, callback) {
+        const currentSection = this.pageSections[this.currentSection];
+        if (!currentSection || !currentSection.section) {
+            callback();
+            return;
+        }
+
+        const section = currentSection.section;
+
+        // 设置3D环境
+        const viewport = this._viewport;
+        if (viewport) {
+            viewport.style.perspective = '2000px';
+            viewport.style.perspectiveOrigin = 'center center';
+        }
+
+        // 设置section的3D属性
+        section.style.transformStyle = 'preserve-3d';
+        section.style.backfaceVisibility = 'hidden';
+
+        if (direction === 'next') {
+            // 向后翻页（下一页）- 当前页从右向左翻转
+            section.style.transformOrigin = 'left center';
+            section.style.transition = `transform ${this.animationDuration}ms cubic-bezier(0.645, 0.045, 0.355, 1)`;
+            section.style.transform = 'rotateY(-180deg)';
+        } else {
+            // 向前翻页（上一页）- 当前页从左向右翻转
+            section.style.transformOrigin = 'right center';
+            section.style.transition = `transform ${this.animationDuration}ms cubic-bezier(0.645, 0.045, 0.355, 1)`;
+            section.style.transform = 'rotateY(180deg)';
+        }
+
+        // 动画结束后恢复并回调
+        setTimeout(() => {
+            section.style.transition = 'none';
+            section.style.transform = 'rotateY(0deg)';
+            callback();
+        }, this.animationDuration);
+    }
+
+    /**
+     * 单页前翻（一次只翻一页）
+     */
+    flipSinglePrev() {
+        if (this.isAnimating) return;
+
+        // 找到前一页所在的section
+        const currentSection = this.pageSections[this.currentSection];
+        if (!currentSection) return;
+
+        const currentStartPage = currentSection.startPageIndex;
+        if (currentStartPage <= 0) return;
+
+        // 计算前一页所在的section索引
+        for (let i = this.currentSection - 1; i >= 0; i--) {
+            const section = this.pageSections[i];
+            if (section.endPageIndex === currentStartPage - 1 ||
+                section.startPageIndex === currentStartPage - 1) {
+                // 找到前一页所在的section
+                this.isAnimating = true;
+                this._animateFlip('prev', () => {
+                    this.currentSection = i;
+                    this._updateSection();
+                    this.isAnimating = false;
+                });
+                return;
+            }
         }
     }
 
     /**
-     * 下一节
+     * 单页后翻（一次只翻一页）
+     */
+    flipSingleNext() {
+        if (this.isAnimating) return;
+
+        // 找到后一页所在的section
+        const currentSection = this.pageSections[this.currentSection];
+        if (!currentSection) return;
+
+        const currentEndPage = currentSection.endPageIndex;
+        if (currentEndPage >= this._imagesData.length - 1) return;
+
+        // 计算后一页所在的section索引
+        for (let i = this.currentSection + 1; i < this.pageSections.length; i++) {
+            const section = this.pageSections[i];
+            if (section.startPageIndex === currentEndPage + 1) {
+                // 找到后一页所在的section
+                this.isAnimating = true;
+                this._animateFlip('next', () => {
+                    this.currentSection = i;
+                    this._updateSection();
+                    this.isAnimating = false;
+                });
+                return;
+            }
+        }
+    }
+
+    /**
+     * 跳转到指定页
+     * @param {number} pageIndex - 页码索引（0-based）
+     */
+    goToPage(pageIndex) {
+        if (pageIndex < 0 || pageIndex >= this._imagesData.length) return;
+
+        // 找到包含该页的section
+        for (let i = 0; i < this.pageSections.length; i++) {
+            const section = this.pageSections[i];
+            if (pageIndex >= section.startPageIndex && pageIndex <= section.endPageIndex) {
+                if (i !== this.currentSection) {
+                    this.currentSection = i;
+                    this._updateSection();
+                    this._onPageAction();
+                }
+                console.log('[PageFlipMultiMode] 跳转到第', pageIndex + 1, '页（section', i + 1, '）');
+                return;
+            }
+        }
+    }
+
+    /**
+     * 调整图片尺寸（移动端边距优化）
      * @private
      */
-    _nextSection() {
-        if (this.currentSection < this.pageSections.length - 1) {
-            this.currentSection++;
-            this._updateSection();
-        }
+    _resizeImages() {
+        const viewport = this._viewport;
+        if (!viewport) return;
+
+        // 移动端/平板使用更小的边距(6px)，PC端使用2%
+        const isMobileOrTablet = window.innerWidth <= 1024;
+        const margin = isMobileOrTablet ? 6 : 0.02;
+
+        this.pageSections.forEach(sectionData => {
+            const section = sectionData.section;
+            const imgs = section.querySelectorAll('img');
+
+            imgs.forEach(img => {
+                if (img.naturalWidth && img.naturalHeight) {
+                    // 计算可用尺寸
+                    const availableWidth = isMobileOrTablet
+                        ? viewport.offsetWidth - margin
+                        : viewport.offsetWidth * (1 - margin);
+                    const availableHeight = isMobileOrTablet
+                        ? viewport.offsetHeight - margin
+                        : viewport.offsetHeight * (1 - margin);
+
+                    // 保持比例缩放
+                    const scale = Math.min(
+                        availableWidth / img.naturalWidth,
+                        availableHeight / img.naturalHeight
+                    );
+
+                    if (imgs.length === 2) {
+                        // 双页模式，每张图片占一半宽度
+                        img.style.width = (availableWidth / 2 - 4) + 'px';
+                        img.style.height = ((availableWidth / 2 - 4) * img.naturalHeight / img.naturalWidth) + 'px';
+                        if (parseFloat(img.style.height) > availableHeight) {
+                            img.style.height = availableHeight + 'px';
+                            img.style.width = (availableHeight * img.naturalWidth / img.naturalHeight) + 'px';
+                        }
+                    } else {
+                        // 单页模式
+                        img.style.width = (img.naturalWidth * scale) + 'px';
+                        img.style.height = (img.naturalHeight * scale) + 'px';
+                    }
+                }
+            });
+        });
     }
 
     /**
@@ -224,12 +451,19 @@ class PageFlipMultiMode extends ReadModeBase {
      * @private
      */
     _updateSection() {
-        const sectionWidth = this.controls.slider.offsetWidth;
-        this.controls.slider.style.transform = `translateX(-${this.currentSection * sectionWidth}px)`;
+        // 隐藏所有section，只显示当前section
+        this.pageSections.forEach((sectionData, index) => {
+            if (index === this.currentSection) {
+                sectionData.section.style.display = '';
+                sectionData.section.style.visibility = 'visible';
+            } else {
+                sectionData.section.style.display = 'none';
+            }
+        });
 
         // 更新按钮状态
         this.controls.prevBtn.disabled = this.currentSection === 0;
-        this.controls.nextBtn.disabled = this.currentSection === this.pageSections.length - 1;
+        this.controls.nextBtn.disabled = this.currentSection >= this.pageSections.length - 1;
 
         // 更新页码指示器
         const currentPageEl = this.controls.indicator.querySelector('.current-page');
@@ -276,9 +510,8 @@ class PageFlipMultiMode extends ReadModeBase {
         if (flipContainer) {
             this.heightCalculator.applyHeight(flipContainer, 'page-flip-multi');
 
-            // 重新计算并更新滑动器位置
-            const sectionWidth = this.controls.slider.offsetWidth;
-            this.controls.slider.style.transform = `translateX(-${this.currentSection * sectionWidth}px)`;
+            // 重新计算图片尺寸
+            this._resizeImages();
         }
     }
 

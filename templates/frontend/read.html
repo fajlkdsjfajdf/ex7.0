@@ -224,7 +224,7 @@
     display: flex;
     /* width: max-content; 让slider宽度能够容纳所有section */
     height: 100%;
-    transition: transform 0.3s ease;
+    /* 移除transition，使用JS控制翻页动画 */
 }
 
 /* 水平布局容器 - 参考老代码的 div-horizontal */
@@ -607,6 +607,119 @@ body.page-flip-multi-mode .comic-chapter-title {
     background-color: #4ade80;
     border-radius: 50%;
     border: 2px solid white;
+}
+
+/* ==================== 快捷功能区 ==================== */
+.quick-actions-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--bg-card);
+    padding: 8px 16px;
+    border-radius: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.quick-actions-container.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.quick-action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.quick-action-btn:hover {
+    background-color: var(--accent-color);
+    transform: scale(1.1);
+}
+
+.quick-action-btn.has-comments {
+    background-color: #4ade80;
+    color: #000;
+}
+
+.page-jump-control {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+#pageJumpInput {
+    width: 50px;
+    height: 32px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    text-align: center;
+    font-size: 0.85rem;
+    padding: 0 4px;
+}
+
+#pageJumpInput:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.page-jump-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background-color: var(--accent-color);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.page-jump-btn:hover {
+    transform: scale(1.05);
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .quick-actions-container {
+        bottom: 80px;
+        padding: 6px 12px;
+        gap: 8px;
+    }
+
+    .quick-action-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+    #pageJumpInput {
+        width: 45px;
+        height: 28px;
+    }
+
+    .page-jump-btn {
+        width: 28px;
+        height: 28px;
+    }
 }
 
 /* 模式选择弹窗 */
@@ -1195,6 +1308,22 @@ body.reading-active .chapter-navigation {
         <button class="mode-switcher-btn" id="modeSwitcherBtn" title="切换阅读模式">
             <i class="fas fa-book-reader"></i>
             <span class="current-indicator"></span>
+        </button>
+    </div>
+
+    <!-- 快捷功能区 -->
+    <div class="quick-actions-container" id="quickActionsContainer">
+        <div class="page-jump-control">
+            <input type="number" id="pageJumpInput" min="1" placeholder="页" title="输入页码跳转">
+            <button class="page-jump-btn" id="pageJumpBtn" title="跳转">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+        <button class="quick-action-btn" id="flipPrevSingleBtn" title="单页前翻">
+            <i class="fas fa-step-backward"></i>
+        </button>
+        <button class="quick-action-btn" id="flipNextSingleBtn" title="单页后翻">
+            <i class="fas fa-step-forward"></i>
         </button>
     </div>
 </div>
