@@ -85,7 +85,7 @@ class PageFlipMultiMode extends ReadModeBase {
             const nextImage = images[i + 1];
 
             const pageSection = document.createElement('div');
-            pageSection.className = 'pager-section flip-page';
+            pageSection.className = 'pager-section flip-multi-page';
             pageSection.dataset.index = sectionIndex;
 
             // 默认只显示第一个section

@@ -200,18 +200,21 @@
 }
 
 /* ========== 翻页式模式 ========== */
-.page-flip-mode {
+.page-flip-mode,
+.page-flip-multi-mode {
     position: relative;
     width: 100%;
 }
 
-.page-flip-mode .comic-pager-container {
+.page-flip-mode .comic-pager-container,
+.page-flip-multi-mode .comic-pager-container {
     position: relative;
     width: 100%;
     height: 100%;
 }
 
-.page-flip-mode .comic-pager-viewport {
+.page-flip-mode .comic-pager-viewport,
+.page-flip-multi-mode .comic-pager-viewport {
     width: 100%;
     height: 100%;
     position: relative;
@@ -220,11 +223,12 @@
     border-radius: 8px;
 }
 
-.page-flip-mode .comic-pager-slider {
-    display: flex;
-    /* width: max-content; 让slider宽度能够容纳所有section */
+.page-flip-mode .comic-pager-slider,
+.page-flip-multi-mode .comic-pager-slider {
+    display: block;
+    width: 100%;
     height: 100%;
-    /* 移除transition，使用JS控制翻页动画 */
+    /* 不设置transition，由JS控制翻页动画 */
 }
 
 /* 水平布局容器 - 参考老代码的 div-horizontal */
@@ -1078,6 +1082,13 @@ body.reading-active .chapter-navigation {
 .flip-book-viewport {
     perspective: 2000px;
     perspective-origin: center center;
+}
+
+/* 翻页式多页模式的页面样式 */
+.flip-multi-page {
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    /* 不设置transition，由JS控制动画 */
 }
 
 .flip-book {
