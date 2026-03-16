@@ -143,7 +143,7 @@ class KMBaseCrawler(BaseCrawler):
 
             # 使用基类的get方法（会自动应用代理配置）
             # task_type='content_image' 会根据配置决定是否使用代理
-            resp = self.get(full_url, headers=headers, cookies=cookies, timeout=30, task_type='content_image')
+            resp = self.get(full_url, headers=headers, cookies=cookies, timeout=10, task_type='content_image')
 
             logger.debug(f"图片响应: status={resp.status_code}, size={len(resp.content)} bytes, type={resp.headers.get('Content-Type', 'N/A')}")
 

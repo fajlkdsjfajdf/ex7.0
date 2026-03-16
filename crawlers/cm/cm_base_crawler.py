@@ -123,7 +123,7 @@ class CMBaseCrawler(BaseCrawler):
 
             # 下载图片
             logger.debug(f"下载图片: {full_url}")
-            response = self.get(full_url)
+            response = self.get(full_url, timeout=10)
             image_data = response.content
 
             # 验证HTTP响应

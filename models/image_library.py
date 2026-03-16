@@ -2,9 +2,16 @@
 图片库模型 - 独立数据库，两层表结构
 
 数据库结构:
-- image_library (独立数据库)
+- image_library (独立数据库, 192.168.1.222:27017)
   ├── {site}_images    # 图片索引表（每张图一条记录）
-  └── {site}_storage   # 存储表（MD5去重）
+
+- image_storage (GridFS 数据库, 192.168.1.222:27018)
+  ├── {site}_cover.files      # 封面图片元数据
+  ├── {site}_cover.chunks     # 封面图片数据块
+  ├── {site}_thumbnail.files  # 缩略图元数据
+  ├── {site}_thumbnail.chunks # 缩略图数据块
+  ├── {site}_content.files    # 内容图片元数据
+  └── {site}_content.chunks   # 内容图片数据块
 
 使用方式:
     image_library = get_image_library('cm')
@@ -20,7 +27,7 @@ from bson.objectid import ObjectId
 from PIL import Image
 
 from database.image_library_db import get_image_library_db
-from models.image_storage import get_image_storage
+from models.image_storage import get_gridfs_image_storage
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -28,13 +35,14 @@ logger = get_logger(__name__)
 
 class ImageLibrary:
     """
-    图片库模型 - 独立数据库，两层表结构
+    图片库模型 - 使用 GridFS 存储图片
 
     核心特性:
-    - 独立数据库 image_library
-    - 两层表结构: images (索引) + storage (存储)
+    - 索引数据库: image_library (192.168.1.222:27017)
+    - 图片存储: GridFS (192.168.1.222:27018)
+    - 按站点+类型分表: {site}_cover, {site}_thumbnail, {site}_content
     - 每张图片一条独立记录
-    - MD5 去重在 storage 层实现
+    - MD5 去重在 GridFS 层实现
     - 通过 (aid, pid, page_num, image_type) 精确定位
     """
 
@@ -50,10 +58,9 @@ class ImageLibrary:
 
         # 获取集合
         self._images_collection = None
-        self._storage_collection = None
 
-        # DAT 文件存储
-        self._storage = get_image_storage(site_id)
+        # GridFS 存储，按类型分表，使用缓存
+        self._storage_cache = {}  # {image_type: GridFSImageStorage}
 
     @property
     def images_collection(self):
@@ -62,12 +69,26 @@ class ImageLibrary:
             self._images_collection = self._db.get_images_collection(self.site_id)
         return self._images_collection
 
+    def _get_storage(self, image_type: str):
+        """
+        获取指定类型的 GridFS 存储实例（带缓存）
+
+        Args:
+            image_type: 图片类型 (cover/thumbnail/content)
+
+        Returns:
+            GridFSImageStorage 实例
+        """
+        if image_type not in self._storage_cache:
+            self._storage_cache[image_type] = get_gridfs_image_storage(self.site_id, image_type)
+        return self._storage_cache[image_type]
+
     @property
     def storage_collection(self):
-        """获取存储表"""
-        if self._storage_collection is None:
-            self._storage_collection = self._db.get_storage_collection(self.site_id)
-        return self._storage_collection
+        """获取存储表（已弃用，保留用于兼容）"""
+        # GridFS 不再使用单独的 storage 集合
+        # 这个属性保留是为了兼容旧代码
+        return None
 
     # ==================== 索引创建 ====================
 
@@ -79,9 +100,10 @@ class ImageLibrary:
         Args:
             site_id: 站点ID
         """
+        from database.image_storage_db import IMAGE_TYPES
+
         db = get_image_library_db()
         images_collection = db.get_images_collection(site_id)
-        storage_collection = db.get_storage_collection(site_id)
 
         # images 表索引
         # 联合唯一索引：精确定位图片
@@ -95,11 +117,9 @@ class ImageLibrary:
         # MD5 索引（用于去重查询）
         images_collection.create_index([('md5', 1)], name='idx_md5')
 
-        # storage 表索引
-        # MD5 唯一索引
-        storage_collection.create_index([('md5', 1)], unique=True, name='idx_md5_unique')
-        # 引用计数索引（用于清理）
-        storage_collection.create_index([('ref_count', 1)], name='idx_ref_count')
+        # GridFS 会自动创建索引，无需手动创建
+        # - {site}_{type}.files 会自动创建: filename, md5, uploadDate 等索引
+        # - {site}_{type}.chunks 会自动创建: files_id, n 索引
 
         logger.info(f"图片库索引创建完成: {site_id}")
 
@@ -134,15 +154,13 @@ class ImageLibrary:
         source_url: str = ''
     ) -> Optional[str]:
         """
-        保存图片到图片库
+        保存图片到图片库（使用 GridFS 存储）
 
         工作流程:
         1. 检查 images 表是否已存在该图片（业务去重）
         2. 计算 MD5
-        3. 查 storage 表是否存在相同 MD5
-        4. 存在：复用 storage，ref_count++
-        5. 不存在：写入 DAT，创建 storage 记录
-        6. 创建 images 记录
+        3. 保存到对应类型的 GridFS bucket
+        4. 创建 images 记录
 
         Args:
             image_data: 图片二进制数据
@@ -174,11 +192,11 @@ class ImageLibrary:
             # 3. 获取图片信息
             img_info = self._get_image_info(image_data)
 
-            # 4. 查或创建 storage 记录
-            storage_id = self._get_or_create_storage(md5_hash, image_data, len(image_data))
+            # 4. 保存到 GridFS（按类型分表）
+            file_id = self._get_or_create_storage(md5_hash, image_data, len(image_data), image_type)
 
-            if not storage_id:
-                logger.error(f"创建 storage 记录失败: md5={md5_hash}")
+            if not file_id:
+                logger.error(f"保存图片到 GridFS 失败: md5={md5_hash}")
                 return None
 
             # 5. 创建 images 记录
@@ -187,7 +205,7 @@ class ImageLibrary:
                 'pid': pid,
                 'page_num': page_num,
                 'image_type': image_type,
-                'storage_id': ObjectId(storage_id),
+                'storage_id': file_id,  # GridFS file_id
                 'md5': md5_hash,
                 'source_url': source_url,
                 'file_size': len(image_data),
@@ -208,54 +226,33 @@ class ImageLibrary:
             logger.error(f"保存图片失败: aid={aid}, pid={pid}, page={page_num}, type={image_type}, error={e}")
             return None
 
-    def _get_or_create_storage(self, md5_hash: str, image_data: bytes, file_size: int) -> Optional[str]:
+    def _get_or_create_storage(self, md5_hash: str, image_data: bytes, file_size: int, image_type: str) -> Optional[str]:
         """
-        获取或创建 storage 记录
+        获取或创建 storage 记录（使用 GridFS）
 
         Args:
             md5_hash: MD5 哈希值
             image_data: 图片二进制数据
             file_size: 文件大小
+            image_type: 图片类型 (cover/thumbnail/content)
 
         Returns:
-            storage_id (字符串)，失败返回 None
+            file_id (GridFS file_id 字符串)，失败返回 None
         """
         try:
-            # 查找是否已存在
-            existing_storage = self.storage_collection.find_one({'md5': md5_hash})
+            # 获取对应类型的 GridFS 存储
+            storage = self._get_storage(image_type)
 
-            if existing_storage:
-                # 复用现有 storage，增加引用计数
-                self.storage_collection.update_one(
-                    {'_id': existing_storage['_id']},
-                    {'$inc': {'ref_count': 1}}
-                )
-                logger.debug(f"复用 storage: md5={md5_hash}, ref_count={existing_storage['ref_count'] + 1}")
-                return str(existing_storage['_id'])
+            # 保存到 GridFS（内部会自动检查 MD5 是否已存在）
+            storage_info = storage.save_image(image_data=image_data, image_id=md5_hash)
 
-            # 写入 DAT 文件
-            storage_info = self._storage.save_image(image_data=image_data, image_id=md5_hash)
+            file_id = storage_info['file_id']
+            logger.debug(f"图片已存储到 GridFS: md5={md5_hash}, file_id={file_id}, type={image_type}")
 
-            # 创建 storage 记录
-            storage_doc = {
-                'md5': md5_hash,
-                'ref_count': 1,
-                'dat_file': storage_info['dat_file'],
-                'offset': storage_info['offset'],
-                'length': storage_info['length'],
-                'file_path': storage_info['file_path'],
-                'created_at': datetime.now()
-            }
-
-            result = self.storage_collection.insert_one(storage_doc)
-            storage_id = str(result.inserted_id)
-
-            logger.debug(f"创建 storage: md5={md5_hash}, storage_id={storage_id}")
-
-            return storage_id
+            return file_id
 
         except Exception as e:
-            logger.error(f"获取或创建 storage 失败: md5={md5_hash}, error={e}")
+            logger.error(f"获取或创建 storage 失败: md5={md5_hash}, type={image_type}, error={e}")
             return None
 
     def _get_image_info(self, image_data: bytes) -> Dict[str, Any]:
@@ -386,7 +383,7 @@ class ImageLibrary:
         image_type: str = 'content'
     ) -> Optional[bytes]:
         """
-        获取图片二进制数据
+        获取图片二进制数据（从 GridFS）
 
         Args:
             aid: 漫画ID
@@ -403,52 +400,36 @@ class ImageLibrary:
         if not image_info:
             return None
 
-        # 2. 获取 storage 信息
-        storage_id = image_info.get('storage_id')
+        # 2. 获取 file_id（GridFS file_id）
+        file_id = image_info.get('storage_id')
 
-        if not storage_id:
+        if not file_id:
             return None
 
-        storage = self.storage_collection.find_one({'_id': ObjectId(storage_id)})
-
-        if not storage:
-            logger.error(f"Storage 记录不存在: storage_id={storage_id}")
-            return None
-
-        # 3. 从 DAT 文件读取
-        image_data = self._storage.read_image_raw(
-            dat_file=storage['dat_file'],
-            offset=storage['offset'],
-            length=storage['length']
-        )
+        # 3. 从 GridFS 读取
+        storage = self._get_storage(image_type)
+        image_data = storage.read_image(file_id)
 
         return image_data
 
     def get_image_data_by_info(self, image_info: Dict[str, Any]) -> Optional[bytes]:
         """
-        根据图片信息获取二进制数据
+        根据图片信息获取二进制数据（从 GridFS）
 
         Args:
-            image_info: 图片信息（包含 storage_id）
+            image_info: 图片信息（包含 storage_id 和 image_type）
 
         Returns:
             图片二进制数据
         """
-        storage_id = image_info.get('storage_id')
+        file_id = image_info.get('storage_id')
+        image_type = image_info.get('image_type', 'content')
 
-        if not storage_id:
+        if not file_id:
             return None
 
-        storage = self.storage_collection.find_one({'_id': ObjectId(storage_id)})
-
-        if not storage:
-            return None
-
-        return self._storage.read_image_raw(
-            dat_file=storage['dat_file'],
-            offset=storage['offset'],
-            length=storage['length']
-        )
+        storage = self._get_storage(image_type)
+        return storage.read_image(file_id)
 
     # ==================== 批量方法 ====================
 
@@ -575,7 +556,7 @@ class ImageLibrary:
         image_type: str = 'content'
     ) -> bool:
         """
-        删除图片（减少 storage 引用计数）
+        删除图片
 
         Args:
             aid: 漫画ID
@@ -598,22 +579,20 @@ class ImageLibrary:
             if not image:
                 return False
 
-            storage_id = image.get('storage_id')
+            file_id = image.get('storage_id')
 
             # 2. 删除 images 记录
             self.images_collection.delete_one({'_id': image['_id']})
 
-            # 3. 减少 storage 引用计数
-            if storage_id:
-                result = self.storage_collection.update_one(
-                    {'_id': ObjectId(storage_id)},
-                    {'$inc': {'ref_count': -1}}
-                )
-
-                # 如果 ref_count 为 0，可以考虑清理（暂不自动清理）
-                storage = self.storage_collection.find_one({'_id': ObjectId(storage_id)})
-                if storage and storage.get('ref_count', 0) <= 0:
-                    logger.info(f"Storage 引用计数为 0，可清理: storage_id={storage_id}")
+            # 3. 检查是否还有其他图片使用这个 file_id
+            if file_id:
+                remaining = self.images_collection.count_documents({'storage_id': file_id})
+                if remaining == 0:
+                    # 没有其他图片使用，删除 GridFS 文件
+                    storage = self._get_storage(image_type)
+                    from bson.objectid import ObjectId
+                    storage._bucket.delete(ObjectId(file_id))
+                    logger.info(f"删除 GridFS 文件: file_id={file_id}")
 
             logger.info(f"删除图片成功: aid={aid}, pid={pid}, page={page_num}, type={image_type}")
             return True
@@ -641,20 +620,27 @@ class ImageLibrary:
             }))
 
             deleted_count = 0
+            file_ids_to_check = []
 
             for image in images:
-                storage_id = image.get('storage_id')
+                file_id = image.get('storage_id')
+                image_type = image.get('image_type', 'content')
 
                 # 删除 images 记录
                 self.images_collection.delete_one({'_id': image['_id']})
                 deleted_count += 1
 
-                # 减少 storage 引用计数
-                if storage_id:
-                    self.storage_collection.update_one(
-                        {'_id': ObjectId(storage_id)},
-                        {'$inc': {'ref_count': -1}}
-                    )
+                # 收集需要检查的 file_id
+                if file_id:
+                    file_ids_to_check.append((file_id, image_type))
+
+            # 检查并删除不再使用的 GridFS 文件
+            for file_id, image_type in file_ids_to_check:
+                remaining = self.images_collection.count_documents({'storage_id': file_id})
+                if remaining == 0:
+                    storage = self._get_storage(image_type)
+                    from bson.objectid import ObjectId
+                    storage._bucket.delete(ObjectId(file_id))
 
             logger.info(f"删除章节图片: aid={aid}, pid={pid}, count={deleted_count}")
             return deleted_count
@@ -678,20 +664,27 @@ class ImageLibrary:
             images = list(self.images_collection.find({'aid': aid}))
 
             deleted_count = 0
+            file_ids_to_check = []
 
             for image in images:
-                storage_id = image.get('storage_id')
+                file_id = image.get('storage_id')
+                image_type = image.get('image_type', 'content')
 
                 # 删除 images 记录
                 self.images_collection.delete_one({'_id': image['_id']})
                 deleted_count += 1
 
-                # 减少 storage 引用计数
-                if storage_id:
-                    self.storage_collection.update_one(
-                        {'_id': ObjectId(storage_id)},
-                        {'$inc': {'ref_count': -1}}
-                    )
+                # 收集需要检查的 file_id
+                if file_id:
+                    file_ids_to_check.append((file_id, image_type))
+
+            # 检查并删除不再使用的 GridFS 文件
+            for file_id, image_type in file_ids_to_check:
+                remaining = self.images_collection.count_documents({'storage_id': file_id})
+                if remaining == 0:
+                    storage = self._get_storage(image_type)
+                    from bson.objectid import ObjectId
+                    storage._bucket.delete(ObjectId(file_id))
 
             logger.info(f"删除漫画图片: aid={aid}, count={deleted_count}")
             return deleted_count
@@ -709,6 +702,8 @@ class ImageLibrary:
         Returns:
             统计信息字典
         """
+        from database.image_storage_db import IMAGE_TYPES
+
         # images 表统计
         total_images = self.images_collection.count_documents({})
 
@@ -722,30 +717,38 @@ class ImageLibrary:
         ]))
 
         type_distribution = {}
+        total_unique_files = 0
+
         for stat in type_stats:
             image_type = stat['_id'] or 'unknown'
+            count = stat['count']
+            size_mb = round(stat['total_size'] / (1024 * 1024), 2)
+
             type_distribution[image_type] = {
-                'count': stat['count'],
-                'size_mb': round(stat['total_size'] / (1024 * 1024), 2)
+                'count': count,
+                'size_mb': size_mb
             }
 
-        # storage 表统计
-        total_storage = self.storage_collection.count_documents({})
-        total_ref = list(self.storage_collection.aggregate([
-            {'$group': {'_id': None, 'total': {'$sum': '$ref_count'}}}
-        ]))
-        total_ref_count = total_ref[0]['total'] if total_ref else 0
+            # 获取 GridFS 统计
+            try:
+                storage = self._get_storage(image_type)
+                gridfs_stats = storage.get_statistics()
+                total_unique_files += gridfs_stats.get('total_files', 0)
+
+                type_distribution[image_type]['gridfs_files'] = gridfs_stats.get('total_files', 0)
+                type_distribution[image_type]['gridfs_chunks'] = gridfs_stats.get('total_chunks', 0)
+            except Exception as e:
+                logger.warning(f"获取 GridFS 统计失败: type={image_type}, error={e}")
 
         # 计算去重率
         dedup_rate = 0
-        if total_ref_count > 0:
-            dedup_rate = round((1 - total_storage / total_ref_count) * 100, 2)
+        if total_images > 0 and total_unique_files > 0:
+            dedup_rate = round((1 - total_unique_files / total_images) * 100, 2)
 
         return {
             'site_id': self.site_id,
             'total_images': total_images,
-            'total_storage_records': total_storage,
-            'total_ref_count': total_ref_count,
+            'total_unique_files': total_unique_files,
             'dedup_rate': dedup_rate,
             'type_distribution': type_distribution
         }
@@ -753,21 +756,16 @@ class ImageLibrary:
     def find_unused_storage(self, limit: int = 1000) -> List[Dict[str, Any]]:
         """
         查找未使用的 storage 记录（ref_count <= 0）
+        注意：GridFS 中引用计数在 metadata 中，此方法已弃用
 
         Args:
             limit: 返回数量限制
 
         Returns:
-            未使用的 storage 列表
+            未使用的 storage 列表（空列表，GridFS 不再使用独立 storage 表）
         """
-        cursor = self.storage_collection.find({'ref_count': {'$lte': 0}}).limit(limit)
-
-        results = []
-        for storage in cursor:
-            storage['_id'] = str(storage['_id'])
-            results.append(storage)
-
-        return results
+        logger.warning("find_unused_storage 方法已弃用，GridFS 引用计数在文件 metadata 中管理")
+        return []
 
 
 # 便捷函数

@@ -304,7 +304,7 @@ class ImageStorage:
 # 便捷函数
 def get_image_storage(site_id: str) -> ImageStorage:
     """
-    获取指定站点的图片存储实例
+    获取指定站点的图片存储实例（DAT文件存储）
 
     Args:
         site_id: 站点ID
@@ -313,3 +313,232 @@ def get_image_storage(site_id: str) -> ImageStorage:
         ImageStorage实例
     """
     return ImageStorage(site_id)
+
+
+# ==================== GridFS 存储实现 ====================
+
+class GridFSImageStorage:
+    """
+    图片存储管理器 - GridFS（按站点+类型分表）
+
+    功能：
+    1. 将图片通过 GridFS 存储到 MongoDB
+    2. 按 {site}_{type} 组织 bucket
+    3. 通过 MD5 去重
+    4. 引用计数管理
+
+    GridFS 结构：
+    - {site}_{type}.files  - 文件元数据
+    - {site}_{type}.chunks - 数据块（每块默认 255KB）
+    """
+
+    def __init__(self, site_id: str, image_type: str = 'content'):
+        """
+        初始化图片存储
+
+        Args:
+            site_id: 站点ID (cm/jm/ex等)
+            image_type: 图片类型 (cover/thumbnail/content)
+        """
+        from database.image_storage_db import IMAGE_TYPES
+
+        if image_type not in IMAGE_TYPES:
+            raise ValueError(f"Invalid image_type: {image_type}, must be one of {IMAGE_TYPES}")
+
+        self.site_id = site_id
+        self.image_type = image_type
+        self.bucket_name = f"{site_id}_{image_type}"
+
+        self._db = get_image_storage_db()
+        self._bucket = self._db.get_gridfs_bucket(site_id, image_type)
+        self._files_collection = self._db.get_files_collection(site_id, image_type)
+
+    def save_image(self, image_data: bytes, image_id: str = None) -> Dict[str, Any]:
+        """
+        保存图片到 GridFS（纯图片数据，不存元数据）
+
+        Args:
+            image_data: 图片二进制数据
+            image_id: 图片标识（用于日志，可以是 MD5）
+
+        Returns:
+            存储信息：
+            {
+                'file_id': 'ObjectId字符串',
+                'md5': 'abc123...',
+                'file_size': 123456,
+                'is_new': True/False
+            }
+        """
+        import hashlib
+
+        try:
+            # 计算 MD5
+            md5_hash = hashlib.md5(image_data).hexdigest()
+
+            # 检查是否已存在（通过 MD5 查找）
+            existing = self._files_collection.find_one({'md5': md5_hash})
+
+            if existing:
+                # 已存在，直接返回（ref_count 由 image_library 管理）
+                logger.debug(f"图片已存在: bucket={self.bucket_name}, md5={md5_hash}")
+                return {
+                    'file_id': str(existing['_id']),
+                    'md5': md5_hash,
+                    'file_size': existing['length'],
+                    'is_new': False
+                }
+
+            # 新图片，通过 GridFS 上传纯数据
+            import io
+
+            file_id = self._bucket.upload_from_stream(
+                filename=md5_hash,  # 用 MD5 作为文件名
+                source=io.BytesIO(image_data)
+            )
+
+            # 手动设置 contentType 和 md5 字段（Navicat 兼容）
+            self._files_collection.update_one(
+                {'_id': file_id},
+                {'$set': {
+                    'contentType': 'image/jpeg',
+                    'md5': md5_hash
+                }}
+            )
+
+            logger.debug(f"图片已保存到 GridFS: bucket={self.bucket_name}, md5={md5_hash}, file_id={file_id}, size={len(image_data)}")
+
+            return {
+                'file_id': str(file_id),
+                'md5': md5_hash,
+                'file_size': len(image_data),
+                'is_new': True
+            }
+
+        except Exception as e:
+            logger.error(f"保存图片到 GridFS 失败: bucket={self.bucket_name}, error={e}")
+            raise
+
+    def read_image(self, file_id: str) -> Optional[bytes]:
+        """
+        从 GridFS 读取图片数据
+
+        Args:
+            file_id: 文件ID（GridFS file_id）
+
+        Returns:
+            图片二进制数据，如果失败返回 None
+        """
+        try:
+            from bson.objectid import ObjectId
+
+            # 从 GridFS 下载
+            grid_out = self._bucket.open_download_stream(ObjectId(file_id))
+            image_data = grid_out.read()
+
+            logger.debug(f"从 GridFS 读取图片成功: bucket={self.bucket_name}, file_id={file_id}, size={len(image_data)}")
+            return image_data
+
+        except Exception as e:
+            logger.error(f"从 GridFS 读取图片失败: bucket={self.bucket_name}, file_id={file_id}, error={e}")
+            return None
+
+    def read_image_by_md5(self, md5: str) -> Optional[bytes]:
+        """
+        通过 MD5 读取图片
+
+        Args:
+            md5: MD5 哈希值
+
+        Returns:
+            图片二进制数据，如果失败返回 None
+        """
+        try:
+            import io
+
+            # 通过 filename（MD5）查找
+            grid_out = self._bucket.open_download_stream_by_name(md5)
+            image_data = grid_out.read()
+
+            return image_data
+
+        except Exception as e:
+            logger.error(f"通过 MD5 读取图片失败: bucket={self.bucket_name}, md5={md5}, error={e}")
+            return None
+
+    def image_exists(self, md5: str) -> bool:
+        """
+        检查图片是否存在（通过 MD5）
+
+        Args:
+            md5: MD5 哈希值
+
+        Returns:
+            是否存在
+        """
+        try:
+            count = self._files_collection.count_documents({'md5': md5})
+            return count > 0
+        except Exception as e:
+            logger.error(f"检查图片是否存在失败: bucket={self.bucket_name}, md5={md5}, error={e}")
+            return False
+
+    def get_statistics(self) -> Dict[str, Any]:
+        """
+        获取当前 bucket 的存储统计信息
+
+        Returns:
+            统计信息字典
+        """
+        try:
+            chunks_collection = self._db.get_chunks_collection(self.site_id, self.image_type)
+
+            # 文件数量
+            total_files = self._files_collection.count_documents({})
+
+            # 总大小（从 files 集合的 length 字段汇总）
+            pipeline = [
+                {'$group': {'_id': None, 'total_size': {'$sum': '$length'}}}
+            ]
+            result = list(self._files_collection.aggregate(pipeline))
+            total_size = result[0]['total_size'] if result else 0
+
+            # 总块数
+            total_chunks = chunks_collection.count_documents({})
+
+            # 平均文件大小
+            avg_file_size = total_size / total_files if total_files > 0 else 0
+
+            return {
+                'site_id': self.site_id,
+                'image_type': self.image_type,
+                'bucket_name': self.bucket_name,
+                'total_files': total_files,
+                'total_chunks': total_chunks,
+                'total_size_mb': round(total_size / (1024 * 1024), 2),
+                'avg_file_size_kb': round(avg_file_size / 1024, 2)
+            }
+
+        except Exception as e:
+            logger.error(f"获取统计信息失败: bucket={self.bucket_name}, error={e}")
+            return {}
+
+
+def get_image_storage_db():
+    """获取图片存储数据库实例（便捷导入）"""
+    from database.image_storage_db import get_image_storage_db as _get_db
+    return _get_db()
+
+
+def get_gridfs_image_storage(site_id: str, image_type: str = 'content') -> GridFSImageStorage:
+    """
+    获取指定站点和类型的 GridFS 图片存储实例
+
+    Args:
+        site_id: 站点ID
+        image_type: 图片类型 (cover/thumbnail/content)
+
+    Returns:
+        GridFSImageStorage 实例
+    """
+    return GridFSImageStorage(site_id, image_type)

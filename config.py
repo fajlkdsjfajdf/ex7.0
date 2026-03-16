@@ -28,6 +28,18 @@ class Config:
     MONGO_PORT = 27017
     MONGO_DB_NAME = 'manga_hub'
 
+    # 图片存储 MongoDB 配置 (GridFS)
+    IMAGE_STORAGE_HOST = '192.168.1.222'
+    IMAGE_STORAGE_PORT = 27018
+    IMAGE_STORAGE_DB_NAME = 'image_storage'
+
+    # GridFS Chunk Size 配置（针对不同图片类型优化）
+    IMAGE_STORAGE_CHUNK_SIZE = {
+        'cover': 64 * 1024,      # 封面图片小，64KB chunk
+        'thumbnail': 64 * 1024,  # 缩略图更小，64KB chunk
+        'content': 255 * 1024    # 内容图默认 255KB
+    }
+
 
 
 

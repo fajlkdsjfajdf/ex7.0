@@ -1,17 +1,17 @@
 """
-图片库独立数据库连接模块
-连接到独立的 image_library 数据库
+图片库数据库连接模块
+与 GridFS 共用 image_storage 数据库（27018）
 """
 
 from pymongo import MongoClient
 from utils.logger import get_logger
-from utils.config_loader import load_system_config
+from config import Config
 
 logger = get_logger(__name__)
 
 
 class ImageLibraryDB:
-    """图片库数据库管理类（独立数据库）"""
+    """图片库数据库管理类（与 GridFS 共用数据库）"""
 
     _instance = None
     _client = None
@@ -29,19 +29,13 @@ class ImageLibraryDB:
             self.initialized = True
 
     def _connect(self):
-        """连接到独立的图片库数据库"""
+        """连接到 image_storage 数据库（与 GridFS 共用）"""
         try:
-            # 从系统配置读取 MongoDB 连接信息
-            config = load_system_config()
-            db_config = config.get('database', {})
+            # 使用 GridFS 的数据库配置
+            db_host = Config.IMAGE_STORAGE_HOST
+            db_port = Config.IMAGE_STORAGE_PORT
+            db_name = Config.IMAGE_STORAGE_DB_NAME
 
-            db_host = db_config.get('host', 'localhost')
-            db_port = db_config.get('port', 27017)
-
-            # 图片库使用独立的数据库名
-            image_library_db_name = 'image_library'
-
-            # 创建连接
             connect_str = f"mongodb://{db_host}:{db_port}/"
 
             self._client = MongoClient(
@@ -56,9 +50,9 @@ class ImageLibraryDB:
                 retryReads=True
             )
 
-            self._db = self._client[image_library_db_name]
+            self._db = self._client[db_name]
 
-            logger.info(f"图片库数据库连接成功: {db_host}:{db_port}/{image_library_db_name}")
+            logger.info(f"图片库数据库连接成功: {db_host}:{db_port}/{db_name}")
 
         except Exception as e:
             logger.error(f"图片库数据库连接失败: {e}")
