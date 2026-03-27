@@ -11,6 +11,10 @@ class PageFlipMode extends ReadModeBase {
         this.resizeTimeout = null;
         this.isAnimating = false;
         this.animationDuration = 600; // 翻页动画时长(ms)
+
+        // 浏览器缓存预加载
+        this._browserCachePreloadCount = 5;  // 预加载后几页到浏览器缓存
+        this._preloadedToBrowserCache = new Set();  // 已预加载到浏览器缓存的页码
     }
 
     /**
@@ -192,9 +196,15 @@ class PageFlipMode extends ReadModeBase {
 
         if (picWidth === 0 || picHeight === 0) return;
 
-        // 获取容器尺寸
-        const divWidth = viewport.offsetWidth * 0.95;
-        const divHeight = viewport.offsetHeight * 0.95;
+        // 移动端/平板使用更小的边距(6px)，PC端使用5%
+        const isMobileOrTablet = window.innerWidth <= 1024;
+        const margin = isMobileOrTablet ? 6 : 0.05; // 6px total or 5%
+        const divWidth = isMobileOrTablet
+            ? viewport.offsetWidth - margin
+            : viewport.offsetWidth * (1 - margin);
+        const divHeight = isMobileOrTablet
+            ? viewport.offsetHeight - margin
+            : viewport.offsetHeight * (1 - margin);
 
         // 计算图片尺寸
         let imgWidth, imgHeight;
@@ -236,6 +246,11 @@ class PageFlipMode extends ReadModeBase {
         // 设置书本尺寸
         book.style.width = imgWidth + 'px';
         book.style.height = imgHeight + 'px';
+
+        // 设置视口居中（水平+垂直）
+        viewport.style.display = 'flex';
+        viewport.style.justifyContent = 'center';
+        viewport.style.alignItems = 'center';
 
         console.log('[PageFlipMode] 图片尺寸:', Math.round(imgWidth), 'x', Math.round(imgHeight));
     }
@@ -392,7 +407,7 @@ class PageFlipMode extends ReadModeBase {
     }
 
     /**
-     * 执行翻页动画
+     * 执行翻页动画 - 3D翻书效果
      * @private
      */
     _animateFlip(direction, callback) {
@@ -402,43 +417,78 @@ class PageFlipMode extends ReadModeBase {
             return;
         }
 
-        const currentPage = book.querySelector('.flip-page-current');
-        const nextPage = book.querySelector('.flip-page-next');
+        const currentPageEl = book.querySelector('.flip-page-current');
+        const nextPageEl = book.querySelector('.flip-page-next');
 
-        if (!currentPage) {
+        if (!currentPageEl) {
             callback();
             return;
         }
 
-        // 使用淡入淡出+滑动效果（更流畅）
+        // 确保3D环境正确设置
+        const viewport = this._viewport;
+        if (viewport) {
+            viewport.style.perspective = '2000px';
+            viewport.style.perspectiveOrigin = 'center center';
+        }
+        book.style.transformStyle = 'preserve-3d';
+
         if (direction === 'next') {
-            // 当前页向左滑出
-            currentPage.classList.add('slide-left');
-            // 下一页从右边滑入
-            if (nextPage) {
-                nextPage.classList.remove('flip-page-next');
-                nextPage.classList.add('flip-page-current');
-                nextPage.style.transform = 'translateX(100%)';
-                nextPage.style.opacity = '0';
+            // 向后翻页（下一页）- 当前页从右向左翻转
+            currentPageEl.style.transformOrigin = 'left center';
+            currentPageEl.style.transition = `transform ${this.animationDuration}ms cubic-bezier(0.645, 0.045, 0.355, 1)`;
+            currentPageEl.style.transform = 'rotateY(-180deg)';
+            currentPageEl.style.zIndex = '2';
 
-                // 触发重绘
-                nextPage.offsetHeight;
-
-                nextPage.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
-                nextPage.style.transform = 'translateX(0)';
-                nextPage.style.opacity = '1';
+            // 下一页准备
+            if (nextPageEl) {
+                nextPageEl.classList.remove('flip-page-next');
+                nextPageEl.classList.add('flip-page-current');
+                nextPageEl.style.transformOrigin = 'left center';
+                nextPageEl.style.transform = 'rotateY(0deg)';
+                nextPageEl.style.zIndex = '1';
             }
         } else {
-            // 向后翻页 - 当前页向右滑出
-            currentPage.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
-            currentPage.style.transform = 'translateX(100%)';
-            currentPage.style.opacity = '0';
+            // 向前翻页（上一页）- 当前页从左向右翻转
+            currentPageEl.style.transformOrigin = 'right center';
+            currentPageEl.style.transition = `transform ${this.animationDuration}ms cubic-bezier(0.645, 0.045, 0.355, 1)`;
+            currentPageEl.style.transform = 'rotateY(180deg)';
+            currentPageEl.style.zIndex = '2';
         }
 
         // 动画结束后回调
         setTimeout(() => {
             callback();
         }, this.animationDuration);
+    }
+
+    /**
+     * 单页前翻（一次只翻一页）
+     */
+    flipSinglePrev() {
+        this._prevPage();
+    }
+
+    /**
+     * 单页后翻（一次只翻一页）
+     */
+    flipSingleNext() {
+        this._nextPage();
+    }
+
+    /**
+     * 跳转到指定页
+     * @param {number} pageIndex - 页码索引（0-based）
+     */
+    goToPage(pageIndex) {
+        if (pageIndex < 0 || pageIndex >= this.pageSections.length) return;
+        if (pageIndex === this.currentPage) return;
+
+        this.currentPage = pageIndex;
+        this._loadPages();
+        this._updatePageIndicator();
+        this._onPageAction();
+        console.log('[PageFlipMode] 跳转到第', this.currentPage + 1, '页');
     }
 
     /**
@@ -458,8 +508,49 @@ class PageFlipMode extends ReadModeBase {
             currentPageEl.textContent = this.currentPage + 1;
         }
 
+        // 预加载后续页面到浏览器缓存
+        this._preloadToBrowserCache();
+
         // 触发预下载
         this._triggerPreload();
+    }
+
+    /**
+     * 预加载后续页面到浏览器缓存
+     * 使用隐藏的Image对象加载已下载的图片到浏览器缓存
+     * @private
+     */
+    _preloadToBrowserCache() {
+        const startIndex = this.currentPage + 1;  // 当前页（1-based）
+        const endIndex = Math.min(startIndex + this._browserCachePreloadCount, this.pageSections.length);
+
+        for (let page = startIndex; page <= endIndex; page++) {
+            // 跳过已预加载的
+            if (this._preloadedToBrowserCache.has(page)) continue;
+
+            const sectionIndex = page - 1;  // 转为0-based
+            if (sectionIndex < 0 || sectionIndex >= this.pageSections.length) continue;
+
+            const sectionData = this.pageSections[sectionIndex];
+            if (!sectionData || !sectionData.imageData) continue;
+
+            // 检查图片是否已在服务器下载好
+            const isDownloaded = sectionData.imageData.downloaded === true ||
+                                 this.imageLoader.downloadedImages.has(sectionData.imageData.page);
+
+            if (isDownloaded && sectionData.imageData.url) {
+                // 使用隐藏的Image对象预加载到浏览器缓存
+                const img = new Image();
+                img.onload = () => {
+                    this._preloadedToBrowserCache.add(page);
+                    console.log(`[PageFlipMode] 预加载到浏览器缓存: 第${page}页`);
+                };
+                img.onerror = () => {
+                    console.warn(`[PageFlipMode] 预加载失败: 第${page}页`);
+                };
+                img.src = sectionData.imageData.url;
+            }
+        }
     }
 
     /**
@@ -512,6 +603,7 @@ class PageFlipMode extends ReadModeBase {
         this.pageSections = [];
         this.currentPage = 0;
         this.isAnimating = false;
+        this._preloadedToBrowserCache.clear();
         clearTimeout(this.resizeTimeout);
         super.destroy();
     }

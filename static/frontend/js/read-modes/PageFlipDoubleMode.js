@@ -24,6 +24,10 @@ class PageFlipDoubleMode extends ReadModeBase {
         this.timeSkip = 200; // 防抖时间
         this.gifFlag = false; // 防止重复触发
         this.isAnimating = false; // 防止快速连续点击
+
+        // 浏览器缓存预加载
+        this._browserCachePreloadCount = 5;  // 预加载后几页到浏览器缓存
+        this._preloadedToBrowserCache = new Set();  // 已预加载到浏览器缓存的页码
     }
 
     /**
@@ -519,8 +523,49 @@ class PageFlipDoubleMode extends ReadModeBase {
 
         console.log('[PageFlipDoubleMode] 翻到第', this.currentPage, '页');
 
+        // 预加载后续页面到浏览器缓存
+        this._preloadToBrowserCache();
+
         // 触发预下载（每翻页10页预下载一次）
         this._triggerPreload();
+    }
+
+    /**
+     * 预加载后续页面到浏览器缓存
+     * 使用隐藏的Image对象加载已下载的图片到浏览器缓存
+     * @private
+     */
+    _preloadToBrowserCache() {
+        const startIndex = this.currentPage;  // 当前页（1-based）
+        const endIndex = Math.min(startIndex + this._browserCachePreloadCount, this.pageSections.length);
+
+        for (let page = startIndex; page <= endIndex; page++) {
+            // 跳过已预加载的
+            if (this._preloadedToBrowserCache.has(page)) continue;
+
+            const sectionIndex = page - 1;  // 转为0-based
+            if (sectionIndex < 0 || sectionIndex >= this.pageSections.length) continue;
+
+            const sectionData = this.pageSections[sectionIndex];
+            if (!sectionData || !sectionData.imageData) continue;
+
+            // 检查图片是否已在服务器下载好
+            const isDownloaded = sectionData.imageData.downloaded === true ||
+                                 this.imageLoader.downloadedImages.has(sectionData.imageData.page);
+
+            if (isDownloaded && sectionData.imageData.url) {
+                // 使用隐藏的Image对象预加载到浏览器缓存
+                const img = new Image();
+                img.onload = () => {
+                    this._preloadedToBrowserCache.add(page);
+                    console.log(`[PageFlipDoubleMode] 预加载到浏览器缓存: 第${page}页`);
+                };
+                img.onerror = () => {
+                    console.warn(`[PageFlipDoubleMode] 预加载失败: 第${page}页`);
+                };
+                img.src = sectionData.imageData.url;
+            }
+        }
     }
 
     /**
@@ -643,6 +688,7 @@ class PageFlipDoubleMode extends ReadModeBase {
         this.pageSections = [];
         this.currentSection = 0;
         this.gifFlag = false;
+        this._preloadedToBrowserCache.clear();
         clearTimeout(this.resizeTimeout);
         super.destroy();
     }

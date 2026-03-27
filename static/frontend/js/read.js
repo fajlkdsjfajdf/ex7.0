@@ -1361,8 +1361,7 @@
                         const imageResourceKey = `content:${this.comicAid}:${this.chapterPid}:${page}`;
                         window.WSClient.subscribeResource('content_image', imageResourceKey, (url) => {
                             console.log(`[阅读页] 第${page}页下载完成:`, url);
-                            this.imageLoader.downloadedImages.set(page, url);
-                            this.imageLoader.pendingImages.delete(page);
+                            // 注意：不要在这里设置 downloadedImages，让 _updateImage 来处理
                             this._updateImage(page, url);
                         });
                     }
@@ -1620,9 +1619,8 @@
                     const imageResourceKey = `content:${this.comicAid}:${this.chapterPid}:${page}`;
                     window.WSClient.subscribeResource('content_image', imageResourceKey, (url) => {
                         console.log(`[阅读页] 第${page}页预下载完成:`, url);
-                        this.imageLoader.downloadedImages.set(page, url);
-                        this.imageLoader.pendingImages.delete(page);
                         // 【重要】更新 DOM 中的图片元素
+                        // 注意：不要在这里设置 downloadedImages，让 _updateImage 来处理
                         this._updateImage(page, url);
                     });
                 }
@@ -1741,9 +1739,9 @@
 
                         if (status.downloaded === true && status.url) {
                             // 图片已下载完成，更新显示
+                            // 注意：不要在这里设置 downloadedImages，让 _updateImage 来处理
+                            // 否则 _updateImage 会因为检查到已存在而直接返回
                             if (!this.imageLoader.downloadedImages.has(page)) {
-                                this.imageLoader.downloadedImages.set(page, status.url);
-                                this.imageLoader.pendingImages.delete(page);
                                 this._updateImage(page, status.url);
                                 updatedCount++;
                             }

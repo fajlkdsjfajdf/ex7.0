@@ -10,6 +10,10 @@ class PageFlipMultiMode extends ReadModeBase {
         this.currentSection = 0;
         this.isAnimating = false; // 防止快速连续点击
         this.currentPageIndex = 0; // 当前页码索引（0-based，用于单页翻）
+
+        // 浏览器缓存预加载
+        this._browserCachePreloadCount = 3;  // 预加载后几节到浏览器缓存
+        this._preloadedToBrowserCache = new Set();  // 已预加载到浏览器缓存的section索引
     }
 
     /**
@@ -332,8 +336,55 @@ class PageFlipMultiMode extends ReadModeBase {
 
         console.log('[PageFlipMultiMode] 翻到第', this.currentSection + 1, '节');
 
+        // 预加载后续section的图片到浏览器缓存
+        this._preloadToBrowserCache();
+
         // 触发预下载
         this._triggerPreload();
+    }
+
+    /**
+     * 预加载后续section的图片到浏览器缓存
+     * 使用隐藏的Image对象加载已下载的图片到浏览器缓存
+     * @private
+     */
+    _preloadToBrowserCache() {
+        const startIndex = this.currentSection + 1;  // 从下一个section开始
+        const endIndex = Math.min(startIndex + this._browserCachePreloadCount, this.pageSections.length);
+
+        for (let sectionIdx = startIndex; sectionIdx < endIndex; sectionIdx++) {
+            // 跳过已预加载的
+            if (this._preloadedToBrowserCache.has(sectionIdx)) continue;
+
+            const sectionData = this.pageSections[sectionIdx];
+            if (!sectionData) continue;
+
+            // 预加载这个section中的所有图片
+            const images = this._imagesData.slice(sectionData.startPageIndex, sectionData.endPageIndex + 1);
+            let loadedCount = 0;
+            const totalCount = images.length;
+
+            images.forEach(imageData => {
+                // 检查图片是否已在服务器下载好
+                const isDownloaded = imageData.downloaded === true ||
+                                     this.imageLoader.downloadedImages.has(imageData.page);
+
+                if (isDownloaded && imageData.url) {
+                    const img = new Image();
+                    img.onload = () => {
+                        loadedCount++;
+                        if (loadedCount === totalCount) {
+                            this._preloadedToBrowserCache.add(sectionIdx);
+                            console.log(`[PageFlipMultiMode] 预加载section ${sectionIdx + 1}到浏览器缓存`);
+                        }
+                    };
+                    img.onerror = () => {
+                        console.warn(`[PageFlipMultiMode] 预加载失败: section ${sectionIdx + 1}`);
+                    };
+                    img.src = imageData.url;
+                }
+            });
+        }
     }
 
     /**
@@ -505,6 +556,7 @@ class PageFlipMultiMode extends ReadModeBase {
         console.log('[PageFlipMultiMode] 销毁模式');
         this.pageSections = [];
         this.currentSection = 0;
+        this._preloadedToBrowserCache.clear();
         super.destroy();
     }
 }

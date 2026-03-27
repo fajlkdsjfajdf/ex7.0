@@ -622,119 +622,6 @@ body.page-flip-multi-mode .comic-chapter-title {
     border: 2px solid white;
 }
 
-/* ==================== 快捷功能区 ==================== */
-.quick-actions-container {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background-color: var(--bg-card);
-    padding: 8px 16px;
-    border-radius: 25px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    z-index: 100;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.quick-actions-container.visible {
-    opacity: 1;
-    visibility: visible;
-}
-
-.quick-action-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: none;
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.quick-action-btn:hover {
-    background-color: var(--accent-color);
-    transform: scale(1.1);
-}
-
-.quick-action-btn.has-comments {
-    background-color: #4ade80;
-    color: #000;
-}
-
-.page-jump-control {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-#pageJumpInput {
-    width: 50px;
-    height: 32px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    text-align: center;
-    font-size: 0.85rem;
-    padding: 0 4px;
-}
-
-#pageJumpInput:focus {
-    outline: none;
-    border-color: var(--accent-color);
-}
-
-.page-jump-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: none;
-    background-color: var(--accent-color);
-    color: var(--text-primary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.page-jump-btn:hover {
-    transform: scale(1.05);
-}
-
-/* 移动端适配 */
-@media (max-width: 768px) {
-    .quick-actions-container {
-        bottom: 80px;
-        padding: 6px 12px;
-        gap: 8px;
-    }
-
-    .quick-action-btn {
-        width: 32px;
-        height: 32px;
-    }
-
-    #pageJumpInput {
-        width: 45px;
-        height: 28px;
-    }
-
-    .page-jump-btn {
-        width: 28px;
-        height: 28px;
-    }
-}
-
 /* 模式选择弹窗 */
 .mode-switcher-modal {
     position: absolute;
@@ -1127,6 +1014,199 @@ body.reading-active .chapter-navigation {
     border-radius: 12px;
 }
 
+/* ==================== 快捷功能（弹窗内） ==================== */
+.modal-shortcuts {
+    margin-bottom: 6px;
+}
+
+.modal-shortcuts .shortcuts-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.shortcut-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 8px;
+    border-radius: 6px;
+    border: none;
+    background-color: var(--bg-light);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.2s ease;
+    flex: 1;
+    min-width: 0;
+}
+
+.shortcut-btn:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.shortcut-btn.active {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.shortcut-btn i {
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.shortcut-btn span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.shortcuts-page-info {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
+}
+
+.shortcuts-page-info #shortcutCurrentPage {
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+.modal-divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 8px 0;
+}
+
+/* ==================== 跳转页弹窗 ==================== */
+.jump-page-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    background-color: #0a0a0a;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    padding: 12px;
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 2000;
+}
+
+.jump-page-modal.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.jump-page-header {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.jump-page-header i {
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: color 0.2s;
+}
+
+.jump-page-header i:hover {
+    color: var(--text-primary);
+}
+
+.jump-page-quick {
+    display: flex;
+    gap: 6px;
+    padding: 0 0 8px 0;
+}
+
+.jp-quick-btn {
+    flex: 1;
+    padding: 6px;
+    border-radius: 6px;
+    border: none;
+    background-color: var(--bg-light);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.jp-quick-btn:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.jump-page-body {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.jump-page-body input {
+    flex: 1;
+    height: 34px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 0 6px;
+}
+
+.jump-page-body input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.jump-page-body input::-webkit-outer-spin-button,
+.jump-page-body input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.jump-page-total {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.jump-page-confirm {
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    background-color: var(--accent-color);
+    color: white;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.jump-page-confirm:hover {
+    background-color: var(--accent-hover);
+}
+
 </style>
 {% endblock %}
 
@@ -1185,6 +1265,17 @@ body.reading-active .chapter-navigation {
                 <span>阅读模式</span>
                 <i class="fas fa-times" style="cursor: pointer;" id="closeModalBtn"></i>
             </div>
+
+            <!-- 快捷功能区 -->
+            <div class="modal-shortcuts" id="modalShortcuts">
+                <button class="shortcut-btn" id="jumpPageBtn" title="翻页">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>翻页</span>
+                </button>
+            </div>
+
+            <div class="modal-divider"></div>
+
             <div class="mode-options">
                 <button class="mode-option-btn" data-mode="scroll">
                     <span class="mode-icon"><i class="fas fa-arrows-alt-v"></i></span>
@@ -1216,19 +1307,26 @@ body.reading-active .chapter-navigation {
         </button>
     </div>
 
-    <!-- 快捷功能区 -->
-    <div class="quick-actions-container" id="quickActionsContainer">
-        <div class="page-jump-control">
-            <input type="number" id="pageJumpInput" min="1" placeholder="页" title="输入页码跳转">
-            <button class="page-jump-btn" id="pageJumpBtn" title="跳转">
-                <i class="fas fa-arrow-right"></i>
-            </button>
+    <!-- 跳转页弹窗 -->
+    <div class="jump-page-modal" id="jumpPageModal">
+        <div class="jump-page-header">
+            <span>跳转页码</span>
+            <i class="fas fa-times" id="closeJumpPageBtn"></i>
         </div>
-        <button class="quick-action-btn" id="flipPrevSingleBtn" title="单页前翻">
-            <i class="fas fa-step-backward"></i>
-        </button>
-        <button class="quick-action-btn" id="flipNextSingleBtn" title="单页后翻">
-            <i class="fas fa-step-forward"></i>
+        <!-- 快速翻页按钮 -->
+        <div class="jump-page-quick">
+            <button class="jp-quick-btn" id="jpFirstBtn" title="首页"><i class="fas fa-fast-backward"></i></button>
+            <button class="jp-quick-btn" id="jpPrevBtn" title="上一页"><i class="fas fa-step-backward"></i></button>
+            <button class="jp-quick-btn" id="jpNextBtn" title="下一页"><i class="fas fa-step-forward"></i></button>
+            <button class="jp-quick-btn" id="jpLastBtn" title="末页"><i class="fas fa-fast-forward"></i></button>
+        </div>
+        <!-- 输入跳转 -->
+        <div class="jump-page-body">
+            <input type="number" id="jumpPageInput" min="1" placeholder="输入页码" />
+            <span class="jump-page-total">/ <span id="jumpPageTotal">1</span></span>
+        </div>
+        <button class="jump-page-confirm" id="confirmJumpBtn">
+            <i class="fas fa-arrow-right"></i> 跳转
         </button>
     </div>
 </div>
@@ -1240,10 +1338,11 @@ body.reading-active .chapter-navigation {
 <!-- 阅读模式 -->
 <script src="/static/frontend/js/read-modes/ScrollMode.js?v=2"></script>
 <script src="/static/frontend/js/read-modes/ScrollSeamlessMode.js?v=2"></script>
-<script src="/static/frontend/js/read-modes/PageFlipMode.js?v=1"></script>
-<script src="/static/frontend/js/read-modes/PageFlipDoubleMode.js?v=9"></script>
+<script src="/static/frontend/js/read-modes/PageFlipMode.js?v=3"></script>
+<script src="/static/frontend/js/read-modes/PageFlipDoubleMode.js?v=10"></script>
+<script src="/static/frontend/js/read-modes/PageFlipMultiMode.js?v=2"></script>
 <!-- 主控制器 -->
-<script src="/static/frontend/js/read.js?v=4"></script>
+<script src="/static/frontend/js/read.js?v=5"></script>
 <script>
 // 阅读页初始化
 (function() {
@@ -1268,6 +1367,137 @@ body.reading-active .chapter-navigation {
         // DOM 已就绪，直接初始化
         initReadPage();
     }
+
+    // ==================== 快捷功能事件绑定 ====================
+    function initShortcutEvents() {
+        const jumpPageBtn = document.getElementById('jumpPageBtn');
+        const jumpPageModal = document.getElementById('jumpPageModal');
+        const closeJumpPageBtn = document.getElementById('closeJumpPageBtn');
+        const jumpPageInput = document.getElementById('jumpPageInput');
+        const jumpPageTotal = document.getElementById('jumpPageTotal');
+        const confirmJumpBtn = document.getElementById('confirmJumpBtn');
+        const jpFirstBtn = document.getElementById('jpFirstBtn');
+        const jpPrevBtn = document.getElementById('jpPrevBtn');
+        const jpNextBtn = document.getElementById('jpNextBtn');
+        const jpLastBtn = document.getElementById('jpLastBtn');
+
+        // 获取当前页和总页数
+        function getCurrentPageInfo() {
+            let current = 1;
+            let total = 0;
+            if (window.readPage && window.readPage.currentMode) {
+                const mode = window.readPage.currentMode;
+                if (mode.pageSections) {
+                    total = mode.pageSections.length;
+                    if (mode.currentPage !== undefined) {
+                        current = mode.currentPage;
+                    } else if (mode.currentSection !== undefined) {
+                        current = mode.currentSection + 1;
+                    }
+                } else if (window.readPage.imagesData) {
+                    total = window.readPage.imagesData.images.length;
+                }
+            }
+            return { current, total };
+        }
+
+        // 执行翻页
+        function doFlip(targetPage) {
+            if (window.readPage && window.readPage.currentMode && window.readPage.currentMode.goToPage) {
+                window.readPage.currentMode.goToPage(targetPage);
+            }
+        }
+
+        // 弹窗内的快速翻页
+        if (jpFirstBtn) {
+            jpFirstBtn.addEventListener('click', () => { doFlip(0); jumpPageModal.classList.remove('active'); });
+        }
+        if (jpPrevBtn) {
+            jpPrevBtn.addEventListener('click', () => {
+                const { current } = getCurrentPageInfo();
+                if (current > 1) doFlip(current - 2);
+            });
+        }
+        if (jpNextBtn) {
+            jpNextBtn.addEventListener('click', () => {
+                const { current, total } = getCurrentPageInfo();
+                if (current < total) doFlip(current);
+            });
+        }
+        if (jpLastBtn) {
+            jpLastBtn.addEventListener('click', () => {
+                const { total } = getCurrentPageInfo();
+                if (total > 0) { doFlip(total - 1); jumpPageModal.classList.remove('active'); }
+            });
+        }
+
+        // 打开弹窗时填入当前页
+        if (jumpPageBtn) {
+            jumpPageBtn.addEventListener('click', () => {
+                const { current, total } = getCurrentPageInfo();
+                if (jumpPageTotal) jumpPageTotal.textContent = total;
+                if (jumpPageInput) {
+                    jumpPageInput.value = current;
+                    jumpPageInput.focus();
+                    jumpPageInput.select();
+                }
+                if (jumpPageModal) jumpPageModal.classList.add('active');
+            });
+        }
+
+        // 关闭跳转弹窗
+        if (closeJumpPageBtn) {
+            closeJumpPageBtn.addEventListener('click', () => {
+                if (jumpPageModal) jumpPageModal.classList.remove('active');
+            });
+        }
+
+        // 点击弹窗外部关闭
+        document.addEventListener('click', (e) => {
+            if (jumpPageModal && jumpPageModal.classList.contains('active')) {
+                if (!jumpPageModal.contains(e.target) && jumpPageBtn && !jumpPageBtn.contains(e.target)) {
+                    jumpPageModal.classList.remove('active');
+                }
+            }
+        });
+
+        // 确认跳转
+        function doJump() {
+            const pageNum = parseInt(jumpPageInput.value);
+            const total = parseInt(jumpPageTotal.textContent);
+
+            if (isNaN(pageNum) || pageNum < 1 || pageNum > total) {
+                jumpPageInput.style.borderColor = '#ff6b6b';
+                setTimeout(() => { jumpPageInput.style.borderColor = ''; }, 1000);
+                return;
+            }
+
+            doFlip(pageNum - 1);
+            jumpPageModal.classList.remove('active');
+        }
+
+        if (confirmJumpBtn) {
+            confirmJumpBtn.addEventListener('click', doJump);
+        }
+
+        if (jumpPageInput) {
+            jumpPageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    doJump();
+                }
+            });
+        }
+    }
+
+    // 等待 ReadPage 初始化后再绑定
+    function tryInitShortcuts() {
+        if (window.ReadPage) {
+            initShortcutEvents();
+        } else {
+            setTimeout(tryInitShortcuts, 100);
+        }
+    }
+    tryInitShortcuts();
 })();
 </script>
 {% endblock %}
