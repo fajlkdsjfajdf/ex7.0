@@ -175,3 +175,23 @@ def settings_page():
     #     return redirect(url_for('frontend.login'))
 
     return render_template('settings.html')
+
+
+@frontend_bp.route('/history.html')
+def history_page():
+    """阅读历史页"""
+    # 临时：跳过登录验证以便测试
+    # if 'user_id' not in session:
+    #     return redirect(url_for('frontend.login'))
+
+    return render_template('history.html')
+
+
+@frontend_bp.route('/bookmarks.html')
+def bookmarks_page():
+    """收藏夹页"""
+    # 临时：跳过登录验证以便测试
+    # if 'user_id' not in session:
+    #     return redirect(url_for('frontend.login'))
+
+    return render_template('bookmarks.html')

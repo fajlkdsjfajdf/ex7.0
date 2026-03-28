@@ -452,6 +452,68 @@
 
             // 显示图片（带占位符）
             this._displayImagesWithPlaceholders(imagesData);
+
+            // 记录阅读历史
+            this._recordHistory();
+        }
+
+        /**
+         * 记录阅读历史
+         * @private
+         */
+        async _recordHistory() {
+            try {
+                // 必须有漫画ID和章节ID才能记录
+                if (!this.comicAid || !this.chapterPid) {
+                    return;
+                }
+
+                // 保存阅读记录到 localStorage（用于侧边栏快捷跳转）
+                this._saveLastReadVisit();
+
+                const response = await fetch(`/api/${this.siteId}/history`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        aid: parseInt(this.comicAid),
+                        pid: parseInt(this.chapterPid)
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    console.log('[阅读页] 历史记录成功');
+                } else {
+                    // 未登录等情况，静默处理
+                    console.debug('[阅读页] 历史记录失败:', result.message);
+                }
+            } catch (error) {
+                // 历史记录失败不影响阅读，静默处理
+                console.debug('[阅读页] 历史记录异常:', error);
+            }
+        }
+
+        /**
+         * 保存阅读记录到 localStorage（用于侧边栏快捷跳转）
+         * @private
+         */
+        _saveLastReadVisit() {
+            try {
+                const data = JSON.parse(localStorage.getItem('last_read_visit') || '{}');
+                data[this.siteId] = {
+                    aid: parseInt(this.comicAid),
+                    pid: parseInt(this.chapterPid),
+                    title: this.comicData?.title || '',
+                    chapter: this.chapterData?.title || `第${this.chapterPid}话`,
+                    time: Date.now()
+                };
+                localStorage.setItem('last_read_visit', JSON.stringify(data));
+                console.log(`[阅读页] 已保存阅读记录: ${this.siteId} - ${this.comicAid}/${this.chapterPid}`);
+            } catch (e) {
+                console.error('[阅读页] 保存阅读记录失败:', e);
+            }
         }
 
         /**

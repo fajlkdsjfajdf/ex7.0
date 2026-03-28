@@ -25,6 +25,14 @@ from .user_routes import *  # noqa
 from .resource_routes import *  # noqa
 
 
+# ========== 历史记录相关 ==========
+from .history_routes import *  # noqa
+
+
+# ========== 收藏相关 ==========
+from .favorite_routes import *  # noqa
+
+
 @api_bp.errorhandler(404)
 def api_not_found(error):
     """API 404错误处理"""

@@ -4,11 +4,55 @@
 
 {% block extra_css %}
 <style>
+/* 隐藏顶部视图控件 */
+.view-controls {
+    display: none !important;
+}
+
 /* 详情页样式 */
 .comic-detail-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+}
+
+/* 顶部操作栏 */
+.info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--bg-light);
+    border-radius: 8px;
+}
+
+.info-header-title {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    flex: 1;
+    text-align: center;
+}
+
+.info-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.back-btn {
+    background-color: var(--bg-darker);
+    color: var(--text-primary);
+}
+
+.back-btn:hover {
+    background-color: #333;
 }
 
 /* 等待状态 */
@@ -117,6 +161,14 @@
 
 .favorite-btn:hover {
     background-color: var(--accent-hover);
+}
+
+.favorite-btn.favorited {
+    background-color: #ff6b6b;
+}
+
+.favorite-btn.favorited:hover {
+    background-color: #ff5252;
 }
 
 .read-btn {
@@ -392,6 +444,15 @@
 
 {% block content %}
 <div class="comic-detail-container" id="comicDetailContainer">
+    <!-- 顶部操作栏 -->
+    <div class="info-header">
+        <button class="info-btn back-btn" id="backBtn">
+            <i class="fas fa-arrow-left"></i> 返回
+        </button>
+        <span class="info-header-title">漫画详情</span>
+        <span style="width: 70px;"></span><!-- 占位，保持标题居中 -->
+    </div>
+
     <!-- 等待状态 -->
     <div class="waiting-state" id="waitingState">
         <div class="waiting-spinner"></div>
@@ -507,10 +568,18 @@
     const comicTitle = document.getElementById('comicTitle');
     const comicTitleSub = document.getElementById('comicTitleSub');
     const comicTitleSub2 = document.getElementById('comicTitleSub2');
+    const backBtn = document.getElementById('backBtn');
     const readBtn = document.getElementById('readBtn');
     const favoriteBtn = document.getElementById('favoriteBtn');
     const shareBtn = document.getElementById('shareBtn');
     const forceUpdateBtn = document.getElementById('forceUpdateBtn');
+
+    // 返回按钮事件
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            window.location.href = `/list.html?site=${currentSiteId}`;
+        });
+    }
 
     // 加载漫画详情
     async function loadComicDetail() {
@@ -620,8 +689,30 @@
             forceUpdateComic();
         });
 
+        // 初始化收藏状态
+        initFavoriteStatus();
+
+        // 保存访问记录到 localStorage（用于侧边栏快捷跳转）
+        saveLastInfoVisit(data.title);
+
         // 显示内容
         comicDetailContent.classList.add('loaded');
+    }
+
+    // 保存访问记录
+    function saveLastInfoVisit(title) {
+        try {
+            const data = JSON.parse(localStorage.getItem('last_info_visit') || '{}');
+            data[currentSiteId] = {
+                aid: parseInt(comicAid),
+                title: title || '',
+                time: Date.now()
+            };
+            localStorage.setItem('last_info_visit', JSON.stringify(data));
+            console.log(`[详情页] 已保存访问记录: ${currentSiteId} - ${comicAid}`);
+        } catch (e) {
+            console.error('[详情页] 保存访问记录失败:', e);
+        }
     }
 
     // 强制更新漫画信息
@@ -697,6 +788,96 @@
             console.error('[详情页] 强制更新失败:', error);
             showError('强制更新失败');
             forceUpdateBtn.disabled = false;
+        }
+    }
+
+    // 初始化收藏状态
+    async function initFavoriteStatus() {
+        if (!comicAid) return;
+
+        try {
+            const response = await fetch(`/api/${currentSiteId}/favorite/${comicAid}`);
+            const result = await response.json();
+
+            if (result.success && result.data.is_favorited) {
+                updateFavoriteButton(true);
+            }
+
+            // 绑定收藏按钮点击事件
+            favoriteBtn.addEventListener('click', toggleFavorite);
+        } catch (error) {
+            console.error('[详情页] 检查收藏状态失败:', error);
+            // 即使检查失败，也绑定点击事件
+            favoriteBtn.addEventListener('click', toggleFavorite);
+        }
+    }
+
+    // 切换收藏状态
+    async function toggleFavorite() {
+        if (!comicAid) return;
+
+        const isFavorited = favoriteBtn.classList.contains('favorited');
+
+        try {
+            favoriteBtn.disabled = true;
+
+            if (isFavorited) {
+                // 取消收藏
+                const response = await fetch(`/api/${currentSiteId}/favorite/${comicAid}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    updateFavoriteButton(false);
+                    if (window.Utils && window.Utils.showToast) {
+                        Utils.showToast('已取消收藏', 'success');
+                    }
+                } else {
+                    if (window.Utils && window.Utils.showToast) {
+                        Utils.showToast(result.message || '取消收藏失败', 'error');
+                    }
+                }
+            } else {
+                // 添加收藏
+                const response = await fetch(`/api/${currentSiteId}/favorite`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ aid: parseInt(comicAid) })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    updateFavoriteButton(true);
+                    if (window.Utils && window.Utils.showToast) {
+                        Utils.showToast('收藏成功', 'success');
+                    }
+                } else {
+                    if (window.Utils && window.Utils.showToast) {
+                        Utils.showToast(result.message || '收藏失败', 'error');
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('[详情页] 收藏操作失败:', error);
+            if (window.Utils && window.Utils.showToast) {
+                Utils.showToast('操作失败，请稍后重试', 'error');
+            }
+        } finally {
+            favoriteBtn.disabled = false;
+        }
+    }
+
+    // 更新收藏按钮状态
+    function updateFavoriteButton(isFavorited) {
+        if (isFavorited) {
+            favoriteBtn.classList.add('favorited');
+            favoriteBtn.innerHTML = '<i class="fas fa-heart-broken"></i> 取消收藏';
+        } else {
+            favoriteBtn.classList.remove('favorited');
+            favoriteBtn.innerHTML = '<i class="fas fa-heart"></i> 加入收藏';
         }
     }
 
@@ -853,6 +1034,7 @@
 
     // 页面加载时执行
     loadComicDetail();
+    initFavoriteStatus();
 })();
 </script>
 {% endblock %}

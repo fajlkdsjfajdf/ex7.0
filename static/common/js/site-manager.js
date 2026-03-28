@@ -168,17 +168,12 @@ class SiteManager {
     }
 
     /**
-     * 切换站点后刷新页面
+     * 切换站点后跳转到列表页
+     * 注意：不刷新当前页面，因为当前页面的 aid/pid 在新站点可能不存在
      */
     reloadPage() {
-        // 获取当前URL
-        const url = new URL(window.location.href);
-
-        // 更新URL中的site参数
-        url.searchParams.set('site', this.currentSiteId);
-
-        // 刷新页面
-        window.location.href = url.toString();
+        // 跳转到新站点的列表页
+        window.location.href = `/list.html?site=${this.currentSiteId}`;
     }
 
     /**

@@ -17,6 +17,41 @@
     let siteDropdown = null;
 
     /**
+     * 根据当前URL设置菜单激活状态
+     */
+    function setActiveMenuItem() {
+        const currentPath = window.location.pathname;
+        let activePage = 'home';
+
+        // 根据路径判断当前页面
+        if (currentPath.includes('/history.html')) {
+            activePage = 'history';
+        } else if (currentPath.includes('/settings.html')) {
+            activePage = 'settings';
+        } else if (currentPath.includes('/bookmarks.html')) {
+            activePage = 'bookmarks';
+        } else if (currentPath.includes('/read.html')) {
+            activePage = 'last_read';
+        } else if (currentPath.includes('/info.html')) {
+            activePage = 'last_info';
+        } else if (currentPath.includes('/list.html') || currentPath === '/') {
+            activePage = 'home';
+        }
+
+        // 更新菜单激活状态
+        menuItems.forEach(item => {
+            const page = item.dataset.page;
+            if (page === activePage) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+
+        console.log('[侧边栏] 设置菜单激活状态:', activePage);
+    }
+
+    /**
      * 初始化站点选择器
      */
     async function initSiteSelector() {
@@ -72,10 +107,8 @@
         // 更新API实例
         window.api.setSiteId(newSiteId);
 
-        // 刷新页面以加载新站点数据
-        const url = new URL(window.location.href);
-        url.searchParams.set('site', newSiteId);
-        window.location.href = url.toString();
+        // 切换站点后跳转到新站点的列表页（而不是停留在当前页面，因为aid可能不存在）
+        window.location.href = `/list.html?site=${newSiteId}`;
     }
 
     // 更新Header位置
@@ -162,11 +195,23 @@
                     // 跳转到列表页（首页），带上站点参数
                     window.location.href = `/list.html?site=${currentSiteId}`;
                     break;
+                case 'history':
+                    window.location.href = '/history.html';
+                    break;
                 case 'settings':
                     window.location.href = '/settings.html';
                     break;
-                case 'history':
                 case 'bookmarks':
+                    window.location.href = '/bookmarks.html';
+                    break;
+                case 'last_info':
+                    // 跳转到上次访问的详情页
+                    navigateToLastPage('info', currentSiteId);
+                    break;
+                case 'last_read':
+                    // 跳转到上次访问的阅读页
+                    navigateToLastPage('read', currentSiteId);
+                    break;
                 default:
                     Utils.showToast(`正在开发: ${item.querySelector('span').textContent}`, 'info');
             }
@@ -178,7 +223,42 @@
         updateHeader();
     });
 
+    /**
+     * 跳转到上次访问的页面（信息页或阅读页）
+     * @param {string} type - 'info' 或 'read'
+     * @param {string} siteId - 当前站点ID
+     */
+    function navigateToLastPage(type, siteId) {
+        const storageKey = type === 'info' ? 'last_info_visit' : 'last_read_visit';
+
+        try {
+            const data = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            const siteData = data[siteId];
+
+            if (!siteData || !siteData.aid) {
+                const siteName = document.querySelector(`#siteDropdown option[value="${siteId}"]`)?.textContent || siteId;
+                Utils.showToast(`当前站点「${siteName}」暂无${type === 'info' ? '访问' : '阅读'}记录`, 'warning');
+                return;
+            }
+
+            if (type === 'info') {
+                window.location.href = `/info.html?site=${siteId}&aid=${siteData.aid}`;
+            } else {
+                if (!siteData.pid) {
+                    Utils.showToast('阅读记录缺少章节信息', 'warning');
+                    return;
+                }
+                window.location.href = `/read.html?site=${siteId}&aid=${siteData.aid}&pid=${siteData.pid}`;
+            }
+        } catch (e) {
+            console.error('[侧边栏] 解析访问记录失败:', e);
+            Utils.showToast('获取访问记录失败', 'error');
+        }
+    }
+
     // 初始化
     updateHeader();
+    setActiveMenuItem();  // 设置当前页面的菜单激活状态
+    initSiteSelector();   // 初始化站点选择器
 
 })();

@@ -30,7 +30,7 @@
 
             try {
                 this.socket = io({
-                    transports: ['websocket', 'polling'],
+                    transports: ['polling', 'websocket'],  // polling优先，避免Windows下threading模式的WebSocket兼容问题
                     reconnection: true,
                     reconnectionDelay: 1000,
                     reconnectionAttempts: 5

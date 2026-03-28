@@ -336,6 +336,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="/static/common/js/settings.js"></script>
 <script src="/static/common/js/grid-view.js"></script>
 <script>
 (function() {
@@ -425,7 +426,9 @@
         showLoading();
 
         try {
-            const response = await fetch(`/api/${currentSiteId}/comics?page=${page}&per_page=50`);
+            // 获取排序模式
+            const sortMode = window.Settings ? Settings.get('sortMode') : 'latest';
+            const response = await fetch(`/api/${currentSiteId}/comics?page=${page}&per_page=50&sort=${sortMode}`);
             const result = await response.json();
 
             if (result.success && result.comics) {
@@ -876,49 +879,32 @@
     }
 
     // ========== 监听搜索事件 ==========
-    document.addEventListener('performSearch', function(e) {
+    document.addEventListener('performSearch', async function(e) {
         const { keyword, tags } = e.detail;
 
-        // 客户端过滤（简单实现）
-        filteredComics = allComics.filter(comic => {
-            // 关键词过滤
-            if (keyword) {
-                const keywordLower = keyword.toLowerCase();
-                const matchTitle = comic.title && comic.title.toLowerCase().includes(keywordLower);
-                const matchAuthor = comic.author && comic.author.toLowerCase().includes(keywordLower);
+        // 服务端搜索（向量+文本混合搜索）
+        if (keyword && keyword.trim()) {
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(keyword)}&site=${currentSiteId}`);
+                const data = await response.json();
 
-                if (!matchTitle && !matchAuthor) {
-                    return false;
+                if (data.comics && data.comics.length > 0) {
+                    filteredComics = data.comics;
+                    renderComics(filteredComics);
+                    Utils.showToast(`找到 ${data.total} 部漫画 (精准:${data.sources.exact}, 向量:${data.sources.vector})`, 'success');
+                } else {
+                    filteredComics = [];
+                    renderComics([]);
+                    Utils.showToast('未找到匹配的漫画', 'info');
                 }
+            } catch (error) {
+                console.error('搜索失败:', error);
+                Utils.showToast('搜索失败，请稍后重试', 'error');
             }
-
-            // 标签过滤
-            if (tags && tags.length > 0) {
-                const includeTags = tags.filter(t => !t.isExcluded).map(t => t.text);
-                const excludeTags = tags.filter(t => t.isExcluded).map(t => t.text);
-                const comicTags = comic.types || [];
-
-                // 检查包含标签
-                const hasIncludeTags = includeTags.length === 0 ||
-                    includeTags.some(tag => comicTags.includes(tag));
-
-                // 检查排除标签
-                const hasExcludeTags = excludeTags.some(tag => comicTags.includes(tag));
-
-                if (!hasIncludeTags || hasExcludeTags) {
-                    return false;
-                }
-            }
-
-            return true;
-        });
-
-        renderComics(filteredComics);
-
-        if (filteredComics.length > 0) {
-            Utils.showToast(`找到 ${filteredComics.length} 部漫画`, 'success');
         } else {
-            Utils.showToast('未找到匹配的漫画', 'info');
+            // 无关键词时显示全部
+            filteredComics = allComics;
+            renderComics(filteredComics);
         }
     });
 
@@ -935,6 +921,19 @@
         const { columns } = e.detail;
         if (comicGrid) {
             comicGrid.style.setProperty('--grid-columns', columns);
+        }
+    });
+
+    // ========== 监听设置变更事件 ==========
+    document.addEventListener('settingChanged', function(e) {
+        const { key, value } = e.detail;
+        if (key === 'sortMode') {
+            // 排序模式变更，重新加载漫画
+            console.log('[排序] 切换排序模式:', value);
+            allComics = [];
+            filteredComics = [];
+            currentPage = 1;
+            loadComics(1, false);
         }
     });
 
