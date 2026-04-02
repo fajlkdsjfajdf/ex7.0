@@ -7,6 +7,43 @@
 
     // 全局变量
     let selectedTags = [];
+    let currentSearchMode = 'all'; // 搜索模式：exact/vector/all
+
+    // 搜索模式提示文本
+    const searchModeHints = {
+        'exact': '精准匹配标题、描述中的关键词',
+        'vector': '基于语义相似度智能搜索相关内容',
+        'all': '结合精准匹配和智能搜索，结果更全面'
+    };
+
+    // 搜索模式图标
+    const searchModeIcons = {
+        'exact': 'fa-crosshairs',
+        'vector': 'fa-brain',
+        'all': 'fa-search'
+    };
+
+    // 从localStorage读取搜索模式偏好
+    function loadSearchModePreference() {
+        const savedMode = localStorage.getItem('searchMode');
+        if (savedMode && ['exact', 'vector', 'all'].includes(savedMode)) {
+            currentSearchMode = savedMode;
+        }
+    }
+
+    // 保存搜索模式偏好到localStorage
+    function saveSearchModePreference(mode) {
+        localStorage.setItem('searchMode', mode);
+        currentSearchMode = mode;
+    }
+
+    // 更新搜索模式提示
+    function updateSearchModeHint(mode) {
+        const hintElement = document.getElementById('searchModeHint');
+        if (hintElement && searchModeHints[mode]) {
+            hintElement.textContent = searchModeHints[mode];
+        }
+    }
 
     // 示例标签数据（后续从API获取）
     const tagCategories = [
@@ -47,11 +84,26 @@
     const tagCategoriesContainer = document.getElementById('tagCategories');
 
     // 打开搜索弹窗
+    function openSearchModal() {
+        searchModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    // 侧边栏搜索按钮
     if (sidebarSearchBtn) {
-        sidebarSearchBtn.addEventListener('click', () => {
-            searchModal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        });
+        sidebarSearchBtn.addEventListener('click', openSearchModal);
+    }
+
+    // 阅读页搜索按钮
+    const pageSearchBtn = document.getElementById('pageSearchBtn');
+    if (pageSearchBtn) {
+        pageSearchBtn.addEventListener('click', openSearchModal);
+    }
+
+    // 设置页搜索按钮
+    const settingsSearchBtn = document.getElementById('settingsSearchBtn');
+    if (settingsSearchBtn) {
+        settingsSearchBtn.addEventListener('click', openSearchModal);
     }
 
     // 关闭搜索弹窗
@@ -260,16 +312,55 @@
         }
     });
 
+    // 搜索模式选择事件
+    function initSearchModeSelector() {
+        const searchModeGroup = document.getElementById('searchModeGroup');
+
+        if (!searchModeGroup) return;
+
+        const buttons = searchModeGroup.querySelectorAll('.btn-group-item');
+
+        // 设置当前选中的模式
+        buttons.forEach(btn => {
+            if (btn.dataset.value === currentSearchMode) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+
+            // 监听按钮点击
+            btn.addEventListener('click', () => {
+                const newMode = btn.dataset.value;
+
+                // 更新UI状态
+                buttons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // 保存偏好
+                saveSearchModePreference(newMode);
+                updateSearchModeHint(newMode);
+            });
+        });
+
+        // 更新初始提示文本
+        updateSearchModeHint(currentSearchMode);
+    }
+
     // 搜索按钮点击事件
     if (searchButton) {
         searchButton.addEventListener('click', () => {
             const searchText = searchInput ? searchInput.value.trim() : '';
 
+            // 获取当前搜索模式
+            const activeBtn = document.querySelector('#searchModeGroup .btn-group-item.active');
+            const selectedMode = activeBtn ? activeBtn.dataset.value : currentSearchMode;
+
             // 触发自定义事件，让页面处理搜索逻辑
             const event = new CustomEvent('performSearch', {
                 detail: {
                     keyword: searchText,
-                    tags: selectedTags
+                    tags: selectedTags,
+                    mode: selectedMode
                 }
             });
             document.dispatchEvent(event);
@@ -281,7 +372,9 @@
     }
 
     // 初始化
+    loadSearchModePreference(); // 加载搜索模式偏好
     initTagCategories();
+    initSearchModeSelector(); // 初始化搜索模式选择器
 
     // 暴露给外部的接口
     window.SearchModal = {

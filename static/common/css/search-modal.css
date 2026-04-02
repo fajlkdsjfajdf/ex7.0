@@ -61,6 +61,82 @@
     background-color: var(--accent-hover);
 }
 
+/* 搜索模式选择器 */
+.search-mode-selector {
+    margin-bottom: 15px;
+    padding: 12px;
+    background-color: var(--bg-light);
+    border-radius: 8px;
+}
+
+.search-mode-title {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+/* 按钮组样式 - 复用settings.css中的btn-group样式 */
+.btn-group {
+    display: flex;
+    background-color: var(--bg-dark);
+    border-radius: 8px;
+    padding: 4px;
+    gap: 4px;
+}
+
+.btn-group-item {
+    flex: 1;
+    padding: 10px 16px;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.btn-group-item:hover:not(:disabled) {
+    color: var(--text-primary);
+    background-color: var(--bg-light);
+}
+
+.btn-group-item.active {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-group-item:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-group-item i {
+    font-size: 0.85rem;
+}
+
+.search-mode-option:hover span {
+    color: var(--accent-color);
+}
+
+.search-mode-option input[type="radio"]:checked + span {
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.search-mode-hint {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    padding-left: 2px;
+    line-height: 1.4;
+    min-height: 18px;
+}
+
 /* 已选标签区域 */
 .selected-tags {
     display: flex;

@@ -11,6 +11,25 @@
             </button>
         </div>
 
+        <!-- 搜索模式选择 -->
+        <div class="search-mode-selector">
+            <div class="search-mode-title">搜索模式：</div>
+            <div class="btn-group" id="searchModeGroup">
+                <button class="btn-group-item" data-value="exact">
+                    <i class="fas fa-crosshairs"></i> 精准
+                </button>
+                <button class="btn-group-item" data-value="vector">
+                    <i class="fas fa-brain"></i> 向量
+                </button>
+                <button class="btn-group-item active" data-value="all">
+                    <i class="fas fa-search"></i> 混合
+                </button>
+            </div>
+            <div class="search-mode-hint" id="searchModeHint">
+                结合精准匹配和智能搜索，结果更全面
+            </div>
+        </div>
+
         <!-- 已选标签区域 -->
         <div class="selected-tags" id="selectedTags"></div>
 
