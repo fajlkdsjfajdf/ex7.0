@@ -18,15 +18,15 @@ class Comic:
         self.site_id = site_id
         self.db = get_db()
 
-        # CM和KM站点使用{site_id}_manga_main，其他站点使用{site_id}_comics
-        if site_id in ['cm', 'km']:
+        # CM/KM/EX站点使用{site_id}_manga_main，其他站点使用{site_id}_comics
+        if site_id in ['cm', 'km', 'ex']:
             self.collection_name = f'{site_id}_manga_main'
         else:
             self.collection_name = f"{site_id}_comics"
 
         self.collection = self.db.get_collection(self.collection_name)
 
-    def get_comics_list(self, page: int = 1, per_page: int = 20, skip: int = 0, limit: int = None):
+    def get_comics_list(self, page: int = 1, per_page: int = 20, skip: int = 0, limit: int = None, sort_by: str = 'latest'):
         """
         获取漫画列表
 
@@ -35,6 +35,7 @@ class Comic:
             per_page: 每页数量
             skip: 跳过的数量
             limit: 限制返回数量（如果指定，则忽略per_page）
+            sort_by: 排序方式 - 'latest'(最新), 'hottest'(最热), 'favorite'(喜欢)
 
         Returns:
             dict: {
@@ -56,6 +57,19 @@ class Comic:
                 actual_limit = per_page
                 actual_skip = (page - 1) * per_page
 
+            # 根据排序方式确定排序字段
+            # latest: 按站点更新时间 (update_time)
+            # hottest: 按阅读数 (readers)，如果为0则按喜欢数 (likes)
+            # favorite: 按喜欢数 (likes)
+            sort_field = 'update_time'
+            sort_direction = -1  # 降序
+
+            if sort_by == 'hottest':
+                sort_field = 'readers'
+            elif sort_by == 'favorite':
+                sort_field = 'likes'
+            # latest 或其他默认按 update_time
+
             # 获取漫画列表
             cursor = self.collection.find(
                 {},
@@ -64,7 +78,7 @@ class Comic:
                     'description': 0,
                     'chapters': 0
                 }
-            ).sort('created_at', -1).skip(actual_skip).limit(actual_limit)
+            ).sort(sort_field, sort_direction).skip(actual_skip).limit(actual_limit)
 
             comics = []
             for doc in cursor:
@@ -257,19 +271,29 @@ class Comic:
             'status': doc.get('status', ''),
             'is_end': doc.get('is_end', False),
             'list_count': doc.get('list_count', 0),
+            'filecount': doc.get('filecount', 0),  # EX站点的页数
             'readers': doc.get('readers', 0),
             'pic': pic_url,
             'created_at': doc.get('created_at') or doc.get('info_update'),
-            'updated_at': doc.get('updated_at') or doc.get('cover_update'),
+            'updated_at': doc.get('update_time') or doc.get('info_update'),
             'info_update': doc.get('info_update'),  # 用于判断是否需要爬取详情页
             'cover_update': doc.get('cover_update'),
-            'list_update': doc.get('list_update')
+            'list_update': doc.get('list_update'),
+            'search_embedding': doc.get('search_embedding'),  # 用于搜索
         }
 
         # 处理封面图片URL - 使用业务参数，不再用file_id
         # 格式: /api/media/image?site=km&aid=5644&type=cover
         aid = doc.get('aid', 0)
         comic['cover_url'] = f"/api/media/image?site={self.site_id}&aid={aid}&type=cover"
+
+        # 添加章节列表（简化版，只包含pid和order）
+        chapters = doc.get('chapters', [])
+        if chapters:
+            comic['chapters'] = [
+                {'pid': ch.get('pid'), 'order': ch.get('order', i + 1)}
+                for i, ch in enumerate(chapters)
+            ]
 
         return comic
 

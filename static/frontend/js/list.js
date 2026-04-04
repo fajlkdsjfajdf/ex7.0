@@ -437,7 +437,7 @@
         const updateTimeHtml = updateTime ? `<span class="comic-update-time"><i class="far fa-clock"></i>${updateTime}</span>` : '';
 
         // 图片页数（如果有的话）
-        const pageCount = comic.page_count || comic.pages || 0;
+        const pageCount = comic.page_count || comic.pages || comic.filecount || 0;
 
         card.innerHTML = `
             <div class="comic-cover">

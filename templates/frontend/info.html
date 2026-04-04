@@ -347,6 +347,156 @@
     color: white;
 }
 
+/* 缩略图区域 */
+.comic-thumbnails-section {
+    margin-bottom: 20px;
+}
+
+.thumbnails-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+    max-height: 350px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.thumbnails-grid.expanded {
+    max-height: none;
+}
+
+.thumbnail-item {
+    position: relative;
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    border-radius: 6px;
+    background-color: var(--bg-darker);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.thumbnail-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.thumbnail-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.thumbnail-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.thumbnail-placeholder i {
+    font-size: 1.5rem;
+    opacity: 0.5;
+}
+
+.thumbnail-loading {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.thumbnail-loading .spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid rgba(106, 90, 205, 0.3);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.thumbnail-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 4px 6px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    color: white;
+    font-size: 0.7rem;
+    text-align: center;
+}
+
+.thumbnails-loading-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 30px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.thumbnails-loading-state .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(106, 90, 205, 0.3);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.thumbnails-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    gap: 8px;
+}
+
+.thumbnails-empty i {
+    font-size: 1.5rem;
+    opacity: 0.5;
+}
+
+.thumbnails-expand {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.btn-expand {
+    padding: 8px 20px;
+    background-color: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-expand:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+}
+
+.btn-expand i {
+    transition: transform 0.3s;
+}
+
 /* 响应式 */
 @media (max-width: 768px) {
     .comic-actions {
@@ -532,6 +682,16 @@
             </div>
         </div>
 
+        <!-- 缩略图区域（动态显示/隐藏） -->
+        <div class="comic-thumbnails-section" id="thumbnailsSection" style="display: none;">
+            <h3 class="section-title">
+                <i class="fas fa-images"></i> 缩略图
+            </h3>
+            <div id="thumbnailsContainer">
+                <!-- 缩略图列表动态生成 -->
+            </div>
+        </div>
+
         <!-- 章节列表 -->
         <div class="comic-chapters">
             <h3 class="section-title">章节列表 <span class="chapter-count" id="chaptersCountTitle"></span></h3>
@@ -577,7 +737,25 @@
     // 返回按钮事件
     if (backBtn) {
         backBtn.addEventListener('click', () => {
-            window.location.href = `/list.html?site=${currentSiteId}`;
+            // 检查URL中是否有搜索参数
+            const searchParams = new URLSearchParams(window.location.search);
+            const searchKeyword = searchParams.get('search');
+            const searchPage = searchParams.get('page');
+            const searchMode = searchParams.get('mode');
+
+            // 构建返回URL，如果有搜索参数则保持
+            let returnUrl = `/list.html?site=${currentSiteId}`;
+            if (searchKeyword) {
+                returnUrl += `&search=${encodeURIComponent(searchKeyword)}`;
+                if (searchPage) {
+                    returnUrl += `&page=${searchPage}`;
+                }
+                if (searchMode) {
+                    returnUrl += `&mode=${searchMode}`;
+                }
+            }
+
+            window.location.href = returnUrl;
         });
     }
 
@@ -640,7 +818,7 @@
         // 设置元数据
         document.getElementById('updateTime').textContent = formatDate(data.updated_at);
         document.getElementById('originalAid').textContent = data.aid || '-';
-        document.getElementById('pageCount').textContent = data.pages || data.list_count || '-';
+        document.getElementById('pageCount').textContent = data.pages || data.list_count || data.filecount || '-';
 
         // 章节数量
         const listCount = data.list_count || data.chapters?.length || 0;
@@ -694,6 +872,9 @@
 
         // 保存访问记录到 localStorage（用于侧边栏快捷跳转）
         saveLastInfoVisit(data.title);
+
+        // 加载缩略图
+        loadThumbnails();
 
         // 显示内容
         comicDetailContent.classList.add('loaded');
@@ -1016,6 +1197,216 @@
     // 隐藏等待状态
     function hideWaiting() {
         waitingState.style.display = 'none';
+    }
+
+    // ========== 缩略图加载 ==========
+    let thumbnailPollTimer = null;
+
+    async function loadThumbnails() {
+        try {
+            // 先获取站点配置，判断是否有缩略图
+            const configResponse = await fetch(`/api/${currentSiteId}/site/config`);
+            const configResult = await configResponse.json();
+
+            if (!configResult.success || !configResult.data.has_thumbnails) {
+                console.log('[详情页] 当前站点不支持缩略图');
+                return;
+            }
+
+            console.log('[详情页] 当前站点支持缩略图，开始检查...');
+
+            // 显示缩略图区域
+            const thumbnailsSection = document.getElementById('thumbnailsSection');
+            thumbnailsSection.style.display = 'block';
+
+            // 检查缩略图下载状态
+            await checkAndDisplayThumbnails();
+
+        } catch (error) {
+            console.error('[详情页] 加载缩略图失败:', error);
+        }
+    }
+
+    async function submitThumbnailDownload() {
+        const container = document.getElementById('thumbnailsContainer');
+        container.innerHTML = `
+            <div class="thumbnails-loading-state">
+                <div class="spinner"></div>
+                <span>缩略图未下载，正在提交下载任务...</span>
+            </div>
+        `;
+
+        try {
+            const response = await fetch(`/api/${currentSiteId}/crawler/submit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    resource_type: 'thumbnail_image',
+                    comic_id: parseInt(comicAid),
+                    priority: 'high'
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log('[详情页] 缩略图下载任务已提交:', result.task_id);
+                // 启动轮询等待下载完成
+                startThumbnailPolling();
+            } else {
+                container.innerHTML = `
+                    <div class="thumbnails-empty">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>提交下载任务失败</span>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('[详情页] 提交缩略图下载任务失败:', error);
+            container.innerHTML = `
+                <div class="thumbnails-empty">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>提交下载任务失败</span>
+                </div>
+            `;
+        }
+    }
+
+    function startThumbnailPolling() {
+        stopThumbnailPolling();
+        thumbnailPollTimer = setInterval(async () => {
+            await checkAndDisplayThumbnails();
+        }, 5000);
+        // 10分钟后自动停止轮询
+        setTimeout(stopThumbnailPolling, 600000);
+    }
+
+    function stopThumbnailPolling() {
+        if (thumbnailPollTimer) {
+            clearInterval(thumbnailPollTimer);
+            thumbnailPollTimer = null;
+        }
+    }
+
+    async function checkAndDisplayThumbnails() {
+        try {
+            const container = document.getElementById('thumbnailsContainer');
+
+            const response = await fetch(
+                `/api/${currentSiteId}/resource/check?resource_type=thumbnail_image&comic_id=${comicAid}`
+            );
+            const result = await response.json();
+
+            if (!result.success) {
+                return;
+            }
+
+            const status = result.status;
+            const data = result.data || {};
+
+            if (status === 'exists' && data.complete) {
+                // 缩略图全部下载完成
+                stopThumbnailPolling();
+                const thumbnails = data.thumbnails || [];
+                const total = data.total || thumbnails.length;
+                const maxVisible = 30;
+
+                // 默认只显示前30张
+                const visibleThumbnails = thumbnails.slice(0, maxVisible);
+                const hasMore = thumbnails.length > maxVisible;
+
+                container.innerHTML = `
+                    <div class="thumbnails-grid" id="thumbnailsGrid">
+                        ${visibleThumbnails.map(thumb => `
+                            <div class="thumbnail-item">
+                                <img src="${thumb.url}" alt="缩略图 ${thumb.page}" loading="lazy">
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${hasMore ? `
+                        <div class="thumbnails-expand" id="thumbnailsExpand">
+                            <button class="btn-expand" id="expandBtn">
+                                <i class="fas fa-chevron-down"></i> 展开查看全部 ${total} 张
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+
+                // 添加展开/收缩事件
+                if (hasMore) {
+                    const expandBtn = document.getElementById('expandBtn');
+                    const grid = document.getElementById('thumbnailsGrid');
+                    expandBtn.addEventListener('click', () => {
+                        const isExpanded = grid.classList.contains('expanded');
+                        if (isExpanded) {
+                            // 收缩
+                            grid.classList.remove('expanded');
+                            // 移除多余的项
+                            const items = grid.querySelectorAll('.thumbnail-item');
+                            items.forEach((item, i) => {
+                                if (i >= maxVisible) item.remove();
+                            });
+                            expandBtn.innerHTML = '<i class="fas fa-chevron-down"></i> 展开查看全部 ' + total + ' 张';
+                        } else {
+                            // 展开
+                            grid.classList.add('expanded');
+                            // 添加所有缩略图
+                            thumbnails.forEach((thumb, i) => {
+                                if (i >= maxVisible) {
+                                    const div = document.createElement('div');
+                                    div.className = 'thumbnail-item';
+                                    div.innerHTML = `<img src="${thumb.url}" alt="缩略图 ${thumb.page}" loading="lazy">`;
+                                    grid.appendChild(div);
+                                }
+                            });
+                            expandBtn.innerHTML = '<i class="fas fa-chevron-up"></i> 收起';
+                        }
+                    });
+                }
+
+                // 更新标题显示数量
+                const sectionTitle = document.querySelector('#thumbnailsSection .section-title');
+                if (sectionTitle) {
+                    sectionTitle.innerHTML = `<i class="fas fa-images"></i> 缩略图 <span style="font-size: 0.85rem; color: var(--text-secondary);">(${total}张)</span>`;
+                }
+                console.log('[详情页] 缩略图全部下载完成，显示', thumbnails.length, '张缩略图');
+            } else if (status === 'downloading' || status === 'need_download') {
+                // 正在下载中或有数据但需要下载，显示进度
+                const progress = data.loaded !== undefined && data.total !== undefined
+                    ? `(${data.loaded}/${data.total})`
+                    : '';
+                if (status === 'need_download') {
+                    container.innerHTML = `
+                        <div class="thumbnails-loading-state">
+                            <div class="spinner"></div>
+                            <span>缩略图待下载 ${progress}，正在提交下载任务...</span>
+                        </div>
+                    `;
+                    // 提交下载任务
+                    submitThumbnailDownload();
+                } else {
+                    container.innerHTML = `
+                        <div class="thumbnails-loading-state">
+                            <div class="spinner"></div>
+                            <span>缩略图下载中 ${progress}...</span>
+                        </div>
+                    `;
+                }
+            } else if (status === 'no_data') {
+                // 缩略图列表尚未生成
+                container.innerHTML = `
+                    <div class="thumbnails-empty">
+                        <i class="fas fa-info-circle"></i>
+                        <span>缩略图列表尚未生成，需要先爬取内容页</span>
+                    </div>
+                `;
+            } else if (status === 'not_exists') {
+                // 缩略图不存在，提交下载任务
+                submitThumbnailDownload();
+            }
+        } catch (error) {
+            console.error('[详情页] 检查缩略图状态失败:', error);
+        }
     }
 
     // 格式化日期
